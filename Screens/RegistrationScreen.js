@@ -4,10 +4,11 @@ import { useFonts } from 'expo-font';
 
 export default function RegistrationScreen() {
   //Fonts
+  //TODO: fontFamily "Roboto-Medium" is not a system font and has not been loaded through Font.loadAsync
   const [fontsLoaded] = useFonts({
-    RobotoBold: require("../assets/fonts/Roboto-Bold.ttf"),
-    RobotoMedium: require("../assets/fonts/Roboto-Medium.ttf"),
-    RobotoRegular: require("../assets/fonts/Roboto-Regular.ttf"),
+    RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
+    RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
+    RobotoRegular: require('../assets/fonts/RobotoRegular.ttf'),
   });
 
   if (!fontsLoaded) {
@@ -20,7 +21,8 @@ export default function RegistrationScreen() {
         <View style={{ ...styles.regScr, paddingBottom: 78 /*32*/ }}>
           <View style={styles.avatarBox}>
             <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
-            <Image style={styles.addPhoto} source={require('../assets/svg/add.svg')} />
+            {/* TODO: SVG не працює */}
+            {/* <Image style={styles.addPhoto} source={require('../assets/svg/add.svg')} /> */}
           </View>
 
           <Text style={styles.title}>Registration</Text>
@@ -86,16 +88,17 @@ const styles = StyleSheet.create({
   },
 
   addPhoto: {
-    width: 25,
-    height: 25,
+    width: 250,
+    height: 250,
     position: 'absolute',
+    fill: 'red',
     right: -14,
     bottom: 14,
   },
 
   title: {
     marginTop: 92,
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'RobotoMedium',
     fontSize: 30,
     lineHeight: 35,
     letterSpacing: 0.01,
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   btn: {
-    marginTop: 43,
+    marginTop: 27,
     backgroundColor: '#FF6C00',
     marginHorizontal: 16,
     padding: 16,
