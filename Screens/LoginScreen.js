@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, ImageBackground, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
 
+const initialFocus = {
+  email: false,
+  password: false,
+};
+
 export default function LoginScreen() {
-  //Fonts
-  //TODO: fontFamily "Roboto-Medium" is not a system font and has not been loaded through Font.loadAsync
+// OnFocus
+  const [isFocused, setIsFocused] = useState(initialFocus);  
+
+  const handleFocus = input => {
+    setIsFocused(prevState => ({ ...prevState, [input]: true }));
+  };
+  const handleBlur = input => {
+    setIsFocused(prevState => ({ ...prevState, [input]: false }));
+  };
+
+// Fonts
   const [fontsLoaded] = useFonts({
     RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
     RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
@@ -18,14 +32,24 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
-        <View style={{ ...styles.regScr, paddingBottom: 78 /*32*/ }}>
+        <View style={styles.regScr}>
 
           <Text style={styles.title}>Log In</Text>
 
           <View style={styles.regForm}>
-            <TextInput style={{ ...styles.input, borderColor: '#E8E8E8' /*'#FF6C00'*/ }} placeholder="E-mail" />
+            <TextInput
+              style={{ ...styles.input, borderColor: isFocused.email ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.email ? 'white' : '#F6F6F6' }}
+              placeholder="E-mail"
+              onFocus={() => { handleFocus('email') }}
+              onBlur={() => { handleBlur('email') }}
+            />
             <View style={styles.inputPass}>
-              <TextInput style={{ ...styles.input, borderColor: '#E8E8E8' /*'#FF6C00'*/ }} placeholder="Password" />
+              <TextInput
+                style={{ ...styles.input, borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.password ? 'white' : '#F6F6F6' }}
+                placeholder="Password"
+                onFocus={() => { handleFocus('password'); }}
+                onBlur={() => { handleBlur('password'); }}
+              />
               <Text style={styles.showPass}> Show / Hide </Text>
             </View>
 
@@ -51,14 +75,14 @@ const styles = StyleSheet.create({
   },
   imgBg: {
     flex: 1,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
   regScr: {
     paddingHorizontal: 16,
     width: '100%',
-    height: '69%',
+    height: '61%',
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,

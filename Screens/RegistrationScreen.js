@@ -1,11 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, ImageBackground, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
 import { AntDesign } from '@expo/vector-icons';
 
+const initialFocus = {
+  email: false,
+  password: false,
+  login: false,
+};
+
 export default function RegistrationScreen() {
-  //Fonts
-  //TODO: fontFamily "Roboto-Medium" is not a system font and has not been loaded through Font.loadAsync
+
+// OnFocus
+  const [isFocused, setIsFocused] = useState(initialFocus);
+
+  const handleFocus = input => {
+    setIsFocused(prevState => ({ ...prevState, [input]: true }));
+  };
+  const handleBlur = input => {
+    setIsFocused(prevState => ({ ...prevState, [input]: false }));
+  };
+
+// Fonts
   const [fontsLoaded] = useFonts({
     RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
     RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
@@ -19,20 +35,47 @@ export default function RegistrationScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
-        <View style={{ ...styles.regScr, paddingBottom: 78 /*32*/ }}>
+        <View style={styles.regScr}>
           <View style={styles.avatarBox}>
             <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
-            {/* <AntDesign name="pluscircleo" style={styles.addRemovePhoto}  size={25} color="#FF6C00" />  */}
+            {/* <AntDesign name="pluscircleo" style={styles.addRemovePhoto} size={25} color="#FF6C00" backgroundColor="white" /> */}
             <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" backgroundColor="white" />
           </View>
 
           <Text style={styles.title}>Registration</Text>
 
           <View style={styles.regForm}>
-            <TextInput style={{ ...styles.input, borderColor: '#E8E8E8' /*'#FF6C00'*/ }} placeholder="Login" />
-            <TextInput style={{ ...styles.input, borderColor: '#E8E8E8' /*'#FF6C00'*/ }} placeholder="E-mail" />
+            <TextInput
+              style={{ ...styles.input, borderColor: isFocused.login ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.login ? 'white' : '#F6F6F6' }}
+              placeholder="Login"
+              onFocus={() => {
+                handleFocus('login');
+              }}
+              onBlur={() => {
+                handleBlur('login');
+              }}
+            />
+            <TextInput
+              style={{ ...styles.input, borderColor: isFocused.email ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.email ? 'white' : '#F6F6F6' }}
+              placeholder="E-mail"
+              onFocus={() => {
+                handleFocus('email');
+              }}
+              onBlur={() => {
+                handleBlur('email');
+              }}
+            />
             <View style={styles.inputPass}>
-              <TextInput style={{ ...styles.input, borderColor: '#E8E8E8' /*'#FF6C00'*/ }} placeholder="Password" />
+              <TextInput
+                style={{ ...styles.input, borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.password ? 'white' : '#F6F6F6' }}
+                placeholder="Password"
+                onFocus={() => {
+                  handleFocus('password');
+                }}
+                onBlur={() => {
+                  handleBlur('password');
+                }}
+              />
               <Text style={styles.showPass}> Show / Hide </Text>
             </View>
 
