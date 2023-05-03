@@ -1,18 +1,38 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ImageBackground,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { useFonts } from 'expo-font';
 import { AntDesign } from '@expo/vector-icons';
 
 const initialFocus = {
+  login: false,
   email: false,
   password: false,
-  login: false,
+};
+
+const initialState = {
+  login: '',
+  email: '',
+  password: '',
 };
 
 export default function RegistrationScreen() {
 
 // OnFocus
+  const [state, setState] = useState(initialState);
   const [isFocused, setIsFocused] = useState(initialFocus);
+  const [isPasswordShown, setIsPasswordShown] = useState(false);
 
   const handleFocus = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: true }));
@@ -32,62 +52,97 @@ export default function RegistrationScreen() {
     return null;
   }
 
+// Submit
+  const handleSubmit = () => {
+  
+  console.log('login:', state.login);
+  console.log('email:', state.email);
+  console.log('password:', state.password);
+  setState(initialState);
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
-        <View style={styles.regScr}>
-          <View style={styles.avatarBox}>
-            <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
-            {/* <AntDesign name="pluscircleo" style={styles.addRemovePhoto} size={25} color="#FF6C00" backgroundColor="white" /> */}
-            <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" backgroundColor="white" />
-          </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.regScr}>
+            <View style={styles.avatarBox}>
+              <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
+              {/* <AntDesign name="pluscircleo" style={styles.addRemovePhoto} size={25} color="#FF6C00" backgroundColor="white" /> */}
+              <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" backgroundColor="white" />
+            </View>
 
-          <Text style={styles.title}>Registration</Text>
+            <Text style={styles.title}>Registration</Text>
 
-          <View style={styles.regForm}>
-            <TextInput
-              style={{ ...styles.input, borderColor: isFocused.login ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.login ? 'white' : '#F6F6F6' }}
-              placeholder="Login"
-              onFocus={() => {
-                handleFocus('login');
-              }}
-              onBlur={() => {
-                handleBlur('login');
-              }}
-            />
-            <TextInput
-              style={{ ...styles.input, borderColor: isFocused.email ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.email ? 'white' : '#F6F6F6' }}
-              placeholder="E-mail"
-              onFocus={() => {
-                handleFocus('email');
-              }}
-              onBlur={() => {
-                handleBlur('email');
-              }}
-            />
-            <View style={styles.inputPass}>
+            <View style={styles.regForm}>
               <TextInput
-                style={{ ...styles.input, borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.password ? 'white' : '#F6F6F6' }}
-                placeholder="Password"
+                style={{ ...styles.input, borderColor: isFocused.login ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.login ? 'white' : '#F6F6F6' }}
+                placeholder="Login"
                 onFocus={() => {
-                  handleFocus('password');
+                  handleFocus('login');
                 }}
                 onBlur={() => {
-                  handleBlur('password');
+                  handleBlur('login');
                 }}
+                value={state.login}
+                onChangeText={value => setState(prevState => ({ ...prevState, login: value }))}
               />
-              <Text style={styles.showPass}> Show / Hide </Text>
-            </View>
+              <TextInput
+                style={{ ...styles.input, borderColor: isFocused.email ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.email ? 'white' : '#F6F6F6' }}
+                placeholder="E-mail"
+                onFocus={() => {
+                  handleFocus('email');
+                }}
+                onBlur={() => {
+                  handleBlur('email');
+                }}
+                value={state.email}
+                onChangeText={value => setState(prevState => ({ ...prevState, email: value.trim() }))}
+                autoComplete="email"
+              />
+              
+              <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
+                <View style={styles.inputPass}>
+                  <TextInput
+                    style={{
+                      ...styles.input,
+                      borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8',
+                      backgroundColor: isFocused.password ? 'white' : '#F6F6F6',
+                    }}
+                    placeholder="Password"
+                    onFocus={() => {
+                      handleFocus('password');
+                    }}
+                    onBlur={() => {
+                      handleBlur('password');
+                    }}
+                    value={state.password}
+                    onChangeText={value => setState(prevState => ({ ...prevState, password: value }))}
+                    autoComplete="password"
+                    secureTextEntry={!isPasswordShown}
+                  />
+                  
+                  {isPasswordShown === true ? (
+                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}> Hide </Text>
+                  ) : (
+                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}> Show </Text>
+                  )}   
+                </View>
+              </KeyboardAvoidingView>
 
-            <View>
-              <TouchableOpacity style={styles.btn} title="Registerr">
-                <Text style={styles.btnText}> Register </Text>
-              </TouchableOpacity>
+              <View>
+                <TouchableOpacity style={styles.btn} title="Register" onPress={handleSubmit}>
+                  <Text style={styles.btnText}> Register </Text>
+                </TouchableOpacity>
 
-              <Text style={styles.haveAccount}> Already have an account? Log in </Text>
+                <Text style={{ ...styles.haveAccount, marginBottom: isFocused.login || isFocused.email || isFocused.password ? 32 : 72 }}>
+                  
+                  Already have an account? Log in
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </ImageBackground>
     </View>
   );
@@ -109,6 +164,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     width: '100%',
     height: '69%',
+
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
@@ -195,5 +251,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: 'center',
     marginTop: 16,
+    // marginBottom: 78,
   },
 });

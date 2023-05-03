@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { useFonts } from 'expo-font';
 
 const initialFocus = {
@@ -7,9 +18,16 @@ const initialFocus = {
   password: false,
 };
 
+const initialState = {
+  email: '',
+  password: '',
+};
+
 export default function LoginScreen() {
-// OnFocus
-  const [isFocused, setIsFocused] = useState(initialFocus);  
+  // OnFocus
+  const [state, setState] = useState(initialState);
+  const [isFocused, setIsFocused] = useState(initialFocus);
+  const [isPasswordShown, setIsPasswordShown] = useState(false);
 
   const handleFocus = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: true }));
@@ -18,7 +36,7 @@ export default function LoginScreen() {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
   };
 
-// Fonts
+  // Fonts
   const [fontsLoaded] = useFonts({
     RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
     RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
@@ -29,39 +47,77 @@ export default function LoginScreen() {
     return null;
   }
 
+  // Submit
+  const handleSubmit = () => {
+    console.log('email:', state.email);
+    console.log('password:', state.password);
+    setState(initialState);
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
-        <View style={styles.regScr}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ ...styles.regScr, height: isFocused.email || isFocused.password ? '47%' : '61%'}}>
+            <Text style={styles.title}>Log In</Text>
 
-          <Text style={styles.title}>Log In</Text>
-
-          <View style={styles.regForm}>
-            <TextInput
-              style={{ ...styles.input, borderColor: isFocused.email ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.email ? 'white' : '#F6F6F6' }}
-              placeholder="E-mail"
-              onFocus={() => { handleFocus('email') }}
-              onBlur={() => { handleBlur('email') }}
-            />
-            <View style={styles.inputPass}>
+            <View style={styles.regForm}>
               <TextInput
-                style={{ ...styles.input, borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.password ? 'white' : '#F6F6F6' }}
-                placeholder="Password"
-                onFocus={() => { handleFocus('password'); }}
-                onBlur={() => { handleBlur('password'); }}
+                style={{ ...styles.input, borderColor: isFocused.email ? '#FF6C00' : '#E8E8E8', backgroundColor: isFocused.email ? 'white' : '#F6F6F6' }}
+                placeholder="E-mail"
+                onFocus={() => {
+                  handleFocus('email');
+                }}
+                onBlur={() => {
+                  handleBlur('email');
+                }}
+                value={state.email}
+                onChangeText={value => setState(prevState => ({ ...prevState, email: value.trim() }))}
+                autoComplete="email"
               />
-              <Text style={styles.showPass}> Show / Hide </Text>
-            </View>
+              <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
+                <View style={styles.inputPass}>
+                  <TextInput
+                    style={{
+                      ...styles.input,
+                      borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8',
+                      backgroundColor: isFocused.password ? 'white' : '#F6F6F6',
+                    }}
+                    placeholder="Password"
+                    onFocus={() => {
+                      handleFocus('password');
+                    }}
+                    onBlur={() => {
+                      handleBlur('password');
+                    }}
+                    value={state.password}
+                    onChangeText={value => setState(prevState => ({ ...prevState, password: value }))}
+                    autoComplete="password"
+                    secureTextEntry={!isPasswordShown}
+                  />
 
-            <View>
-              <TouchableOpacity style={styles.btn} title="Registerr">
-                <Text style={styles.btnText}> Log in </Text>
-              </TouchableOpacity>
+                  {isPasswordShown === true ? (
+                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}>
+                      Hide
+                    </Text>
+                  ) : (
+                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}>
+                      Show{' '}
+                    </Text>
+                  )}
+                </View>
+              </KeyboardAvoidingView>
 
-              <Text style={styles.haveAccount}> Don't have an account? Registration </Text>
+              <View>
+                <TouchableOpacity style={styles.btn} title="LogIn" onPress={handleSubmit}>
+                  <Text style={styles.btnText}> Log in </Text>
+                </TouchableOpacity>
+
+                <Text style={styles.haveAccount}> Don't have an account? Registration </Text>
+              </View>
             </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </ImageBackground>
     </View>
   );
@@ -75,14 +131,15 @@ const styles = StyleSheet.create({
   },
   imgBg: {
     flex: 1,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
   regScr: {
     paddingHorizontal: 16,
     width: '100%',
-    height: '61%',
+    // height: '47%',
+    // height: '61%',
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
@@ -147,5 +204,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: 'center',
     marginTop: 16,
+    // marginBottom: 114,
   },
 });
