@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
 
     color: '#212121',
-    placeholderTextColor: '#BDBDBD',
+    // placeholderTextColor: '#BDBDBD',
     fontSize: 16,
   },
 

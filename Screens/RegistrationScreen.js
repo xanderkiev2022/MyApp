@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, ImageBackground, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
+import { AntDesign } from '@expo/vector-icons';
 
 export default function RegistrationScreen() {
   //Fonts
@@ -21,8 +22,8 @@ export default function RegistrationScreen() {
         <View style={{ ...styles.regScr, paddingBottom: 78 /*32*/ }}>
           <View style={styles.avatarBox}>
             <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
-            {/* TODO: SVG не працює */}
-            {/* <Image style={styles.addPhoto} source={require('../assets/svg/add.svg')} /> */}
+            {/* <AntDesign name="pluscircleo" style={styles.addRemovePhoto}  size={25} color="#FF6C00" />  */}
+            <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" backgroundColor="white" />
           </View>
 
           <Text style={styles.title}>Registration</Text>
@@ -87,13 +88,11 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
 
-  addPhoto: {
-    width: 250,
-    height: 250,
+  addRemovePhoto: {
     position: 'absolute',
-    fill: 'red',
-    right: -14,
-    bottom: 14,
+    left: 108,
+    top: 80,
+    borderRadius: 12.5,
   },
 
   title: {
@@ -119,7 +118,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
 
     color: '#212121',
-    placeholderTextColor: '#BDBDBD',
+    // placeholderTextColor: '#BDBDBD',
     fontSize: 16,
   },
 
