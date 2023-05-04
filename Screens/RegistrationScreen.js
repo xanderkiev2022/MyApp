@@ -151,7 +151,7 @@ export default function RegistrationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     fontFamily: 'RobotoRegular',
   },
   imgBg: {
@@ -183,15 +183,16 @@ const styles = StyleSheet.create({
   avatarImg: {
     height: '100%',
     width: '100%',
-    borderRadius: 8,
+    borderRadius: 16,
     resizeMode: 'contain',
   },
 
   addRemovePhoto: {
+    backgroundColor: '#FFFFFF',
     position: 'absolute',
     left: 108,
     top: 80,
-    borderRadius: 12.5,
+    borderRadius: 25,
   },
 
   title: {
