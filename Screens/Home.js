@@ -23,12 +23,11 @@ export default function Home () {
               return <SimpleLineIcons name="grid" size={size} color={color} />;
             }
           },
+          tabBarActiveTintColor: '#FF6C00',
+          tabBarInactiveTintColor: 'rgba(33, 33, 33, 0.8)',
+          tabBarShowLabel: false,
+          initialRouteName: 'PostsScreen',
         })}
-        tabBarOptions={{
-          activeTintColor: '#FF6C00',
-          inactiveTintColor: 'rgba(33, 33, 33, 0.8)',
-          showLabel: false,
-        }}
       >
         <MainTab.Screen
           name="Posts"

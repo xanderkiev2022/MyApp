@@ -23,7 +23,7 @@ const initialState = {
   password: '',
 };
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
   // OnFocus
   const [state, setState] = useState(initialState);
   const [isFocused, setIsFocused] = useState(initialFocus);
@@ -54,11 +54,16 @@ export default function LoginScreen() {
     setState(initialState);
   };
 
+  // Registration
+  const handleRegistration = () => {
+    navigation.navigate('Registration');
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ ...styles.regScr, height: isFocused.email || isFocused.password ? '47%' : '61%'}}>
+          <View style={{ ...styles.regScr, height: isFocused.email || isFocused.password ? '47%' : '61%' }}>
             <Text style={styles.title}>Log In</Text>
 
             <View style={styles.regForm}>
@@ -113,7 +118,9 @@ export default function LoginScreen() {
                   <Text style={styles.btnText}> Log in </Text>
                 </TouchableOpacity>
 
-                <Text style={styles.haveAccount}> Don't have an account? Registration </Text>
+                <TouchableOpacity style={styles.btn2} title="Registration" onPress={handleRegistration}>
+                  <Text style={styles.haveAccount}> Don't have an account? Registration </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>

@@ -27,9 +27,8 @@ const initialState = {
   password: '',
 };
 
-export default function RegistrationScreen() {
-
-// OnFocus
+export default function RegistrationScreen({ navigation }) {
+  // OnFocus
   const [state, setState] = useState(initialState);
   const [isFocused, setIsFocused] = useState(initialFocus);
   const [isPasswordShown, setIsPasswordShown] = useState(false);
@@ -41,7 +40,7 @@ export default function RegistrationScreen() {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
   };
 
-// Fonts
+  // Fonts
   const [fontsLoaded] = useFonts({
     RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
     RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
@@ -52,13 +51,18 @@ export default function RegistrationScreen() {
     return null;
   }
 
-// Submit
+  // Submit
   const handleSubmit = () => {
-  
-  console.log('login:', state.login);
-  console.log('email:', state.email);
-  console.log('password:', state.password);
-  setState(initialState);
+    console.log('login:', state.login);
+    console.log('email:', state.email);
+    console.log('password:', state.password);
+    setState(initialState);
+    navigation.navigate('Home');
+  };
+
+  // Login
+  const handleLogin = () => {
+    navigation.navigate('Login');
   };
 
   return (
@@ -100,7 +104,7 @@ export default function RegistrationScreen() {
                 onChangeText={value => setState(prevState => ({ ...prevState, email: value.trim() }))}
                 autoComplete="email"
               />
-              
+
               <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
                 <View style={styles.inputPass}>
                   <TextInput
@@ -121,12 +125,18 @@ export default function RegistrationScreen() {
                     autoComplete="password"
                     secureTextEntry={!isPasswordShown}
                   />
-                  
+
                   {isPasswordShown === true ? (
-                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}> Hide </Text>
+                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}>
+                      {' '}
+                      Hide{' '}
+                    </Text>
                   ) : (
-                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}> Show </Text>
-                  )}   
+                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}>
+                      {' '}
+                      Show{' '}
+                    </Text>
+                  )}
                 </View>
               </KeyboardAvoidingView>
 
@@ -134,11 +144,11 @@ export default function RegistrationScreen() {
                 <TouchableOpacity style={styles.btn} title="Register" onPress={handleSubmit}>
                   <Text style={styles.btnText}> Register </Text>
                 </TouchableOpacity>
-
-                <Text style={{ ...styles.haveAccount, marginBottom: isFocused.login || isFocused.email || isFocused.password ? 32 : 72 }}>
-                  
-                  Already have an account? Log in
-                </Text>
+                <TouchableOpacity style={styles.btn2} title="Login" onPress={handleLogin}>
+                  <Text style={{ ...styles.haveAccount, marginBottom: isFocused.login || isFocused.email || isFocused.password ? 32 : 72 }}>
+                    Already have an account? Log in
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
