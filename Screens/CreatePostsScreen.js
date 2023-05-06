@@ -62,10 +62,10 @@ export default function CreatePostsScreen({ navigation }) {
   // upload photo
   const uploadPhoto = () => {
       // uploadToServer();
-      navigation.navigate('PostsScreen', {
+      navigation.navigate('Posts', {
         photo,
         location,
-        state
+        state,
       });
       Keyboard.dismiss(); 
       setState(initialState);

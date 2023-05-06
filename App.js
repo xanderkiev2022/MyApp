@@ -9,12 +9,6 @@ import RegistrationScreen from './Screens/RegistrationScreen';
 import Home from './Screens/Home';
 import LoginScreen from './Screens/LoginScreen';
 
-// import CreatePostsScreen from './Screens/CreatePostsScreen';
-// import PostsScreen from './Screens/PostsScreen';
-// import CommentsScreen from './Screens/CommentsScreen';
-// import ProfileScreen from './Screens/ProfileScreen';
-// import MapScreen from './Screens/MapScreen';
-
 const MainStack = createStackNavigator();
 
 export default function App() {
@@ -38,16 +32,8 @@ export default function App() {
       </MainStack.Navigator>
       {/* <View style={styles.container}> */}
       {/* <StatusBar style="auto" /> */}
-      {/* <Header /> */}
-      {/* <RegistrationScreen /> */}
-      {/* <LoginScreen /> */}
-      {/* <CreatePostsScreen /> */}
-      {/* <PostsScreen /> */}
       {/* <CommentsScreen /> */}
-      {/* <ProfileScreen /> */}
       {/* <MapScreen /> */}
-      {/* <Home /> */}
-      {/* </View> */}
     </NavigationContainer>
   );
 }
