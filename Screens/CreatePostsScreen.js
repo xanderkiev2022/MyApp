@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, TextInput, Image, ImageBackground } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, TextInput, Image, ImageBackground, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { AntDesign, Feather, EvilIcons, Ionicons,} from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { Camera, CameraType } from 'expo-camera';
@@ -12,30 +12,41 @@ const initialState = {
   place: '',
 };
 
-export default function CreatePostsScreen() {
+const initialFocus = {
+  name: false,
+  place: false,
+};
+
+export default function CreatePostsScreen({ navigation }) {
   const [cameraRef, setCameraRef] = useState(null);
   const [state, setState] = useState(initialState);
   const [photo, setPhoto] = useState('');
   const [location, setLocation] = useState(null);
+  const [isFocused, setIsFocused] = useState(initialFocus);
 
+  // makePhoto
   const makePhoto = async () => {
     const photo = await cameraRef.takePictureAsync();
     const location = await Location.getCurrentPositionAsync({});
     setPhoto(photo.uri);
     setLocation(location.coords);
     await MediaLibrary.createAssetAsync(photo.uri); //фото збережеться в пам'ять телефону.
-    console.log('photo.uri :>> ', photo.uri);
-    console.log('photo :>> ', photo);
-    {
-      /* <ImageBackground source={{ uri: photo }} style={styles.photo} /> */
-    }
   };
 
-    const openCamera = async () => {
-      setPhoto(null);
-      setLocation(null);
-      setCameraRef(cameraRef);
-    };
+  // OnFocus
+  const handleFocus = input => {
+    setIsFocused(prevState => ({ ...prevState, [input]: true }));
+    console.log('state :>> ', state);
+  };
+  const handleBlur = input => {
+    setIsFocused(prevState => ({ ...prevState, [input]: false }));
+  };
+
+  const openCamera = async () => {
+    setPhoto(null);
+    setLocation(null);
+    setCameraRef(cameraRef);
+  };
 
   // Fonts
   const [fontsLoaded] = useFonts({
@@ -48,6 +59,19 @@ export default function CreatePostsScreen() {
     return null;
   }
 
+  // upload photo
+  const uploadPhoto = () => {
+      // uploadToServer();
+      navigation.navigate('PostsScreen', {
+        photo,
+        location,
+        state
+      });
+      Keyboard.dismiss(); 
+      setState(initialState);
+      setPhoto('');
+    }
+
   return (
     <View style={styles.container}>
       <View style={styles.wrapper}>
@@ -55,7 +79,7 @@ export default function CreatePostsScreen() {
           <View style={styles.fotoContainer}>
             <Image source={{ uri: photo }} style={styles.photo} />
             <TouchableOpacity style={styles.svgConatiner} onPress={openCamera}>
-                 <Feather name="camera" size={20} color="#FFFFFF" />
+              <Feather name="camera" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         ) : (
@@ -66,20 +90,45 @@ export default function CreatePostsScreen() {
 
         <Text style={styles.mainText}>Upload photo</Text>
 
-        <View style={styles.form}>
-          <TextInput placeholder="Name..." style={styles.inputName} />
-          <View>
-            <EvilIcons style={styles.iconLocation} name="location" size={24} color="#BDBDBD" />
-            <TextInput placeholder="Location..." style={styles.inputLocation} />
-          </View>
-          <TouchableOpacity activeOpacity={0.8} style={styles.uploadBtnActive}>
-            <Text style={styles.uploadBtnTitleActive}>Upload</Text>
-          </TouchableOpacity>
+        <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
+          <View style={styles.form}>
+            <TextInput
+              style={{ ...styles.inputName, borderColor: isFocused.name ? '#FF6C00' : '#E8E8E8' }}
+              placeholder="Name..."
+              onFocus={() => {
+                handleFocus('name');
+              }}
+              onBlur={() => {
+                handleBlur('name');
+              }}
+              onChangeText={value => setState(prevState => ({ ...prevState, name: value }))}
+              value={state.name}
+            />
 
-          <TouchableOpacity activeOpacity={0.8} style={styles.deleteBtn}>
-            <AntDesign style={styles.deleteSvg} name="delete" size={25} color="#DADADA" />
-          </TouchableOpacity>
-        </View>
+            <View>
+              <EvilIcons style={styles.iconLocation} name="location" size={24} color="#BDBDBD" />
+              <TextInput
+                style={{ ...styles.inputLocation, borderColor: isFocused.place ? '#FF6C00' : '#E8E8E8' }}
+                placeholder="Location..."
+                onFocus={() => {
+                  handleFocus('place');
+                }}
+                onBlur={() => {
+                  handleBlur('place');
+                }}
+                value={state.place}
+                onChangeText={value => setState(prevState => ({ ...prevState, place: value }))}
+              />
+            </View>
+            <TouchableOpacity activeOpacity={0.8} style={styles.uploadBtnActive} onPress={uploadPhoto}>
+              <Text style={styles.uploadBtnTitleActive}>Upload</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity activeOpacity={0.8} style={styles.deleteBtn}>
+              <AntDesign style={styles.deleteSvg} name="delete" size={25} color="#DADADA" />
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </View>
   );
@@ -90,7 +139,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
     alignItems: 'center',
-    paddingTop: 60,
   },
   wrapper: {
     width: 343,
