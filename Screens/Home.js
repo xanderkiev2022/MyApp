@@ -7,7 +7,7 @@ import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
 import ProfileScreen from './ProfileScreen';
 import Header from './Header';
-
+// import { NavigationContainer } from '@react-navigation/native';
 const MainTab = createBottomTabNavigator();
 
 export default function Home () {
@@ -67,3 +67,17 @@ const styles = StyleSheet.create({
     paddingTop: 9,
   },
 });
+
+// const MainStack = createStackNavigator();
+
+// <NavigationContainer>
+//   <MainStack.Navigator initialRouteName="Home">
+//     <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
+//     <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+//     <MainStack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+//   </MainStack.Navigator>
+//   {/* <View style={styles.container}> */}
+//   {/* <StatusBar style="auto" /> */}
+//   {/* <CommentsScreen /> */}
+//   {/* <MapScreen /> */}
+// </NavigationContainer>

@@ -1,15 +1,15 @@
 import 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 
-import RegistrationScreen from './Screens/RegistrationScreen';
-import Home from './Screens/Home';
-import LoginScreen from './Screens/LoginScreen';
+// Redux
+import { Provider } from 'react-redux';
+import store from './redux/store';
 
-const MainStack = createStackNavigator();
+import Home from './Screens/Home';
+
 
 export default function App() {
   // Fonts
@@ -24,17 +24,11 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <MainStack.Navigator initialRouteName="Home">
-        <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
-        <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <MainStack.Screen name="Home" component={Home} options={{ headerShown: false }} />
-      </MainStack.Navigator>
-      {/* <View style={styles.container}> */}
-      {/* <StatusBar style="auto" /> */}
-      {/* <CommentsScreen /> */}
-      {/* <MapScreen /> */}
-    </NavigationContainer>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <Home />
+      </PersistGate>
+    </Provider>
   );
 }
 
