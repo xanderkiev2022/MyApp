@@ -7,11 +7,12 @@ import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
 import ProfileScreen from './ProfileScreen';
 import Header from './Header';
-// import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 const MainTab = createBottomTabNavigator();
 
 export default function Home () {
-    return (
+  return (
+    <NavigationContainer>
       <MainTab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) => {
@@ -54,7 +55,8 @@ export default function Home () {
           }}
         />
       </MainTab.Navigator>
-    );
+    </NavigationContainer>
+  );
 };
 
 const styles = StyleSheet.create({

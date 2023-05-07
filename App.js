@@ -3,13 +3,12 @@ import { StyleSheet } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
+import { PersistGate } from 'redux-persist/integration/react';
+import Home from './Screens/Home';
 
 // Redux
 import { Provider } from 'react-redux';
-import store from './redux/store';
-
-import Home from './Screens/Home';
-
+import { store, persistor } from './redux/store';
 
 export default function App() {
   // Fonts
