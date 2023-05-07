@@ -13,6 +13,10 @@ import {
 } from 'react-native';
 import { useFonts } from 'expo-font';
 
+// Firebase
+import { login } from '../redux/auth/authOperations';
+import { useDispatch, useSelector } from 'react-redux';
+
 const initialFocus = {
   email: false,
   password: false,
@@ -24,6 +28,8 @@ const initialState = {
 };
 
 export default function LoginScreen({ navigation }) {
+  const dispatch = useDispatch();
+  
   // OnFocus
   const [state, setState] = useState(initialState);
   const [isFocused, setIsFocused] = useState(initialFocus);
@@ -49,9 +55,9 @@ export default function LoginScreen({ navigation }) {
 
   // Submit
   const handleSubmit = () => {
-    console.log('email:', state.email);
-    console.log('password:', state.password);
     setState(initialState);
+    dispatch(login(state));
+    navigation.navigate('Home');
   };
 
   // Registration

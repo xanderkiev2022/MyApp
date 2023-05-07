@@ -4,8 +4,13 @@ import { useFonts } from 'expo-font';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+// Firebase
+import { logout } from '../redux/auth/authOperations';
+import { useDispatch, useSelector } from 'react-redux';
 
-export default function Header({title}) {
+
+export default function Header({ title }) {
+  const dispatch = useDispatch();
   // Fonts
   const [fontsLoaded] = useFonts({
     RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
@@ -17,11 +22,16 @@ export default function Header({title}) {
     return null;
   }
 
+  // Submit
+  const handleSubmit = () => {
+    dispatch(logout());
+  };
+
   return (
     <View style={styles.container}>
       <AntDesign name="arrowleft" style={styles.returnSvg} size={28} color={'#BDBDBD'} backgroundColor={'transparent'} header={20} />
       <Text style={styles.title}>{title}</Text>
-      <Ionicons name="exit-outline" style={styles.exitSvg} size={28} color="#BDBDBD" backgroundColor="transparent" />
+      <Ionicons name="exit-outline" style={styles.exitSvg} size={28} color="#BDBDBD" backgroundColor="transparent" onPress={handleSubmit} />
     </View>
   );
 }

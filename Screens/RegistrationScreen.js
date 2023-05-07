@@ -15,6 +15,10 @@ import {
 import { useFonts } from 'expo-font';
 import { AntDesign } from '@expo/vector-icons';
 
+// Firebase
+import { register } from '../redux/auth/authOperations';
+import { useDispatch, useSelector } from 'react-redux';
+
 const initialFocus = {
   login: false,
   email: false,
@@ -28,6 +32,8 @@ const initialState = {
 };
 
 export default function RegistrationScreen({ navigation }) {
+ const dispatch = useDispatch();
+
   // OnFocus
   const [state, setState] = useState(initialState);
   const [isFocused, setIsFocused] = useState(initialFocus);
@@ -53,11 +59,10 @@ export default function RegistrationScreen({ navigation }) {
 
   // Submit
   const handleSubmit = () => {
-    console.log('login:', state.login);
-    console.log('email:', state.email);
-    console.log('password:', state.password);
     setState(initialState);
+    dispatch(register(state));
     navigation.navigate('Home');
+  
   };
 
   // Login

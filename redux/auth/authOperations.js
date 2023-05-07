@@ -9,6 +9,7 @@ export const register = createAsyncThunk('auth/register', async ({ login, email,
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
     console.log('Користувач успішно зареєстрований:', user.uid);
+    await updateProfile(user, {displayName: login, });
     return {
       userId: user.uid,
       name: user.displayName,
