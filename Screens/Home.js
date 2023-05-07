@@ -1,13 +1,13 @@
-import React from 'react';
-import { Feather } from '@expo/vector-icons';
-import { SimpleLineIcons } from '@expo/vector-icons';
+import { NavigationContainer } from '@react-navigation/native';
+import { Feather, SimpleLineIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
+import React from 'react';
 import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
 import ProfileScreen from './ProfileScreen';
 import Header from './Header';
-import { NavigationContainer } from '@react-navigation/native';
+
 const MainTab = createBottomTabNavigator();
 
 export default function Home () {

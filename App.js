@@ -1,12 +1,11 @@
 import 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
-import { PersistGate } from 'redux-persist/integration/react';
 import Home from './Screens/Home';
 
 // Redux
+import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
 import { store, persistor } from './redux/store';
 
