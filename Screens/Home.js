@@ -2,7 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Feather, SimpleLineIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
@@ -13,6 +13,7 @@ import { selectIsLoggedIn, selectRefreshing } from '../redux/auth/authSelectors'
 import RegistrationScreen from './RegistrationScreen';
 import LoginScreen from './LoginScreen';
 import PostsScreenMain from './PostsScreenMain';
+import { AntDesign } from '@expo/vector-icons';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -45,8 +46,9 @@ export default function Home() {
             name="Posts"
             component={PostsScreen}
             options={{
-              headerShown: true,
-              header: ({ navigation, route }) => <Header title={route.name} />,
+              headerShown: false,
+
+              // header: ({ navigation, route }) => <Header title={route.name} navigation={navigation} />,
             }}
           />
           <MainTab.Screen
@@ -54,15 +56,16 @@ export default function Home() {
             component={CreatePostsScreen}
             options={{
               headerShown: true,
-              header: ({ navigation, route }) => <Header title={route.name} />,
+              // header: ({ navigation, route }) => <Header title={route.name} navigation={navigation} />,
             }}
+
           />
           <MainTab.Screen
             name="Profile"
             component={ProfileScreen}
             options={{
               headerShown: false,
-              header: ({ navigation, route }) => <Header title={route.name} />,
+              // header: ({ navigation, route }) => <Header title={route.name} navigation={navigation} />,
             }}
           />
         </MainTab.Navigator>
@@ -70,7 +73,7 @@ export default function Home() {
         <MainStack.Navigator initialRouteName="Login">
           <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
           <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-          <MainStack.Screen name="Home" component={PostsScreenMain} options={{ headerShown: true }} />
+          <MainStack.Screen name="Home" component={PostsScreenMain} options={{ headerShown: false }} />
         </MainStack.Navigator>
       )}
     </NavigationContainer>

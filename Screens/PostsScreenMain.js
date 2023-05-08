@@ -1,46 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
 import { EvilIcons, Feather } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 
-export default function PostsScreenMain({navigation}) {
-  // Fonts
-  const [fontsLoaded] = useFonts({
-    RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
-    RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
-    RobotoRegular: require('../assets/fonts/RobotoRegular.ttf'),
-  });
+// Firebase
+import { collection, query, where, onSnapshot, updateProfile } from 'firebase/firestore';
+import { db, auth } from '../firebase/config';
+import { selectName, selectUserId, selectPhoto, selectEmail } from '../redux/auth/authSelectors';
+import { useSelector, useDispatch } from 'react-redux';
+import PostComponent from '../Components/PostComponent';
 
-  if (!fontsLoaded) {
-    return null;
-  }
+export default function PostsScreenMain({ navigation }) {
+  const [posts, setPosts] = useState([]);
+  const userId = useSelector(selectUserId);
+  const userName = useSelector(selectName);
+  const userEmail = useSelector(selectEmail);
+  const userPhoto = useSelector(selectPhoto);
+
+  useEffect(() => {
+    const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
+    onSnapshot(postsCollection, querySnapshot => {
+      // прослуховування колекції posts
+      const postsArray = querySnapshot.docs.map(doc => ({
+        // при зміні posts querySnapshot викликається повторно з оновленими даними
+        ...doc.data(), // Для кожного поста створюється новий об'єкт, який містить всі дані про пост, а також його id.
+        id: doc.id,
+      }));
+      setPosts(postsArray);
+    });
+  }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
         <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
         <View style={styles.avatarData}>
-          <Text style={styles.avatarName}>Natali Romanova</Text>
-          <Text style={styles.avatarEmail}>email@example.com</Text>
+          <Text style={styles.avatarName}>{userName}</Text>
+          <Text style={styles.avatarEmail}>{userEmail}</Text>
         </View>
       </View>
-
-      <View>
-        <Image style={styles.photo} source={require('../assets/img/avatar.png')} />
-        <Text style={styles.locationName}>Wood</Text>
-
-        <View style={styles.iconsContainer}>
-          <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={() => navigation.navigate('Comments')}>
-            <Feather name="message-circle" size={24} color="#BDBDBD" />
-            <Text style={styles.messeges}>0</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={() => navigation.navigate('Map')}>
-            <EvilIcons name="location" size={24} color="#BDBDBD" />
-            <Text style={styles.location}>Ivano-Frankivs'k Region, Ukraine</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <FlatList
+        data={posts}
+        style={styles.posts}
+        keyExtractor={(__, index) => index.toString()}
+        renderItem={({ item }) => <PostComponent post={item} navigation={navigation} />}
+      />
     </View>
   );
 }
@@ -77,47 +81,5 @@ const styles = StyleSheet.create({
     fontFamily: 'RobotoRegular',
     fontSize: 11,
     lineHeight: 13,
-  },
-
-  photo: {
-    width: '100%',
-    height: 240,
-    alignSelf: 'center',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  locationName: {
-    fontFamily: 'RobotoMedium',
-    fontSize: 16,
-    lineHeight: 19,
-    marginBottom: 11,
-  },
-
-  iconsContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  messeges: {
-    marginLeft: 9,
-    fontFamily: 'RobotoRegular',
-    fontSize: 16,
-    lineHeight: 19,
-    color: '#BDBDBD',
-  },
-
-  location: {
-    fontFamily: 'RobotoRegular',
-    fontSize: 16,
-    lineHeight: 19,
-    color: '#212121',
-    textDecorationLine: 'underline',
-  },
-
-  innerWrapperIcons: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 });

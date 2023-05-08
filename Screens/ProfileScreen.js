@@ -1,19 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, View, Text, StyleSheet, ImageBackground, Image, FlatList } from 'react-native';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 
-export default function ProfileScreen() {
-  // Fonts
-  const [fontsLoaded] = useFonts({
-    RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
-    RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
-    RobotoRegular: require('../assets/fonts/RobotoRegular.ttf'),
-  });
+// Firebase
+import { collection, query, where, onSnapshot, updateProfile } from 'firebase/firestore';
+import { db, auth } from '../firebase/config';
+import { selectName, selectUserId, selectPhoto } from '../redux/auth/authSelectors';
+import { useSelector, useDispatch } from 'react-redux';
+import PostComponent from '../Components/PostComponent';
+import { logout } from '../redux/auth/authOperations';
 
-  if (!fontsLoaded) {
-    return null;
-  }
+export default function ProfileScreen({ navigation }) {
+ const [posts, setPosts] = useState([]);
+ const userId = useSelector(selectUserId);
+ const userName = useSelector(selectName);
+const userPhoto = useSelector(selectPhoto);
+  
+const dispatch = useDispatch();
+
+ useEffect(() => {
+   const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
+   onSnapshot(postsCollection, querySnapshot => {
+     // прослуховування колекції posts
+     const postsArray = querySnapshot.docs.map(doc => ({
+       // при зміні posts querySnapshot викликається повторно з оновленими даними
+       ...doc.data(), // Для кожного поста створюється новий об'єкт, який містить всі дані про пост, а також його id.
+       id: doc.id,
+     }));
+     setPosts(postsArray);
+   });
+ }, []);
 
   return (
     <View style={styles.container}>
@@ -22,13 +39,22 @@ export default function ProfileScreen() {
           <View style={styles.avatarBox}>
             <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
             <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" />
+            <TouchableOpacity style={styles.exitSvg} onPress={() => dispatch(logout())}>
+              <Ionicons name="exit-outline" size={28} color="#BDBDBD" backgroundColor="transparent" />
+            </TouchableOpacity>
           </View>
-          <Text style={styles.avatarName}>Natali Romanova</Text>
+          <Text style={styles.avatarName}>{userName}</Text>
+          <FlatList
+            data={posts}
+            style={styles.posts}
+            keyExtractor={(__, index) => index.toString()}
+            renderItem={({ item }) => <PostComponent post={item} navigation={navigation} forProfileScreen />}
+          />
         </View>
       </ImageBackground>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -46,11 +72,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     width: '100%',
     height: '85%',
-
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    alignItems: 'center',
     position: 'relative',
   },
   avatarBox: {
@@ -77,6 +101,12 @@ const styles = StyleSheet.create({
     top: 80,
     borderRadius: 25,
   },
+  exitSvg: {
+    position: 'absolute',
+    top: 78,
+    right: -120,
+  },
+
   avatarName: {
     fontFamily: 'RobotoMedium',
     fontSize: 30,
@@ -84,5 +114,9 @@ const styles = StyleSheet.create({
     color: '#212121',
     marginBottom: 32,
     alignSelf: 'center',
+  },
+  posts: {
+    marginHorizontal: 8,
+    height: '50%',
   },
 });

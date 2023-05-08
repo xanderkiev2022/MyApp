@@ -5,17 +5,6 @@ import { useFonts } from 'expo-font';
 
 export default function CommentsScreen() {
 
-  // Fonts
-  const [fontsLoaded] = useFonts({
-    RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
-    RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
-    RobotoRegular: require('../assets/fonts/RobotoRegular.ttf'),
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
     <View style={styles.container}>
       <Image style={styles.photo} source={require('../assets/img/avatar.png')} />

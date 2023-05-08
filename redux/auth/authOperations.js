@@ -8,16 +8,14 @@ export const register = createAsyncThunk('auth/register', async ({ login, email,
   try {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
-    console.log('Користувач успішно зареєстрований:', user.uid);
     await updateProfile(user, {displayName: login, });
     return {
       userId: user.uid,
       name: user.displayName,
-      email: user.userEmail,
+      email: user.email,
       photo: user.photoURL,
     };
   } catch (error) {
-    console.log('Помилка при реєстрації:', error.message);
     return thunkAPI.rejectWithValue(error.message);
   }
 });
@@ -26,15 +24,13 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }, 
   try {
     const res = await signInWithEmailAndPassword(auth, email, password);
     const user = res.user;
-    console.log('Користувач успішно залогінився:', user.uid);
     return {
       userId: user.uid,
       name: user.displayName,
-      email: user.userEmail,
+      email: user.email,
       photo: user.photoURL,
     };
   } catch (error) {
-    console.log('Помилка при вході:', error.message);
     return thunkAPI.rejectWithValue(error.message);
   }
 });

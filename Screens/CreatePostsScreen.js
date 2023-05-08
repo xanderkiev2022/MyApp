@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, TextInput, Image, ImageBackground, KeyboardAvoidingView, Keyboard } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View, TextInput, Image, ImageBackground, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { AntDesign, Feather, EvilIcons, Ionicons,} from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { Camera, CameraType } from 'expo-camera';
@@ -7,90 +7,104 @@ import * as MediaLibrary from 'expo-media-library';
 import * as Location from 'expo-location';
 import { CameraComponent } from '../Components/Camera';
 
+// Firebase
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc } from 'firebase/firestore';
+import { db, storage } from '../firebase/config';
+import { selectName, selectUserId } from '../redux/auth/authSelectors';
+import { useSelector } from 'react-redux';
+
 const initialState = {
   name: '',
-  place: '',
+  location: '',
+  photo: null,
+  coordinate: null,
 };
 
 const initialFocus = {
   name: false,
-  place: false,
+  location: false,
 };
 
 export default function CreatePostsScreen({ navigation }) {
   const [cameraRef, setCameraRef] = useState(null);
   const [state, setState] = useState(initialState);
-  const [photo, setPhoto] = useState('');
-  const [location, setLocation] = useState(null);
   const [isFocused, setIsFocused] = useState(initialFocus);
+  const userId = useSelector(selectUserId);
+  const userName = useSelector(selectName);
 
   // makePhoto
   const makePhoto = async () => {
     const photo = await cameraRef.takePictureAsync();
     const location = await Location.getCurrentPositionAsync({});
-    setPhoto(photo.uri);
-    setLocation(location.coords);
+     const coords = {
+       latitude: location.coords.latitude,
+       longitude: location.coords.longitude,
+     };
+    setState(prevState => ({ ...prevState, photo: photo.uri, coordinate: coords }));
     await MediaLibrary.createAssetAsync(photo.uri); //фото збережеться в пам'ять телефону.
   };
 
   // OnFocus
   const handleFocus = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: true }));
-    console.log('state :>> ', state);
   };
   const handleBlur = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
   };
 
   const openCamera = async () => {
-    setPhoto(null);
-    setLocation(null);
+    setState(prevState => ({ ...prevState, photo: null}));
     setCameraRef(cameraRef);
   };
 
-  // Fonts
-  const [fontsLoaded] = useFonts({
-    RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
-    RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
-    RobotoRegular: require('../assets/fonts/RobotoRegular.ttf'),
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   // upload photo
-  const uploadPhoto = () => {
-      // uploadToServer();
-      navigation.navigate('Posts', {
-        photo,
-        location,
-        state,
-      });
-      Keyboard.dismiss(); 
+  const uploadPhoto = async () => {
+    try {
+      const response = await fetch(state.photo); // дістаємо фото зі стейту
+      const file = await response.blob(); // перетворюємо отриману фотографію на об'єкт Blob
+      const uniquePostId = Date.now().toString(); // генеруємо унікальне ім"я для фото
+      const linkToFile = ref(storage, `imgPost/${uniquePostId}`); // створюємо посилання на місце збереження фото в Firebase
+      await uploadBytes(linkToFile, file); // завантажуємо фото
+      const photoUrl = await getDownloadURL(ref(storage, `imgPost/${uniquePostId}`)); // отримуємо URL-адресу завантаженого фото
+      const uploadedInfo = {
+        displayName: userName,
+        photo: photoUrl,
+        name: state.name,
+        location: state.location,
+        coordinate: state.coordinate,
+        userId,
+        likes: [],
+        comments: 0,
+      };
+      await addDoc(collection(db, 'posts'), uploadedInfo); // додаємо інформацію про пост до бази даних
+      Keyboard.dismiss();
       setState(initialState);
-      setPhoto('');
+      navigation.navigate('Posts');
+    } catch (error) {
+    console.log(error);
+    }
     }
 
   return (
     <View style={styles.container}>
       <View style={styles.wrapper}>
-        {photo ? (
+        {state.photo ? (
           <View style={styles.fotoContainer}>
-            <Image source={{ uri: photo }} style={styles.photo} />
+            <Image source={{ uri: state.photo }} style={styles.photo} />
             <TouchableOpacity style={styles.svgConatiner} onPress={openCamera}>
               <Feather name="camera" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.fotoContainer}>
-            <CameraComponent makePhoto={makePhoto} location={location} photo={photo} setCameraRef={setCameraRef} />
+            <CameraComponent makePhoto={makePhoto} location={state.location} photo={state.photo} setCameraRef={setCameraRef} />
           </View>
         )}
 
         <Text style={styles.mainText}>Upload photo</Text>
 
-        <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={80}>
           <View style={styles.form}>
             <TextInput
               style={{ ...styles.inputName, borderColor: isFocused.name ? '#FF6C00' : '#E8E8E8' }}
@@ -105,19 +119,19 @@ export default function CreatePostsScreen({ navigation }) {
               value={state.name}
             />
 
-            <View>
+            <View style={styles.locationContainer}>
               <EvilIcons style={styles.iconLocation} name="location" size={24} color="#BDBDBD" />
               <TextInput
-                style={{ ...styles.inputLocation, borderColor: isFocused.place ? '#FF6C00' : '#E8E8E8' }}
+                style={{ ...styles.inputLocation, borderColor: isFocused.location ? '#FF6C00' : '#E8E8E8' }}
                 placeholder="Location..."
                 onFocus={() => {
-                  handleFocus('place');
+                  handleFocus('location');
                 }}
                 onBlur={() => {
-                  handleBlur('place');
+                  handleBlur('location');
                 }}
-                value={state.place}
-                onChangeText={value => setState(prevState => ({ ...prevState, place: value }))}
+                value={state.location}
+                onChangeText={value => setState(prevState => ({ ...prevState, location: value }))}
               />
             </View>
             <TouchableOpacity activeOpacity={0.8} style={styles.uploadBtnActive} onPress={uploadPhoto}>
@@ -194,12 +208,19 @@ const styles = StyleSheet.create({
     paddingLeft: 34,
     borderBottomWidth: 1,
     borderColor: '#E8E8E8',
-    marginBottom: 32,
+    width: "100%",
+    position: 'relative'
   },
   iconLocation: {
-    justifyContent: 'center',
-    marginBottom: -38,
+    position: 'absolute',
   },
+
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+
   uploadBtn: {
     backgroundColor: '#F6F6F6',
     borderRadius: 100,
