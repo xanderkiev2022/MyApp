@@ -59,6 +59,11 @@ const handlePendingRefreshing = state => {
 const authSlice = createSlice({
   name: 'auth',
   initialState,
+  reducers: {
+    removeError(state) {
+      state.error = null;
+    },
+  },
   extraReducers: builder => {
     builder
       .addCase(logout.fulfilled, handleLogoutFulfilled)
@@ -70,5 +75,5 @@ const authSlice = createSlice({
       .addMatcher(isAnyOf(register.rejected, login.rejected), handleRejected);
   },
 });
-
+export const { removeError } = authSlice.actions;
 export const authReducer = authSlice.reducer;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,8 @@ import { AntDesign } from '@expo/vector-icons';
 // Firebase
 import { register } from '../redux/auth/authOperations';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectError } from '../redux/auth/authSelectors';
+import { removeError } from '../redux/auth/authSlice';
 
 const initialFocus = {
   login: false,
@@ -32,7 +34,8 @@ const initialState = {
 };
 
 export default function RegistrationScreen({ navigation }) {
- const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const error = useSelector(selectError);
 
   // OnFocus
   const [state, setState] = useState(initialState);
@@ -46,24 +49,16 @@ export default function RegistrationScreen({ navigation }) {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
   };
 
-  // Fonts
-  const [fontsLoaded] = useFonts({
-    RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
-    RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
-    RobotoRegular: require('../assets/fonts/RobotoRegular.ttf'),
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   // Submit
   const handleSubmit = () => {
     setState(initialState);
     dispatch(register(state));
-    navigation.navigate('Home');
-  
   };
+
+    // WrongPass
+  useEffect(() => {
+    if (error) {alert(error); dispatch(removeError());}
+  }, [error]);
 
   // Login
   const handleLogin = () => {

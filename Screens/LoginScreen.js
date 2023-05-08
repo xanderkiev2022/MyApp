@@ -16,6 +16,8 @@ import { useFonts } from 'expo-font';
 // Firebase
 import { login } from '../redux/auth/authOperations';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectError } from '../redux/auth/authSelectors';
+import { removeError } from '../redux/auth/authSlice';
 
 const initialFocus = {
   email: false,
@@ -29,7 +31,8 @@ const initialState = {
 
 export default function LoginScreen({ navigation }) {
   const dispatch = useDispatch();
-  
+  const error = useSelector(selectError);
+
   // OnFocus
   const [state, setState] = useState(initialState);
   const [isFocused, setIsFocused] = useState(initialFocus);
@@ -42,23 +45,16 @@ export default function LoginScreen({ navigation }) {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
   };
 
-  // Fonts
-  const [fontsLoaded] = useFonts({
-    RobotoBold: require('../assets/fonts/RobotoBold.ttf'),
-    RobotoMedium: require('../assets/fonts/RobotoMedium.ttf'),
-    RobotoRegular: require('../assets/fonts/RobotoRegular.ttf'),
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   // Submit
   const handleSubmit = () => {
     setState(initialState);
     dispatch(login(state));
-    navigation.navigate('Home');
   };
+
+  // WrongPass
+  useEffect(() => {
+    if (error) {alert(error); dispatch(removeError());}
+  }, [error]);
 
   // Registration
   const handleRegistration = () => {
