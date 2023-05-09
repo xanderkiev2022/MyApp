@@ -33,7 +33,7 @@ export default function PostsScreenMain({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
-        <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
+        <Image style={styles.avatarImg} source={{ uri: userPhoto }} />
         <View style={styles.avatarData}>
           <Text style={styles.avatarName}>{userName}</Text>
           <Text style={styles.avatarEmail}>{userEmail}</Text>

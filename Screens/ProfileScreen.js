@@ -20,7 +20,8 @@ const userPhoto = useSelector(selectPhoto);
 const dispatch = useDispatch();
 
  useEffect(() => {
-   const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
+  //  const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
+   const postsCollection = query(collection(db, 'posts')); // всі опубліковані пости
    onSnapshot(postsCollection, querySnapshot => {
      // прослуховування колекції posts
      const postsArray = querySnapshot.docs.map(doc => ({
@@ -37,7 +38,7 @@ const dispatch = useDispatch();
       <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
         <View style={styles.regScr}>
           <View style={styles.avatarBox}>
-            <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
+            <Image style={styles.avatarImg} source={{ uri: userPhoto }} />
             <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" />
             <TouchableOpacity style={styles.exitSvg} onPress={() => dispatch(logout())}>
               <Ionicons name="exit-outline" size={28} color="#BDBDBD" backgroundColor="transparent" />

@@ -32,7 +32,7 @@ export default function Home() {
                 return <Feather name="user" size={size} color={color} />;
               } else if (route.name === 'Create Posts') {
                 return <Feather name="plus" size={size} color="#fff" style={styles.addPost} />;
-              } else if (route.name === 'Posts') {
+              } else if (route.name === 'PostsScreen') {
                 return <SimpleLineIcons name="grid" size={size} color={color} />;
               }
             },
@@ -43,12 +43,10 @@ export default function Home() {
           })}
         >
           <MainTab.Screen
-            name="Posts"
+            name="PostsScreen"
             component={PostsScreen}
             options={{
               headerShown: false,
-
-              // header: ({ navigation, route }) => <Header title={route.name} navigation={navigation} />,
             }}
           />
           <MainTab.Screen
@@ -56,24 +54,23 @@ export default function Home() {
             component={CreatePostsScreen}
             options={{
               headerShown: true,
-              // header: ({ navigation, route }) => <Header title={route.name} navigation={navigation} />,
+              headerTitleAlign: 'center',
+              headerStyle: styles.bottomBorder,
             }}
-
           />
           <MainTab.Screen
             name="Profile"
             component={ProfileScreen}
             options={{
               headerShown: false,
-              // header: ({ navigation, route }) => <Header title={route.name} navigation={navigation} />,
             }}
           />
+          {() => <ProfileScreen navigation={navigation} />}
         </MainTab.Navigator>
       ) : (
         <MainStack.Navigator initialRouteName="Login">
           <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
           <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-          <MainStack.Screen name="Home" component={PostsScreenMain} options={{ headerShown: false }} />
         </MainStack.Navigator>
       )}
     </NavigationContainer>
@@ -88,5 +85,9 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     paddingTop: 9,
+  },
+  bottomBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#b3b3b3',
   },
 });

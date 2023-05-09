@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { EvilIcons, Feather, AntDesign, FontAwesome } from '@expo/vector-icons';
 
 // Firebase
-import { doc, updateDoc, collection, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { selectName, selectUserId } from '../redux/auth/authSelectors';
 
@@ -32,6 +32,11 @@ export default function PostComponent({ post, navigation, forProfileScreen }) {
     }
   };
 
+    const deletePost = async () => {
+      const docRef = doc(db, 'posts', id);
+      await deleteDoc(docRef);
+    };
+
   return (
     <View>
       <Image style={styles.photo} source={{ uri: photo }} />
@@ -43,6 +48,12 @@ export default function PostComponent({ post, navigation, forProfileScreen }) {
             <Feather style={styles.flippedIcon} name="message-circle" size={24} color="#BDBDBD" />
             <Text style={styles.messeges}>{comments}</Text>
           </TouchableOpacity>
+
+          {!forProfileScreen && (
+            <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={deletePost}>
+              <FontAwesome name="trash" size={24} color="#BDBDBD" />
+            </TouchableOpacity>
+          )}
 
           {forProfileScreen && (
             <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons}>

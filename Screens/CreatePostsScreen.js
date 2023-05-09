@@ -1,5 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, StyleSheet, Text, TouchableOpacity, View, TextInput, Image, ImageBackground, KeyboardAvoidingView, Keyboard } from 'react-native';
+import {
+  TouchableWithoutFeedback,
+  Dimensions,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Keyboard,
+} from 'react-native';
 import { AntDesign, Feather, EvilIcons, Ionicons,} from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { Camera, CameraType } from 'expo-camera';
@@ -30,6 +43,9 @@ export default function CreatePostsScreen({ navigation }) {
   const [cameraRef, setCameraRef] = useState(null);
   const [state, setState] = useState(initialState);
   const [isFocused, setIsFocused] = useState(initialFocus);
+  const [isKeyboardShown, setIsKeyboardShown] = useState(false);
+  
+
   const userId = useSelector(selectUserId);
   const userName = useSelector(selectName);
 
@@ -56,6 +72,7 @@ export default function CreatePostsScreen({ navigation }) {
   const openCamera = async () => {
     setState(prevState => ({ ...prevState, photo: null}));
     setCameraRef(cameraRef);
+    setIsKeyboardShown(false);
   };
 
   // upload photo
@@ -80,6 +97,7 @@ export default function CreatePostsScreen({ navigation }) {
       await addDoc(collection(db, 'posts'), uploadedInfo); // додаємо інформацію про пост до бази даних
       Keyboard.dismiss();
       setState(initialState);
+      setIsKeyboardShown(false);
       navigation.navigate('Posts');
     } catch (error) {
     console.log(error);
@@ -87,64 +105,78 @@ export default function CreatePostsScreen({ navigation }) {
     }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.wrapper}>
-        {state.photo ? (
-          <View style={styles.fotoContainer}>
-            <Image source={{ uri: state.photo }} style={styles.photo} />
-            <TouchableOpacity style={styles.svgConatiner} onPress={openCamera}>
-              <Feather name="camera" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.fotoContainer}>
-            <CameraComponent makePhoto={makePhoto} location={state.location} photo={state.photo} setCameraRef={setCameraRef} />
-          </View>
-        )}
+    <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss();  setIsKeyboardShown(false)}}>
+      <View style={styles.container}>
+        <View style={styles.wrapper}>
+          {state.photo ? (
+            <View style={styles.fotoContainer}>
+              <Image source={{ uri: state.photo }} style={styles.photo} />
+              <TouchableOpacity style={styles.svgConatiner} onPress={openCamera}>
+                <Feather name="camera" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.fotoContainer}>
+              <CameraComponent makePhoto={makePhoto} location={state.location} photo={state.photo} setCameraRef={setCameraRef} />
+            </View>
+          )}
 
-        <Text style={styles.mainText}>Upload photo</Text>
+          <Text style={styles.mainText}>Upload photo</Text>
 
-        <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={80}>
-          <View style={styles.form}>
-            <TextInput
-              style={{ ...styles.inputName, borderColor: isFocused.name ? '#FF6C00' : '#E8E8E8' }}
-              placeholder="Name..."
-              onFocus={() => {
-                handleFocus('name');
-              }}
-              onBlur={() => {
-                handleBlur('name');
-              }}
-              onChangeText={value => setState(prevState => ({ ...prevState, name: value }))}
-              value={state.name}
-            />
-
-            <View style={styles.locationContainer}>
-              <EvilIcons style={styles.iconLocation} name="location" size={24} color="#BDBDBD" />
+          <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={80}>
+            <View style={{ ...styles.form, marginBottom: isKeyboardShown ? -40 : 0 }}>
               <TextInput
-                style={{ ...styles.inputLocation, borderColor: isFocused.location ? '#FF6C00' : '#E8E8E8' }}
-                placeholder="Location..."
+                style={{
+                  ...styles.inputName,
+                  borderColor: isFocused.name ? '#FF6C00' : '#E8E8E8',
+                }}
+                placeholder="Name..."
                 onFocus={() => {
-                  handleFocus('location');
+                  handleFocus('name');
+                  setIsKeyboardShown(true);
                 }}
                 onBlur={() => {
-                  handleBlur('location');
+                  handleBlur('name');
                 }}
-                value={state.location}
-                onChangeText={value => setState(prevState => ({ ...prevState, location: value }))}
+                onChangeText={value => setState(prevState => ({ ...prevState, name: value }))}
+                value={state.name}
               />
-            </View>
-            <TouchableOpacity activeOpacity={0.8} style={styles.uploadBtnActive} onPress={uploadPhoto}>
-              <Text style={styles.uploadBtnTitleActive}>Upload</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity activeOpacity={0.8} style={styles.deleteBtn}>
-              <AntDesign style={styles.deleteSvg} name="delete" size={25} color="#DADADA" />
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
+              <View
+                style={{
+                  ...styles.locationContainer,
+                }}
+              >
+                <EvilIcons style={styles.iconLocation} name="location" size={24} color="#BDBDBD" />
+                <TextInput
+                  style={{
+                    ...styles.inputLocation,
+                    borderColor: isFocused.location ? '#FF6C00' : '#E8E8E8',
+                  }}
+                  placeholder="Location..."
+                  onFocus={() => {
+                    handleFocus('location');
+                    setIsKeyboardShown(true);
+                  }}
+                  onBlur={() => {
+                    handleBlur('location');
+                  }}
+                  value={state.location}
+                  onChangeText={value => setState(prevState => ({ ...prevState, location: value }))}
+                />
+              </View>
+              <TouchableOpacity activeOpacity={0.8} style={styles.uploadBtnActive} onPress={uploadPhoto}>
+                <Text style={styles.uploadBtnTitleActive}>Upload</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity activeOpacity={0.8} style={styles.deleteBtn}>
+                <AntDesign style={styles.deleteSvg} name="delete" size={25} color="#DADADA" />
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -195,16 +227,16 @@ const styles = StyleSheet.create({
     fontFamily: 'RobotoRegular',
     fontSize: 16,
     lineHeight: 19,
-    height: 50,
+    height: 40,
     borderBottomWidth: 1,
     borderColor: '#E8E8E8',
-    marginBottom: 32,
+    // marginBottom: 32,
   },
   inputLocation: {
     fontFamily: 'RobotoRegular',
     fontSize: 16,
     lineHeight: 19,
-    height: 50,
+    height: 40,
     paddingLeft: 34,
     borderBottomWidth: 1,
     borderColor: '#E8E8E8',
@@ -218,6 +250,7 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    // marginTop: 32,
     marginBottom: 32,
   },
 
