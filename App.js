@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import Home from './Screens/Home';
+import 'react-native-gesture-handler';
 
 // Redux
 import { PersistGate } from 'redux-persist/integration/react';
