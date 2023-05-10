@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, ImageBackground, Image, FlatList } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, Image, FlatList } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 
@@ -10,6 +10,7 @@ import { selectName, selectUserId, selectPhoto } from '../redux/auth/authSelecto
 import { useSelector, useDispatch } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
 import { logout } from '../redux/auth/authOperations';
+import { BgImage } from '../Components/BgImage';
 
 export default function ProfileScreen({ navigation }) {
  const [posts, setPosts] = useState([]);
@@ -35,7 +36,7 @@ const dispatch = useDispatch();
 
   return (
     <View style={styles.container}>
-      <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
+      <BgImage>
         <View style={styles.regScr}>
           <View style={styles.avatarBox}>
             <Image style={styles.avatarImg} source={{ uri: userPhoto }} />
@@ -52,7 +53,7 @@ const dispatch = useDispatch();
             renderItem={({ item }) => <PostComponent post={item} navigation={navigation} forProfileScreen />}
           />
         </View>
-      </ImageBackground>
+        </BgImage>
     </View>
   );
 }
@@ -62,12 +63,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     fontFamily: 'RobotoRegular',
-  },
-  imgBg: {
-    flex: 1,
-    resizeMode: 'contain',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
   },
   regScr: {
     paddingHorizontal: 16,
