@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  ImageBackground,
   TextInput,
   KeyboardAvoidingView,
   Platform,
@@ -20,6 +19,7 @@ import { register } from '../redux/auth/authOperations';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectError } from '../redux/auth/authSelectors';
 import { removeError } from '../redux/auth/authSlice';
+import { BgImage } from '../Components/BgImage';
 
 const initialFocus = {
   login: false,
@@ -67,9 +67,9 @@ export default function RegistrationScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
+      <BgImage>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.regScr}>
+          <View style={{ ...styles.regScr, height: isFocused.login || isFocused.email || isFocused.password ? '85%' : '69%' }}>
             <View style={styles.avatarBox}>
               <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
               {/* <AntDesign name="pluscircleo" style={styles.addRemovePhoto} size={25} color="#FF6C00" backgroundColor="white" /> */}
@@ -145,7 +145,7 @@ export default function RegistrationScreen({ navigation }) {
                   <Text style={styles.btnText}> Register </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.btn2} title="Login" onPress={handleLogin}>
-                  <Text style={{ ...styles.haveAccount, marginBottom: isFocused.login || isFocused.email || isFocused.password ? 32 : 72 }}>
+                  <Text style={styles.haveAccount}>
                     Already have an account? Log in
                   </Text>
                 </TouchableOpacity>
@@ -153,7 +153,7 @@ export default function RegistrationScreen({ navigation }) {
             </View>
           </View>
         </TouchableWithoutFeedback>
-      </ImageBackground>
+      </BgImage>
     </View>
   );
 }
@@ -163,12 +163,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     fontFamily: 'RobotoRegular',
-  },
-  imgBg: {
-    flex: 1,
-    resizeMode: 'contain',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
   },
   regScr: {
     paddingHorizontal: 16,

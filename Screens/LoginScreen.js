@@ -18,6 +18,7 @@ import { login } from '../redux/auth/authOperations';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectError } from '../redux/auth/authSelectors';
 import { removeError } from '../redux/auth/authSlice';
+import { BgImage } from '../Components/BgImage';
 
 const initialFocus = {
   email: false,
@@ -63,9 +64,9 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ImageBackground style={styles.imgBg} source={require('../assets/img/bg-photo.jpg')}>
+      <BgImage>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ ...styles.regScr, height: isFocused.email || isFocused.password ? '47%' : '61%' }}>
+          <View style={{ ...styles.regScr, height: isFocused.email || isFocused.password ? '68%' : '61%' }}>
             <Text style={styles.title}>Log In</Text>
 
             <View style={styles.regForm}>
@@ -127,7 +128,7 @@ export default function LoginScreen({ navigation }) {
             </View>
           </View>
         </TouchableWithoutFeedback>
-      </ImageBackground>
+      </BgImage>
     </View>
   );
 }
@@ -138,17 +139,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontFamily: 'RobotoRegular',
   },
-  imgBg: {
-    flex: 1,
-    resizeMode: 'contain',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
   regScr: {
     paddingHorizontal: 16,
     width: '100%',
-    // height: '47%',
-    // height: '61%',
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
