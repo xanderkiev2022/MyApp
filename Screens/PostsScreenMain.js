@@ -30,6 +30,13 @@ export default function PostsScreenMain({ navigation }) {
     });
   }, []);
 
+
+// margin for last child
+const renderPostItem = ({ item, index }) => {
+  const isLastItem = index === posts.length - 1;
+  return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} />;
+};
+
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
@@ -43,7 +50,7 @@ export default function PostsScreenMain({ navigation }) {
         data={posts}
         style={styles.posts}
         keyExtractor={(__, index) => index.toString()}
-        renderItem={({ item }) => <PostComponent post={item} navigation={navigation} />}
+        renderItem={renderPostItem}
       />
     </View>
   );

@@ -8,7 +8,7 @@ import { doc, updateDoc, collection, getDoc, deleteDoc } from 'firebase/firestor
 import { db } from '../firebase/config';
 import { selectName, selectUserId } from '../redux/auth/authSelectors';
 
-export default function PostComponent({ post, navigation, forProfileScreen }) {
+export default function PostComponent({ post, navigation, isLastItem, forProfileScreen }) {
   const { photo, name, location, coordinate, id, comments, likes } = post;
 
   const userId = useSelector(selectUserId);
@@ -32,13 +32,17 @@ export default function PostComponent({ post, navigation, forProfileScreen }) {
     }
   };
 
-    const deletePost = async () => {
-      const docRef = doc(db, 'posts', id);
-      await deleteDoc(docRef);
-    };
+  const deletePost = async () => {
+    const docRef = doc(db, 'posts', id);
+    await deleteDoc(docRef);
+  };
+
+  // margin for last child
+  const containerStylePosts = isLastItem ? styles.lastItemContainer : styles.itemContainer;
+   const containerStyleProfile = isLastItem ? styles.lastItemContainerProfile : styles.itemContainer;
 
   return (
-    <View>
+    <View style={forProfileScreen ? containerStyleProfile : containerStylePosts}>
       <Image style={styles.photo} source={{ uri: photo }} />
       <Text style={styles.locationName}>{name}</Text>
 
@@ -73,6 +77,16 @@ export default function PostComponent({ post, navigation, forProfileScreen }) {
 }
 
 const styles = StyleSheet.create({
+  itemContainer: {
+    marginBottom: 0,
+  },
+
+  lastItemContainer: {
+    marginBottom: 100,
+  },
+  lastItemContainerProfile: {
+    marginBottom: 25
+  },
   photo: {
     width: '100%',
     height: 240,

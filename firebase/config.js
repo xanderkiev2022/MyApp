@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDJw1Z50ycOABR26n5s4256k7 - _EJxl3H8',
+  apiKey: 'AIzaSyDJw1Z50ycOABR26n5s4256k7-_EJxl3H8',
   authDomain: 'webringitapp.firebaseapp.com',
   databaseURL: 'https://webringitapp-default-rtdb.firebaseio.com',
   projectId: 'webringitapp',

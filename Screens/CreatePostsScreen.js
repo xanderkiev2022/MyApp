@@ -75,6 +75,29 @@ export default function CreatePostsScreen({ navigation }) {
     setIsKeyboardShown(false);
   };
 
+const uploadPost = async () => {
+  try {
+    const photoUrl = await uploadPhoto();
+    const uploadedInfo = {
+      displayName: userName,
+      photo: photoUrl,
+      name: state.name,
+      location: state.location,
+      coordinate: state.coordinate,
+      userId,
+      likes: [],
+      comments: 0,
+    };
+    await addDoc(collection(db, 'posts'), uploadedInfo);
+    Keyboard.dismiss();
+    setState(initialState);
+    setIsKeyboardShown(false);
+    navigation.navigate('Posts');
+  } catch (error) {
+    console.log(error);
+  }
+};
+
   // upload photo
   const uploadPhoto = async () => {
     try {
@@ -84,28 +107,21 @@ export default function CreatePostsScreen({ navigation }) {
       const linkToFile = ref(storage, `imgPost/${uniquePostId}`); // створюємо посилання на місце збереження фото в Firebase
       await uploadBytes(linkToFile, file); // завантажуємо фото
       const photoUrl = await getDownloadURL(ref(storage, `imgPost/${uniquePostId}`)); // отримуємо URL-адресу завантаженого фото
-      const uploadedInfo = {
-        displayName: userName,
-        photo: photoUrl,
-        name: state.name,
-        location: state.location,
-        coordinate: state.coordinate,
-        userId,
-        likes: [],
-        comments: 0,
-      };
-      await addDoc(collection(db, 'posts'), uploadedInfo); // додаємо інформацію про пост до бази даних
-      Keyboard.dismiss();
-      setState(initialState);
-      setIsKeyboardShown(false);
-      navigation.navigate('Posts');
+      return photoUrl;
     } catch (error) {
     console.log(error);
     }
-    }
+  }
+  
+
 
   return (
-    <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss();  setIsKeyboardShown(false)}}>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+        setIsKeyboardShown(false)
+      }}
+    >
       <View style={styles.container}>
         <View style={styles.wrapper}>
           {state.photo ? (
@@ -124,7 +140,12 @@ export default function CreatePostsScreen({ navigation }) {
           <Text style={styles.mainText}>Upload photo</Text>
 
           <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={80}>
-            <View style={{ ...styles.form, marginBottom: isKeyboardShown ? -40 : 0 }}>
+            <View
+              style={{
+                ...styles.form,
+                marginBottom: isKeyboardShown ? -40 : 0
+              }}
+            >
               <TextInput
                 style={{
                   ...styles.inputName,
@@ -165,7 +186,7 @@ export default function CreatePostsScreen({ navigation }) {
                   onChangeText={value => setState(prevState => ({ ...prevState, location: value }))}
                 />
               </View>
-              <TouchableOpacity activeOpacity={0.8} style={styles.uploadBtnActive} onPress={uploadPhoto}>
+              <TouchableOpacity activeOpacity={0.8} style={styles.uploadBtnActive} onPress={uploadPost}>
                 <Text style={styles.uploadBtnTitleActive}>Upload</Text>
               </TouchableOpacity>
 

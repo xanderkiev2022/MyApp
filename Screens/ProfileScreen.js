@@ -13,26 +13,29 @@ import { logout } from '../redux/auth/authOperations';
 import { BgImage } from '../Components/BgImage';
 
 export default function ProfileScreen({ navigation }) {
- const [posts, setPosts] = useState([]);
- const userId = useSelector(selectUserId);
- const userName = useSelector(selectName);
-const userPhoto = useSelector(selectPhoto);
-  
-const dispatch = useDispatch();
+  const [posts, setPosts] = useState([]);
+  const userId = useSelector(selectUserId);
+  const userName = useSelector(selectName);
+  const userPhoto = useSelector(selectPhoto);
 
- useEffect(() => {
-  //  const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
-   const postsCollection = query(collection(db, 'posts')); // всі опубліковані пости
-   onSnapshot(postsCollection, querySnapshot => {
-     // прослуховування колекції posts
-     const postsArray = querySnapshot.docs.map(doc => ({
-       // при зміні posts querySnapshot викликається повторно з оновленими даними
-       ...doc.data(), // Для кожного поста створюється новий об'єкт, який містить всі дані про пост, а також його id.
-       id: doc.id,
-     }));
-     setPosts(postsArray);
-   });
- }, []);
+  const dispatch = useDispatch();
+
+  const getAllPost = async () => {
+   onSnapshot(collection(db, 'posts'), snapshot => {
+      const postsArray = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      setPosts(postsArray);
+    });
+  };
+
+  useEffect(() => {
+    getAllPost();
+  }, []);
+
+  // margin for last child
+  const renderPostItem = ({ item, index }) => {
+    const isLastItem = index === posts.length - 1;
+    return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} forProfileScreen />;
+  };
 
   return (
     <View style={styles.container}>
@@ -46,14 +49,9 @@ const dispatch = useDispatch();
             </TouchableOpacity>
           </View>
           <Text style={styles.avatarName}>{userName}</Text>
-          <FlatList
-            data={posts}
-            style={styles.posts}
-            keyExtractor={(__, index) => index.toString()}
-            renderItem={({ item }) => <PostComponent post={item} navigation={navigation} forProfileScreen />}
-          />
+          <FlatList data={posts} style={styles.posts} keyExtractor={(__, index) => index.toString()} renderItem={renderPostItem}/>
         </View>
-        </BgImage>
+      </BgImage>
     </View>
   );
 }

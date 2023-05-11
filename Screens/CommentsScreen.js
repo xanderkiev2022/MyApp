@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
@@ -9,13 +9,14 @@ import { db } from '../firebase/config';
 import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 import CommentComponent from '../Components/CommentComponent';
 import { useSelector } from 'react-redux';
+import { Keyboard } from 'react-native';
 
 export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
   const [allComments, setAllComments] = useState();
-
   const userId = useSelector(selectUserId);
   const userPhoto = useSelector(selectPhoto);
+  const positionForScrollDownOfComments = useRef(null);
   const postId = route.params.id;
 
   const addComment = async () => {
@@ -33,7 +34,7 @@ export default function CommentsScreen({ route, navigation }) {
     const docSnap = await getDoc(docRef); // Отримуємо знімок об"єкта
     const docData = docSnap.data(); // Отримуємо об"єкт
     await updateDoc(docRef, { comments: docData.comments + 1 }); // Оновлюємо запис
-  };
+    };
 
   const commentsCollection = async () => {
     onSnapshot(collection(db, 'posts', postId, 'comments'), querySnapshot => {
@@ -60,11 +61,28 @@ export default function CommentsScreen({ route, navigation }) {
     <View style={styles.container}>
       <Image style={styles.photo} source={{ uri: photo }} />
 
-      <FlatList data={allComments} keyExtractor={item => item.id.toString()} renderItem={({ item }) => <CommentComponent item={item} />} />
+      <FlatList
+        ref={positionForScrollDownOfComments}
+        data={allComments}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => <CommentComponent item={item} />}
+        onContentSizeChange={() => positionForScrollDownOfComments.current.scrollToEnd({ animated: true })}
+      />
       <View style={styles.inputContainer}>
         <TextInput placeholder="Comment..." style={styles.inputComment} value={comment} onChangeText={text => setComment(text)} />
         <TouchableOpacity activeOpacity={0.8} style={styles.btnComment}>
-          <AntDesign name="arrowup" size={24} color="#FFFFFF" style={styles.svgArrow} opacity={0.6} onPress={addComment} />
+          <AntDesign
+            name="arrowup"
+            size={24}
+            color="#FFFFFF"
+            style={styles.svgArrow}
+            opacity={0.6}
+            onPress={() => {
+              setComment('');
+              Keyboard.dismiss();
+              addComment();
+            }}
+          />
         </TouchableOpacity>
       </View>
     </View>

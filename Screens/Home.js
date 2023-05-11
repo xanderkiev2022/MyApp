@@ -26,6 +26,9 @@ export default function Home() {
     <NavigationContainer>
       {authCheck ? (
         <MainTab.Navigator
+          tabBarOptions={{
+            style: { position: 'absolute', bottom: 0 },
+          }}
           screenOptions={({ route }) => ({
             tabBarIcon: ({ color, size }) => {
               if (route.name === 'Profile') {
