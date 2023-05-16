@@ -1,14 +1,17 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Firebase
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, getAuth } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 
 export const register = createAsyncThunk('auth/register', async ({ login, email, password }, thunkAPI) => {
   try {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
-    await updateProfile(user, { displayName: login, photoURL: 'https://i.pravatar.cc/300' });
+    await updateProfile(user, {
+      displayName: login,
+      // photoURL: 'https://i.pravatar.cc/300'
+    });
     return {
       userId: user.uid,
       name: user.displayName,
@@ -33,6 +36,27 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }, 
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }
+});
+
+export const update = createAsyncThunk('auth/update', async ({photoUrl}, thunkAPI) => {
+  // try {
+  //   const auth = getAuth();
+  //   const currentUser = auth.currentUser;
+  //   if (currentUser) {
+  //     await updateProfile(currentUser, {
+  //       photoURL: photoUrl,
+  //     });
+  //     console.log('Profile updated successfully');
+  //         return {
+  //           photoURL: photoUrl,
+  //         };
+  //   } else {
+  //     console.log('User is not authenticated');
+  //   }
+  // }
+  //  catch (error) {
+  //   return thunkAPI.rejectWithValue(error.message);
+  // }
 });
 
 export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
