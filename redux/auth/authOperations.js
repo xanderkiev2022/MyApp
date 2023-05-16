@@ -39,24 +39,24 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }, 
 });
 
 export const update = createAsyncThunk('auth/update', async ({photoUrl}, thunkAPI) => {
-  // try {
-  //   const auth = getAuth();
-  //   const currentUser = auth.currentUser;
-  //   if (currentUser) {
-  //     await updateProfile(currentUser, {
-  //       photoURL: photoUrl,
-  //     });
-  //     console.log('Profile updated successfully');
-  //         return {
-  //           photoURL: photoUrl,
-  //         };
-  //   } else {
-  //     console.log('User is not authenticated');
-  //   }
-  // }
-  //  catch (error) {
-  //   return thunkAPI.rejectWithValue(error.message);
-  // }
+  try {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await updateProfile(currentUser, {
+        photoURL: photoUrl,
+      });
+      console.log('Profile updated successfully');
+          return {
+            photo: photoUrl,
+    };
+    } else {
+      console.log('User is not authenticated');
+    }
+  }
+   catch (error) {
+    return thunkAPI.rejectWithValue(error.message);
+  }
 });
 
 export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {

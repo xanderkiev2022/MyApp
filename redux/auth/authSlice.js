@@ -57,8 +57,8 @@ const handlePendingRefreshing = state => {
 };
 
 const handleUserFulfilledUpdate = (state, { payload }) => {
-  const { photoURL } = payload;
-  state.photo = photoURL;
+  const { photo } = payload;
+  state.photo = photo;
   state.error = '';
   state.isLoading = false;
 };
@@ -86,9 +86,9 @@ const authSlice = createSlice({
       .addCase(refresh.pending, handlePendingRefreshing)
       .addCase(refresh.fulfilled, handleUserFulfilledRefreshing)
       .addCase(refresh.rejected, handleRejectedRefreshing)
-      // .addCase(update.pending, handlePendingUpdate)
-      // .addCase(update.fulfilled, handleUserFulfilledUpdate)
-      // .addCase(update.rejected, handleRejectedUpdate)
+      .addCase(update.pending, handlePendingUpdate)
+      .addCase(update.fulfilled, handleUserFulfilledUpdate)
+      .addCase(update.rejected, handleRejectedUpdate)
       .addMatcher(isAnyOf(register.pending, login.pending), handlePending)
       .addMatcher(isAnyOf(register.fulfilled, login.fulfilled), handleFulfilled)
       .addMatcher(isAnyOf(register.rejected, login.rejected), handleRejected);

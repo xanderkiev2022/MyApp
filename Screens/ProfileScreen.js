@@ -100,17 +100,7 @@ export default function ProfileScreen({ navigation }) {
       const userRef = doc(db, 'users', userId);
       await setDoc(userRef, uploadedInfo);
     
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-   if (currentUser) {
-     await updateProfile(currentUser, {
-       photoURL: photoUrl,
-     });
-     console.log('Profile updated successfully');
-   } else {
-     console.log('User is not authenticated');
-   }
-// update(photoUrl);
+      dispatch(update({photoUrl}));
 
     } catch (error) {
       console.log(error);
