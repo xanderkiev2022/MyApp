@@ -5,12 +5,12 @@ import { useFonts } from 'expo-font';
 import { launchImageLibraryAsync } from 'react-native-image-picker';
 
 // Firebase
-import { collection, query, where, onSnapshot, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db, auth, storage, database } from '../firebase/config';
-import { selectName, selectUserId, selectPhoto } from '../redux/auth/authSelectors';
+import { selectName, selectUserId, selectPhoto, selectEmail, selectPass } from '../redux/auth/authSelectors';
 import { useSelector, useDispatch } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
-import { logout, update } from '../redux/auth/authOperations';
+import { login, logout, update } from '../redux/auth/authOperations';
 import { BgImage } from '../Components/BgImage';
 import { getAuth, updateProfile } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -25,10 +25,24 @@ export default function ProfileScreen({ navigation }) {
   const userName = useSelector(selectName);
   const userPhoto = useSelector(selectPhoto);
 
+
+
+  // const email = useSelector(selectEmail);
+  // const pass = useSelector(selectPass);
+  // const [state, setState] = useState({email, password: pass});
+  // setState(prevState => ({ ...prevState, email, password: pass }));
+  // setState(prevState => ({ ...prevState, password: pass }));
+  // console.log('state :>> ', state);
+
+
+
+
+
+
   const dispatch = useDispatch();
 
   const getAllPost = async () => {
-   onSnapshot(collection(db, 'posts'), snapshot => {
+    onSnapshot(collection(db, 'posts'), snapshot => {
       const postsArray = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
       setPosts(postsArray);
     });
@@ -55,7 +69,7 @@ export default function ProfileScreen({ navigation }) {
     const options = {
       mediaType: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3]
+      aspect: [4, 3],
     };
     let res = await ImagePicker.launchImageLibraryAsync(options);
 
@@ -88,37 +102,38 @@ export default function ProfileScreen({ navigation }) {
 
 
 
+
   const uploadInfo = async () => {
     try {
       const photoUrl = await uploadData();
-
 
       const uploadedInfo = {
         avatar: photoUrl,
         userId: userId,
       };
       const userRef = doc(db, 'users', userId);
-      await setDoc(userRef, uploadedInfo);
-    
-      dispatch(update({photoUrl}));
+      // await setDoc(userRef, uploadedInfo);
+await updateDoc(userRef, uploadedInfo);
 
+//       const docRef = doc(db, 'users', userId);
+//       const docSnap = await getDoc(docRef);
+//       const docData = docSnap.data();
+//       console.log('docData :>> ', docData);
+// setState(prevState => ({ ...prevState, email: docData.email, password: docData.password }));
+// console.log('state :>> ', state);
+
+//       dispatch(login(state));
+      dispatch(update({ photoUrl }));
     } catch (error) {
       console.log(error);
     }
   };
 
-
-
-
-useEffect(() => {
-  if (image !== '') {
-    uploadInfo();
-  }
-}, [image]);
-
-
-
-
+  useEffect(() => {
+    if (image !== '') {
+      uploadInfo();
+    }
+  }, [image]);
 
   return (
     <View style={styles.container}>

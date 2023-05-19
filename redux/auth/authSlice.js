@@ -6,6 +6,7 @@ const initialState = {
   name: '',
   email: '',
   photo: '',
+  password: '',
   isLoggedIn: false,
   isLoading: false,
   isRefreshing: false,
@@ -16,11 +17,12 @@ const handlePending = state => {
   state.isLoading = true;
 };
 const handleFulfilled = (state, { payload }) => {
-  const { userId, name, email, photo } = payload;
+  const { userId, name, email, photo, password } = payload;
   state.userId = userId;
   state.name = name;
   state.email = email;
   state.photo = photo;
+  state.password = password;
   state.isLoggedIn = true;
   state.isLoading = false;
   state.error = '';
@@ -34,6 +36,7 @@ const handleLogoutFulfilled = state => {
   state.name = '';
   state.email = '';
   state.photo = '';
+  state.password = '';
   state.isLoggedIn = false;
   state.isLoading = false;
 };
@@ -63,7 +66,7 @@ const handleUserFulfilledUpdate = (state, { payload }) => {
   state.isLoading = false;
 };
 
-const handleRejectedUpdate = (state, action) => {
+const handleRejectedUpdate = (state, {payload}) => {
    state.error = payload;
   state.isLoading = false;
 };
@@ -79,13 +82,21 @@ const authSlice = createSlice({
     removeError(state) {
       state.error = null;
     },
+    // refreshUser: (state, { payload }) => {
+    //   state.user = {
+    //     userId: payload.userId,
+    //     name: payload.name || null,
+    //     email: payload.email,
+    //     photo: payload.photo || null,
+    //   };
+    // },
   },
   extraReducers: builder => {
     builder
       .addCase(logout.fulfilled, handleLogoutFulfilled)
-      .addCase(refresh.pending, handlePendingRefreshing)
-      .addCase(refresh.fulfilled, handleUserFulfilledRefreshing)
-      .addCase(refresh.rejected, handleRejectedRefreshing)
+      // .addCase(refresh.pending, handlePendingRefreshing)
+      // .addCase(refresh.fulfilled, handleUserFulfilledRefreshing)
+      // .addCase(refresh.rejected, handleRejectedRefreshing)
       .addCase(update.pending, handlePendingUpdate)
       .addCase(update.fulfilled, handleUserFulfilledUpdate)
       .addCase(update.rejected, handleRejectedUpdate)

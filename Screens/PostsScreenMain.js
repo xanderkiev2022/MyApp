@@ -6,7 +6,7 @@ import { useFonts } from 'expo-font';
 // Firebase
 import { collection, query, where, onSnapshot, updateProfile } from 'firebase/firestore';
 import { db, auth } from '../firebase/config';
-import { selectName, selectUserId, selectPhoto, selectEmail } from '../redux/auth/authSelectors';
+import { selectName, selectUserId, selectPhoto, selectEmail, selectPass } from '../redux/auth/authSelectors';
 import { useSelector, useDispatch } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
 
@@ -35,7 +35,12 @@ export default function PostsScreenMain({ navigation }) {
 const renderPostItem = ({ item, index }) => {
   const isLastItem = index === posts.length - 1;
   return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} />;
-};
+  };
+  
+    // const email = useSelector(selectEmail);
+    const pass = useSelector(selectPass);
+    // console.log('email :>> ', email);
+    // console.log('pass :>> ', pass);
 
   return (
     <View style={styles.container}>
@@ -43,7 +48,7 @@ const renderPostItem = ({ item, index }) => {
         <Image style={styles.avatarImg} source={{ uri: userPhoto }} />
         <View style={styles.avatarData}>
           <Text style={styles.avatarName}>{userName}</Text>
-          <Text style={styles.avatarEmail}>{userEmail}</Text>
+          <Text style={styles.avatarEmail}>{userEmail}, {pass}</Text>
         </View>
       </View>
       <FlatList

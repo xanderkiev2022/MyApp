@@ -3,17 +3,20 @@ import { Feather, SimpleLineIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
 import ProfileScreen from './ProfileScreen';
 import Header from './Header';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectIsLoggedIn, selectRefreshing } from '../redux/auth/authSelectors';
+import { selectEmail, selectIsLoggedIn, selectPass, selectRefreshing, selectUserId } from '../redux/auth/authSelectors';
 import RegistrationScreen from './RegistrationScreen';
 import LoginScreen from './LoginScreen';
 import PostsScreenMain from './PostsScreenMain';
 import { AntDesign } from '@expo/vector-icons';
+import { login, refresh } from '../redux/auth/authOperations';
+import { auth, db } from '../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -22,13 +25,36 @@ export default function Home() {
   const authCheck = useSelector(selectIsLoggedIn);
   const dispatch = useDispatch();
 
+    const email = useSelector(selectEmail);
+    const pass = useSelector(selectPass);
+    const [state, setState] = useState({ email, password: pass });
+
+  const userId = useSelector(selectUserId);
+  const user = auth.currentUser;
+  console.log('user :>> ', user);
+
+  const needToLogin = async () => {
+  if (!user) {
+      const docRef = doc(db, 'users', userId);
+      const docSnap = await getDoc(docRef);
+      const docData = docSnap.data();
+      console.log('docData :>> ', docData);
+    console.log('object :>> ', { email: docData.email, password: docData.password });
+      dispatch(login({email: docData.email, password: docData.password }));
+    }
+}
+  useEffect( () => {
+    
+    needToLogin();
+    // console.log('userId :>> ', userId);
+    // console.log('user :>> ', user);
+  }, [user]);
+
+
   return (
     <NavigationContainer>
       {authCheck ? (
         <MainTab.Navigator
-          tabBarOptions={{
-            style: { position: 'absolute', bottom: 0 },
-          }}
           screenOptions={({ route }) => ({
             tabBarIcon: ({ color, size }) => {
               if (route.name === 'Profile') {
@@ -43,6 +69,7 @@ export default function Home() {
             tabBarInactiveTintColor: 'rgba(33, 33, 33, 0.8)',
             tabBarShowLabel: false,
             initialRouteName: 'PostsScreen',
+            style: { position: 'absolute', bottom: 0 }
           })}
         >
           <MainTab.Screen
