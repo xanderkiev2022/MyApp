@@ -82,14 +82,14 @@ const authSlice = createSlice({
     removeError(state) {
       state.error = null;
     },
-    // refreshUser: (state, { payload }) => {
-    //   state.user = {
-    //     userId: payload.userId,
-    //     name: payload.name || null,
-    //     email: payload.email,
-    //     photo: payload.photo || null,
-    //   };
-    // },
+    refreshUser: (state, { payload }) => {
+      state.user = {
+        userId: payload.userId,
+        name: payload.name || null,
+        email: payload.email,
+        photo: payload.photo || null,
+      };
+    },
   },
   extraReducers: builder => {
     builder
@@ -105,5 +105,5 @@ const authSlice = createSlice({
       .addMatcher(isAnyOf(register.rejected, login.rejected), handleRejected);
   },
 });
-export const { removeError } = authSlice.actions;
+export const { removeError, refreshUser } = authSlice.actions;
 export const authReducer = authSlice.reducer;

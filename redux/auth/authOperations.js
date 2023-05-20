@@ -1,8 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Firebase
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-import { app, auth, database, db } from '../../firebase/config';
+import { createUserWithEmailAndPassword, onIdTokenChanged, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
+import { app, auth, auth2, database, db } from '../../firebase/config';
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { set, ref } from 'firebase/database';
 import { useDispatch, useSelector } from 'react-redux';
@@ -56,6 +56,9 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }, 
 // Відпрацьовує лише після логіну
 export const update = createAsyncThunk('auth/update', async ({photoUrl:photoURL}, thunkAPI) => {
   try {
+
+
+
     // const dispatch = useDispatch();
     //
     // const email = useSelector(selectEmail);
@@ -175,25 +178,25 @@ export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
 // });
 
 export const refresh = () => dispatch => {
-  try {
-    console.log('Виконуємо рефреш');
-    onAuthStateChanged(auth, user => {
-      const user2 = auth;
-      // const user2 = user?.reload();
-      // const user2 = auth?.currentUser?.getIdToken(true);
-      // console.log('user2 в рефреш :>> ', user2);
+  // try {
+  //   // console.log('Виконуємо рефреш');
+  //   onAuthStateChanged(auth2, user => {
+  //     // const user2 = auth;
+  //     // const user2 = user?.reload();
+  //     // const user2 = auth?.currentUser?.getIdToken(true);
+  //     // console.log('user2 в рефреш :>> ', user2);
       
-      if (user) {
-        const userData = {
-          userId: user.uid,
-          name: user.displayName,
-          email: user.email,
-          photo: user.photoURL,
-        };
-        dispatch(refreshUser(userData));
-      }
-    });
-  } catch (err) {
-    console.log(err.toString());
-  }
+  //     if (user) {
+  //       const userData = {
+  //         userId: user.uid,
+  //         name: user.displayName,
+  //         email: user.email,
+  //         photo: user.photoURL,
+  //       };
+  //       dispatch(refreshUser(userData));
+  //     }
+  //   });
+  // } catch (err) {
+  //   console.log(err.toString());
+  // }
 };

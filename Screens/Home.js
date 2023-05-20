@@ -15,8 +15,11 @@ import LoginScreen from './LoginScreen';
 import PostsScreenMain from './PostsScreenMain';
 import { AntDesign } from '@expo/vector-icons';
 import { login, refresh } from '../redux/auth/authOperations';
-import { auth, db } from '../firebase/config';
+import { auth, authAsyncStorage, db } from '../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth/react-native';
+import { refreshUser } from '../redux/auth/authSlice';
+// import { onAuthStateChanged, onIdTokenChanged } from 'firebase/auth';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -25,31 +28,66 @@ export default function Home() {
   const authCheck = useSelector(selectIsLoggedIn);
   const dispatch = useDispatch();
 
-    const email = useSelector(selectEmail);
-    const pass = useSelector(selectPass);
-    const [state, setState] = useState({ email, password: pass });
-
   const userId = useSelector(selectUserId);
   const user = auth.currentUser;
-  console.log('user :>> ', user);
+  console.log('auth.currentUser :>> ', auth.currentUser);
+  console.log('authAsyncStorage.currentUser :>> ', authAsyncStorage.currentUser);
 
-  const needToLogin = async () => {
-  if (!user) {
-      const docRef = doc(db, 'users', userId);
-      const docSnap = await getDoc(docRef);
-      const docData = docSnap.data();
-      console.log('docData :>> ', docData);
-    console.log('object :>> ', { email: docData.email, password: docData.password });
-      dispatch(login({email: docData.email, password: docData.password }));
-    }
-}
-  useEffect( () => {
-    
+  const needToLogin = () => {
+
+onAuthStateChanged(authAsyncStorage, user => {
+  // const user2 = auth;
+  // const user2 = user?.reload();
+  // const user2 = auth?.currentUser?.getIdToken(true);
+  // console.log('user2 в рефреш :>> ', user2);
+
+  if (user) {
+    const userData = {
+      userId: user.uid,
+      name: user.displayName,
+      email: user.email,
+      photo: user.photoURL,
+    };
+      console.log('authAsyncStorage.currentUser :>> ', authAsyncStorage.currentUser);
+    dispatch(refreshUser(userData));
+  }
+});
+    //     // const id= user.uid;
+    //     // console.log('id :>> ', id);
+    //     // console.log('user :>> ', user);
+    //     // const user = auth.currentUser;
+
+    // //  const user = onAuthStateChanged(auth);
+    // //  const currentUser = res.currentUser;
+  };
+
+  // Saving password
+  // const needToLogin = async () => {
+  //   if (!user) {
+  //     const docRef = doc(db, 'users', userId);
+  //     const docSnap = await getDoc(docRef);
+  //     const docData = docSnap.data();
+  //     console.log('docData :>> ', docData);
+  //     console.log('object :>> ', { email: docData.email, password: docData.password });
+  //     dispatch(login({ email: docData.email, password: docData.password }));
+  //   }
+  // };
+
+  // NO
+  // const needToLogin = async () => {
+  // onIdTokenChanged(auth, user => {
+  //   if (user) {
+  //     console.log('currentUser :>> ', auth.currentUser);
+  //   } else {
+  //     console.log('No-currentUser :>> ', auth.currentUser);
+  //   }
+  // });
+  // };
+
+
+  useEffect(() => {
     needToLogin();
-    // console.log('userId :>> ', userId);
-    // console.log('user :>> ', user);
   }, [user]);
-
 
   return (
     <NavigationContainer>
@@ -69,7 +107,7 @@ export default function Home() {
             tabBarInactiveTintColor: 'rgba(33, 33, 33, 0.8)',
             tabBarShowLabel: false,
             initialRouteName: 'PostsScreen',
-            style: { position: 'absolute', bottom: 0 }
+            style: { position: 'absolute', bottom: 0 },
           })}
         >
           <MainTab.Screen

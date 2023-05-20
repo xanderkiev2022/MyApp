@@ -17,27 +17,13 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ref as ref2, set } from 'firebase/database';
 
 import * as ImagePicker from 'expo-image-picker';
-import { setDoc } from 'firebase/firestore'; 
+import { setDoc } from 'firebase/firestore';
 
 export default function ProfileScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
   const userId = useSelector(selectUserId);
   const userName = useSelector(selectName);
   const userPhoto = useSelector(selectPhoto);
-
-
-
-  // const email = useSelector(selectEmail);
-  // const pass = useSelector(selectPass);
-  // const [state, setState] = useState({email, password: pass});
-  // setState(prevState => ({ ...prevState, email, password: pass }));
-  // setState(prevState => ({ ...prevState, password: pass }));
-  // console.log('state :>> ', state);
-
-
-
-
-
 
   const dispatch = useDispatch();
 
@@ -100,9 +86,6 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-
-
-
   const uploadInfo = async () => {
     try {
       const photoUrl = await uploadData();
@@ -112,17 +95,7 @@ export default function ProfileScreen({ navigation }) {
         userId: userId,
       };
       const userRef = doc(db, 'users', userId);
-      // await setDoc(userRef, uploadedInfo);
-await updateDoc(userRef, uploadedInfo);
-
-//       const docRef = doc(db, 'users', userId);
-//       const docSnap = await getDoc(docRef);
-//       const docData = docSnap.data();
-//       console.log('docData :>> ', docData);
-// setState(prevState => ({ ...prevState, email: docData.email, password: docData.password }));
-// console.log('state :>> ', state);
-
-//       dispatch(login(state));
+      await updateDoc(userRef, uploadedInfo);
       dispatch(update({ photoUrl }));
     } catch (error) {
       console.log(error);
