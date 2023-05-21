@@ -31,11 +31,11 @@ export default function Home() {
   const userId = useSelector(selectUserId);
   const user = auth.currentUser;
   console.log('auth.currentUser :>> ', auth.currentUser);
-  console.log('authAsyncStorage.currentUser :>> ', authAsyncStorage.currentUser);
+  // console.log('authAsyncStorage.currentUser :>> ', authAsyncStorage.currentUser);
 
   const needToLogin = () => {
 
-onAuthStateChanged(authAsyncStorage, user => {
+onAuthStateChanged(auth, user => {
   // const user2 = auth;
   // const user2 = user?.reload();
   // const user2 = auth?.currentUser?.getIdToken(true);
@@ -48,7 +48,7 @@ onAuthStateChanged(authAsyncStorage, user => {
       email: user.email,
       photo: user.photoURL,
     };
-      console.log('authAsyncStorage.currentUser :>> ', authAsyncStorage.currentUser);
+    // console.log('authAsyncStorage.currentUser :>> ', authAsyncStorage.currentUser);
     dispatch(refreshUser(userData));
   }
 });
@@ -87,7 +87,7 @@ onAuthStateChanged(authAsyncStorage, user => {
 
   useEffect(() => {
     needToLogin();
-  }, [user]);
+  }, [auth]);
 
   return (
     <NavigationContainer>

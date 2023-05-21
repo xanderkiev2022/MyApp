@@ -2,36 +2,44 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Firebase
 import { createUserWithEmailAndPassword, onIdTokenChanged, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-import { app, auth, auth2, database, db } from '../../firebase/config';
+import { app, auth, auth2, database, db, storage } from '../../firebase/config';
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { set, ref } from 'firebase/database';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectEmail, selectPass } from './authSelectors';
 import { doc, setDoc } from 'firebase/firestore';
+import { getDownloadURL, uploadBytes, ref as ref2 } from 'firebase/storage';
 // import { refreshUser } from './authSlice';
 
-export const register = createAsyncThunk('auth/register', async ({ login, email, password }, thunkAPI) => {
+
+const getUrlofUploadedAvatar = async (photo, userId) => {
+  const response = await fetch(photo); // дістаємо фото зі стейту
+  const file = await response.blob(); // перетворюємо отриману фотографію на об'єкт Blob
+  const uniqueId = Date.now().toString(); // генеруємо унікальне ім"я для фото
+  const fileName = `${uniqueId}.jpg`; // Використовуємо унікальне ім'я для файлу
+  const linkToFile = ref2(storage, `avatar/${userId}/${fileName}`); // створюємо посилання на місце збереження фото в Firebase
+  await uploadBytes(linkToFile, file); // завантажуємо фото
+  const url = await getDownloadURL(linkToFile); // отримуємо URL-адресу завантаженого фото
+  return url;
+};
+
+export const register = createAsyncThunk('auth/register', async ({ login, email, password, photo }, thunkAPI) => {
   try {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
 
-    await updateProfile(user, {
-      displayName: login,
-      // photoURL: 'https://i.pravatar.cc/300'
-    });
+    await updateProfile(user, { displayName: login });
+    const photoUrl = photo ? await getUrlofUploadedAvatar(photo, user.uid) : 'https://i.pravatar.cc/300';
 
     const userData = {
       userId: user.uid,
       name: user.displayName,
       email: user.email,
-      photo: user.photoURL,
+      photo: photoUrl,
       password,
     };
-    // realtime database
-    // await set(ref(database, 'users/' + user.uid), userData);
     const userRef = doc(db, 'users', user.uid);
     await setDoc(userRef, userData);
-
     return userData;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);

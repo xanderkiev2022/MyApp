@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectError } from '../redux/auth/authSelectors';
 import { removeError } from '../redux/auth/authSlice';
 import { BgImage } from '../Components/BgImage';
+import Avatar from '../Components/Avatar';
 
 const initialFocus = {
   login: false,
@@ -31,6 +32,7 @@ const initialState = {
   login: '',
   email: '',
   password: '',
+  photo: null,
 };
 
 export default function RegistrationScreen({ navigation }) {
@@ -53,6 +55,7 @@ export default function RegistrationScreen({ navigation }) {
   const handleSubmit = () => {
     setState(initialState);
     dispatch(register(state));
+    
   };
 
     // WrongPass
@@ -71,9 +74,10 @@ export default function RegistrationScreen({ navigation }) {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={{ ...styles.regScr, height: isFocused.login || isFocused.email || isFocused.password ? '85%' : '69%' }}>
             <View style={styles.avatarBox}>
-              <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} />
+              <Avatar setState={setState} />
+              {/* <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} /> */}
               {/* <AntDesign name="pluscircleo" style={styles.addRemovePhoto} size={25} color="#FF6C00" backgroundColor="white" /> */}
-              <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" backgroundColor="white" />
+              {/* <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" backgroundColor="white" /> */}
             </View>
 
             <Text style={styles.title}>Registration</Text>
@@ -145,9 +149,7 @@ export default function RegistrationScreen({ navigation }) {
                   <Text style={styles.btnText}> Register </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.btn2} title="Login" onPress={handleLogin}>
-                  <Text style={styles.haveAccount}>
-                    Already have an account? Log in
-                  </Text>
+                  <Text style={styles.haveAccount}>Already have an account? Log in</Text>
                 </TouchableOpacity>
               </View>
             </View>

@@ -1,4 +1,4 @@
-import { getApps, initializeApp } from 'firebase/app';
+import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
@@ -16,17 +16,24 @@ const firebaseConfig = {
   appId: '1:750126251136:web:1e1c3f5e65967f38573a65',
 };
 
-  const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-// Initialize the firebase app if no app exists
-//if (!getApps().length) {
-  // Required to use the community AsyncStorage package
-export let authAsyncStorage = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+// console.log('getApps().length :>> ', getApps().length);
+
+// export let authAsyncStorage;
+// // Initialize the firebase app if no app exists
+// if (!getApps().length) {
+//   // Required to use the community AsyncStorage package
+
+//   authAsyncStorage = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
 // } else {
-export let auth = getAuth(app);
+//   // getApp();
 // }
 
-// export let auth;
+
+
+// export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const database = getDatabase(app);
+export const auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
