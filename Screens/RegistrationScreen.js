@@ -75,9 +75,6 @@ export default function RegistrationScreen({ navigation }) {
           <View style={{ ...styles.regScr, height: isFocused.login || isFocused.email || isFocused.password ? '85%' : '69%' }}>
             <View style={styles.avatarBox}>
               <Avatar setState={setState} />
-              {/* <Image style={styles.avatarImg} source={require('../assets/img/avatar.png')} /> */}
-              {/* <AntDesign name="pluscircleo" style={styles.addRemovePhoto} size={25} color="#FF6C00" backgroundColor="white" /> */}
-              {/* <AntDesign name="closecircleo" style={styles.addRemovePhoto} size={25} color="#E8E8E8" backgroundColor="white" /> */}
             </View>
 
             <Text style={styles.title}>Registration</Text>
@@ -186,21 +183,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     top: -60,
   },
-  avatarImg: {
-    height: '100%',
-    width: '100%',
-    borderRadius: 16,
-    resizeMode: 'contain',
-  },
-
-  addRemovePhoto: {
-    backgroundColor: '#FFFFFF',
-    position: 'absolute',
-    left: 108,
-    top: 80,
-    borderRadius: 25,
-  },
-
   title: {
     marginTop: 92,
     fontFamily: 'RobotoMedium',

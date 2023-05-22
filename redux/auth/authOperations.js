@@ -2,26 +2,9 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Firebase
 import { createUserWithEmailAndPassword, onIdTokenChanged, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-import { app, auth, auth2, database, db, storage } from '../../firebase/config';
-import { onAuthStateChanged, getAuth } from "firebase/auth";
-import { set, ref } from 'firebase/database';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectEmail, selectPass } from './authSelectors';
-import { doc, setDoc } from 'firebase/firestore';
-import { getDownloadURL, uploadBytes, ref as ref2 } from 'firebase/storage';
-// import { refreshUser } from './authSlice';
-
-
-const getUrlofUploadedAvatar = async (photo, userId) => {
-  const response = await fetch(photo); // дістаємо фото зі стейту
-  const file = await response.blob(); // перетворюємо отриману фотографію на об'єкт Blob
-  const uniqueId = Date.now().toString(); // генеруємо унікальне ім"я для фото
-  const fileName = `${uniqueId}.jpg`; // Використовуємо унікальне ім'я для файлу
-  const linkToFile = ref2(storage, `avatar/${userId}/${fileName}`); // створюємо посилання на місце збереження фото в Firebase
-  await uploadBytes(linkToFile, file); // завантажуємо фото
-  const url = await getDownloadURL(linkToFile); // отримуємо URL-адресу завантаженого фото
-  return url;
-};
+import { app, auth, auth2, database, db, getUrlofUploadedAvatar, storage } from '../../firebase/config';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 
 export const register = createAsyncThunk('auth/register', async ({ login, email, password, photo }, thunkAPI) => {
   try {
@@ -61,40 +44,20 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }, 
   }
 });
 
-// Відпрацьовує лише після логіну
-export const update = createAsyncThunk('auth/update', async ({photoUrl:photoURL}, thunkAPI) => {
+export const update = createAsyncThunk('auth/update', async ({ photoURL }, thunkAPI) => {
   try {
+    // const uploadedInfo = {
+    //   photo: photoURL,
+    //   userId,
+    // };
+    // const userRef = doc(db, 'users', userId);
+    // await updateDoc(userRef, uploadedInfo);
 
-
-
-    // const dispatch = useDispatch();
-    //
-    // const email = useSelector(selectEmail);
-    // const pass = useSelector(selectPass);
-
-    // const { currentUser } = auth;
-    // console.log('currentUser :>> ', currentUser);
-    // if (!currentUser) {
-    // const res =
-    // const user = res.user;
-    // const email = useSelector(selectEmail);
-    // const pass = useSelector(selectPass);
-    
-
-    // await signInWithEmailAndPassword(auth, email, pass);
-// console.log('email :>> ', email);
-// console.log('pass :>> ', pass);
     await updateProfile(auth.currentUser, { photoURL });
-    // dispatch(login({email, pass}));
-
-    // }
-    // await updateProfile(auth.currentUser, { photoURL });
-    // console.log('Profile updated successfully');
     return {
       photo: photoURL,
     };
-  }
-   catch (error) {
+  } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }
 });
@@ -109,8 +72,6 @@ export const update = createAsyncThunk('auth/update', async ({photoUrl:photoURL}
 
 // //  const user = onAuthStateChanged(auth);
 // //  const currentUser = res.currentUser;
-
-
 
 //     // const auth = getAuth();
 //     const { currentUser } = auth;
@@ -137,7 +98,6 @@ export const update = createAsyncThunk('auth/update', async ({photoUrl:photoURL}
 //     return thunkAPI.rejectWithValue(error.message);
 //   }
 // });
-
 
 export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
   try {
@@ -193,7 +153,6 @@ export const refresh = () => dispatch => {
   //     // const user2 = user?.reload();
   //     // const user2 = auth?.currentUser?.getIdToken(true);
   //     // console.log('user2 в рефреш :>> ', user2);
-      
   //     if (user) {
   //       const userData = {
   //         userId: user.uid,

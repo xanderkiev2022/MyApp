@@ -1,7 +1,7 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { getDownloadURL, getStorage, uploadBytes, ref } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
 import { getReactNativePersistence, initializeAuth } from 'firebase/auth/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,3 +37,14 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const database = getDatabase(app);
 export const auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+
+export const getUrlofUploadedAvatar = async (photo, userId) => {
+  const response = await fetch(photo); // дістаємо фото зі стейту
+  const file = await response.blob(); // перетворюємо отриману фотографію на об'єкт Blob
+  const uniqueId = Date.now().toString(); // генеруємо унікальне ім"я для фото
+  const fileName = `${uniqueId}.jpg`; // Використовуємо унікальне ім'я для файлу
+  const linkToFile = ref(storage, `avatar/${userId}/${fileName}`); // створюємо посилання на місце збереження фото в Firebase
+  await uploadBytes(linkToFile, file); // завантажуємо фото
+  const url = await getDownloadURL(linkToFile); // отримуємо URL-адресу завантаженого фото
+  return url;
+};
