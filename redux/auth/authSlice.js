@@ -91,7 +91,7 @@ const authSlice = createSlice({
       };
     },
     refreshAvatar: (state, { payload }) => {
-      state.photo = payload.photo || null;
+      state.photo = payload.photo;
       },
   },
   extraReducers: builder => {

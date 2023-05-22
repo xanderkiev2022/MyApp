@@ -10,44 +10,28 @@ import { update } from '../redux/auth/authOperations';
 import { doc, updateDoc } from 'firebase/firestore';
 
 export default function Avatar({ setState }) {
+  const dispatch = useDispatch();
   const avatar = useSelector(selectPhoto);
   const userId = useSelector(selectUserId);
-  const [image, setImage] = useState('');
-  const dispatch = useDispatch();
+  let photo;
 
   const handleChooseAvatar = async () => {
-    const photo = await choseFileOnHardDrive();
-    setImage(photo);
-    dispatch(refreshAvatar({ photo }));
-    setState(prevState => ({ ...prevState, photo }));
-  };
+    photo = await choseFileOnHardDrive();
 
-  const uploadInfo = async () => {
-    try {
-      // if (userId) {
-        const photoURL = await getUrlofUploadedAvatar(image, userId);
-        console.log('photoURL :>> ', photoURL);
-        
-            const uploadedInfo = {
-              photo: photoURL,
-              userId,
-            };
-            const userRef = doc(db, 'users', userId);
-            await updateDoc(userRef, uploadedInfo);
-      
+    if (userId) {
+      const photoURL = await getUrlofUploadedAvatar(photo, userId);
+      const uploadedInfo = {
+        photo: photoURL,
+        userId,
+      };
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, uploadedInfo);
       dispatch(update({ photoURL }));
-      // }
-    } catch (error) {
-      console.log(error);
+    } else {
+      dispatch(refreshAvatar({ photo }));
+      setState(prevState => ({ ...prevState, photo }));
     }
   };
-
-
-    useEffect(() => {
-      if (image !== '') {
-        uploadInfo();
-      }
-    }, [image]);
 
   return (
     <View style={styles.container}>
