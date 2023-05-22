@@ -20,13 +20,7 @@ export default function Avatar({ setState }) {
 
     if (userId) {
       const photoURL = await getUrlofUploadedAvatar(photo, userId);
-      const uploadedInfo = {
-        photo: photoURL,
-        userId,
-      };
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, uploadedInfo);
-      dispatch(update({ photoURL }));
+      dispatch(update({ photoURL, userId }));
     } else {
       dispatch(refreshAvatar({ photo }));
       setState(prevState => ({ ...prevState, photo }));

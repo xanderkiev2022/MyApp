@@ -55,7 +55,6 @@ export default function RegistrationScreen({ navigation }) {
   const handleSubmit = () => {
     setState(initialState);
     dispatch(register(state));
-    
   };
 
     // WrongPass

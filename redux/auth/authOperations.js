@@ -44,14 +44,14 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }, 
   }
 });
 
-export const update = createAsyncThunk('auth/update', async ({ photoURL }, thunkAPI) => {
+export const update = createAsyncThunk('auth/update', async ({ photoURL, userId }, thunkAPI) => {
   try {
-    // const uploadedInfo = {
-    //   photo: photoURL,
-    //   userId,
-    // };
-    // const userRef = doc(db, 'users', userId);
-    // await updateDoc(userRef, uploadedInfo);
+    const uploadedInfo = {
+      photo: photoURL,
+      userId,
+    };
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, uploadedInfo);
 
     await updateProfile(auth.currentUser, { photoURL });
     return {
