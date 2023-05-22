@@ -17,7 +17,7 @@ import { AntDesign } from '@expo/vector-icons';
 // Firebase
 import { register } from '../redux/auth/authOperations';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectError } from '../redux/auth/authSelectors';
+import { selectError, selectPhoto } from '../redux/auth/authSelectors';
 import { removeError } from '../redux/auth/authSlice';
 import { BgImage } from '../Components/BgImage';
 import Avatar from '../Components/Avatar';
@@ -37,6 +37,7 @@ const initialState = {
 
 export default function RegistrationScreen({ navigation }) {
   const dispatch = useDispatch();
+  const avatar = useSelector(selectPhoto);
   const error = useSelector(selectError);
 
   // OnFocus
@@ -51,9 +52,12 @@ export default function RegistrationScreen({ navigation }) {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
   };
 
-  // Submit
+// Submit
+    useEffect(() => {
+      setState(prevState => ({ ...prevState, photo: avatar }));
+    }, [avatar]);
+  
   const handleSubmit = () => {
-    setState(initialState);
     dispatch(register(state));
   };
 
@@ -73,7 +77,7 @@ export default function RegistrationScreen({ navigation }) {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={{ ...styles.regScr, height: isFocused.login || isFocused.email || isFocused.password ? '85%' : '69%' }}>
             <View style={styles.avatarBox}>
-              <Avatar setState={setState} />
+              <Avatar />
             </View>
 
             <Text style={styles.title}>Registration</Text>

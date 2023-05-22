@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, Image, FlatList } from 'react-native';
+import React from 'react';
+import { TouchableOpacity, View, StyleSheet, Image } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 import { useSelector, useDispatch } from 'react-redux';
 import { refreshAvatar } from '../redux/auth/authSlice';
 import { choseFileOnHardDrive } from '../Utils/hardDriveUtils';
-import { db, getUrlofUploadedAvatar } from '../firebase/config';
+import { getUrlofUploadedAvatar } from '../firebase/config';
 import { update } from '../redux/auth/authOperations';
-import { doc, updateDoc } from 'firebase/firestore';
 
-export default function Avatar({ setState }) {
+export default function Avatar() {
   const dispatch = useDispatch();
   const avatar = useSelector(selectPhoto);
   const userId = useSelector(selectUserId);
@@ -23,7 +22,6 @@ export default function Avatar({ setState }) {
       dispatch(update({ photoURL, userId }));
     } else {
       dispatch(refreshAvatar({ photo }));
-      setState(prevState => ({ ...prevState, photo }));
     }
   };
 
