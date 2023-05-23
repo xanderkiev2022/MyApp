@@ -19,7 +19,7 @@ import { auth, authAsyncStorage, db } from '../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth/react-native';
 import { refreshUser } from '../redux/auth/authSlice';
-import { ScrollTab } from '../Components/showTabBar';
+import { HomeScreen, ScrollTab, WrapperForTabBar } from '../Components/WrapperForTabBar';
 
 // import { onAuthStateChanged, onIdTokenChanged } from 'firebase/auth';
 
@@ -71,68 +71,10 @@ onAuthStateChanged(auth, user => {
     needToLogin();
   }, [auth]);
 
-  // const [scrollDirection, setScrollDirection] = useState('none');
-
-  // const handleScroll = event => {
-  //   const offsetY = event.nativeEvent.contentOffset.y;
-  //   const direction = offsetY > 0 ? 'up' : 'down';
-  //   setScrollDirection(direction);
-  // };
-
-
-  const height = Dimensions.get('window').height;
-  const width = Dimensions.get('window').width;
-
-  class HomeScreen extends React.Component {
-    offset = 0;
-    onScrollHandler = e => {
-      const currentOffset = e.nativeEvent.contentOffset.y;
-      var direction = currentOffset > this.offset ? 'down' : 'up';
-      this.offset = currentOffset;
-      if (direction === 'down') {
-        this.props.navigation.dispatch(
-          CommonActions.setParams({
-            tabBarVisible: false,
-            tabBarStyle: { display: 'none' },
-          })
-        );
-      } else {
-        this.props.navigation.dispatch(
-          CommonActions.setParams({
-            tabBarVisible: true,
-            tabBarStyle: { display: 'flex' },
-          })
-        );
-      }
-    };
-    render() {
-      return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ScrollView showsVerticalScrollIndicator={false} scrollEventThrottle={16} onScroll={this.onScrollHandler}>
-            <View
-              style={{
-                alignItems: 'center',
-                height: height * 2,
-                width: width,
-                backgroundColor: 'red',
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: 'blue',
-                  width: 100,
-                  height: height * 2,
-                }}
-              />
-            </View>
-          </ScrollView>
-        </View>
-      );
-    }
-  }
-
   const getTabBarVisible = route => {
     const params = route.params;
+    console.log('params :>> ', params);
+    console.log('route :>> ', route);
     if (params) {
       if (params.tabBarVisible === false) {
         return { display: 'none' };
@@ -145,8 +87,6 @@ onAuthStateChanged(auth, user => {
   return (
     <NavigationContainer>
       {authCheck ? (
-        // <ScrollTab >
-        // <VirtualizedList>
         <MainTab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ color, size }) => {
@@ -170,8 +110,7 @@ onAuthStateChanged(auth, user => {
         >
           <MainTab.Screen
             name="PostsScreen"
-            component={HomeScreen}
-            // component={PostsScreen}
+            component={PostsScreen}
             options={{
               headerShown: false,
             }}
@@ -197,8 +136,6 @@ onAuthStateChanged(auth, user => {
           {() => <ProfileScreen navigation={navigation} />}
         </MainTab.Navigator>
       ) : (
-        // </VirtualizedList>
-        // </ScrollTab>
         <MainStack.Navigator initialRouteName="Login">
           <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
           <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />

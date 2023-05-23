@@ -9,6 +9,7 @@ import { db, auth } from '../firebase/config';
 import { selectName, selectUserId, selectPhoto, selectEmail, selectPass } from '../redux/auth/authSelectors';
 import { useSelector, useDispatch } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
+import { WrapperForTabBar, onScrollHandler } from '../Components/WrapperForTabBar';
 
 export default function PostsScreenMain({ navigation }) {
   const [posts, setPosts] = useState([]);
@@ -41,22 +42,28 @@ const renderPostItem = ({ item, index }) => {
     const pass = useSelector(selectPass);
     // console.log('email :>> ', email);
     // console.log('pass :>> ', pass);
+  
+  const [offset, setOffset] = useState(0);
+
+  const onScroll = e => {
+    onScrollHandler(e, offset, setOffset, navigation);
+  };
+
+  
 
   return (
+    // <WrapperForTabBar navigation={navigation}>
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
         <Image style={styles.avatarImg} source={{ uri: userPhoto }} />
         <View style={styles.avatarData}>
           <Text style={styles.avatarName}>{userName}</Text>
-          <Text style={styles.avatarEmail}>{userEmail}, {pass}</Text>
+          <Text style={styles.avatarEmail}>
+            {userEmail}, {pass}
+          </Text>
         </View>
       </View>
-      <FlatList
-        data={posts}
-        style={styles.posts}
-        keyExtractor={(__, index) => index.toString()}
-        renderItem={renderPostItem}
-      />
+      <FlatList onScroll={onScroll} data={posts} style={styles.posts} keyExtractor={(__, index) => index.toString()} renderItem={renderPostItem} />
     </View>
   );
 }

@@ -9,6 +9,7 @@ import CommentsScreen from './CommentsScreen';
 import MapScreen from './MapScreen';
 import { useDispatch } from 'react-redux';
 import { logout } from '../redux/auth/authOperations';
+import { WrapperForTabBar } from '../Components/WrapperForTabBar';
 
 const NavStack = createStackNavigator();
 
@@ -16,7 +17,6 @@ export default function PostsScreen() {
   const dispatch = useDispatch();
 
   return (
-    // <NavigationContainer independent={true}>
     <NavStack.Navigator initialRouteName="Posts">
       <NavStack.Screen
         name="Posts"
@@ -52,7 +52,6 @@ export default function PostsScreen() {
         })}
       />
     </NavStack.Navigator>
-    // </NavigationContainer>
   );
 }
 

@@ -10,6 +10,9 @@ import Avatar from '../Components/Avatar';
 // Firebase
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { WrapperForTabBar, onScrollHandler } from '../Components/WrapperForTabBar';
+import { ScrollView } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
 
 export default function ProfileScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
@@ -31,13 +34,24 @@ export default function ProfileScreen({ navigation }) {
   // margin for last child
   const renderPostItem = ({ item, index }) => {
     const isLastItem = index === posts.length - 1;
-    return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} forProfileScreen />;
+    return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} forProfileScreen />
   };
 
   const [state, setState] = useState({ photo: null });
 
+
+
+const [offset, setOffset] = useState(0);
+
+  const onScroll = e => {
+  onScrollHandler(e, offset, setOffset, navigation);
+};
+
+
+
+
   return (
-    <View style={styles.container}>
+     <View style={styles.container}>
       <BgImage>
         <View style={styles.regScr}>
           <View style={styles.avatarBox}>
@@ -47,7 +61,15 @@ export default function ProfileScreen({ navigation }) {
             </TouchableOpacity>
           </View>
           <Text style={styles.avatarName}>{userName}</Text>
-          <FlatList data={posts} style={styles.posts} keyExtractor={(__, index) => index.toString()} renderItem={renderPostItem} />
+          <FlatList
+            // showsVerticalScrollIndicator={false}
+            // scrollEventThrottle={16}
+            onScroll={onScroll}
+            data={posts}
+            style={styles.posts}
+            keyExtractor={(__, index) => index.toString()}
+            renderItem={renderPostItem}
+          />
         </View>
       </BgImage>
     </View>
