@@ -1,8 +1,8 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { CommonActions, NavigationContainer } from '@react-navigation/native';
 import { Feather, SimpleLineIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, ScrollView, FlatList, VirtualizedList, Dimensions, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
@@ -19,7 +19,11 @@ import { auth, authAsyncStorage, db } from '../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth/react-native';
 import { refreshUser } from '../redux/auth/authSlice';
+import { ScrollTab } from '../Components/showTabBar';
+
 // import { onAuthStateChanged, onIdTokenChanged } from 'firebase/auth';
+
+
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -31,15 +35,11 @@ export default function Home() {
   const userId = useSelector(selectUserId);
   const user = auth.currentUser;
   console.log('auth.currentUser :>> ', auth.currentUser);
-  // console.log('authAsyncStorage.currentUser :>> ', authAsyncStorage.currentUser);
-
+  
   const needToLogin = () => {
 
 onAuthStateChanged(auth, user => {
-  // const user2 = auth;
-  // const user2 = user?.reload();
-  // const user2 = auth?.currentUser?.getIdToken(true);
-  // console.log('user2 в рефреш :>> ', user2);
+
 
   if (user) {
     const userData = {
@@ -52,13 +52,6 @@ onAuthStateChanged(auth, user => {
     dispatch(refreshUser(userData));
   }
 });
-    //     // const id= user.uid;
-    //     // console.log('id :>> ', id);
-    //     // console.log('user :>> ', user);
-    //     // const user = auth.currentUser;
-
-    // //  const user = onAuthStateChanged(auth);
-    // //  const currentUser = res.currentUser;
   };
 
   // Saving password
@@ -73,25 +66,87 @@ onAuthStateChanged(auth, user => {
   //   }
   // };
 
-  // NO
-  // const needToLogin = async () => {
-  // onIdTokenChanged(auth, user => {
-  //   if (user) {
-  //     console.log('currentUser :>> ', auth.currentUser);
-  //   } else {
-  //     console.log('No-currentUser :>> ', auth.currentUser);
-  //   }
-  // });
-  // };
-
 
   useEffect(() => {
     needToLogin();
   }, [auth]);
 
+  // const [scrollDirection, setScrollDirection] = useState('none');
+
+  // const handleScroll = event => {
+  //   const offsetY = event.nativeEvent.contentOffset.y;
+  //   const direction = offsetY > 0 ? 'up' : 'down';
+  //   setScrollDirection(direction);
+  // };
+
+
+  const height = Dimensions.get('window').height;
+  const width = Dimensions.get('window').width;
+
+  class HomeScreen extends React.Component {
+    offset = 0;
+    onScrollHandler = e => {
+      const currentOffset = e.nativeEvent.contentOffset.y;
+      var direction = currentOffset > this.offset ? 'down' : 'up';
+      this.offset = currentOffset;
+      if (direction === 'down') {
+        this.props.navigation.dispatch(
+          CommonActions.setParams({
+            tabBarVisible: false,
+            tabBarStyle: { display: 'none' },
+          })
+        );
+      } else {
+        this.props.navigation.dispatch(
+          CommonActions.setParams({
+            tabBarVisible: true,
+            tabBarStyle: { display: 'flex' },
+          })
+        );
+      }
+    };
+    render() {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ScrollView showsVerticalScrollIndicator={false} scrollEventThrottle={16} onScroll={this.onScrollHandler}>
+            <View
+              style={{
+                alignItems: 'center',
+                height: height * 2,
+                width: width,
+                backgroundColor: 'red',
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: 'blue',
+                  width: 100,
+                  height: height * 2,
+                }}
+              />
+            </View>
+          </ScrollView>
+        </View>
+      );
+    }
+  }
+
+  const getTabBarVisible = route => {
+    const params = route.params;
+    if (params) {
+      if (params.tabBarVisible === false) {
+        return { display: 'none' };
+      }
+    }
+    return  { display: 'flex'  };
+  };
+
+
   return (
     <NavigationContainer>
       {authCheck ? (
+        // <ScrollTab >
+        // <VirtualizedList>
         <MainTab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ color, size }) => {
@@ -108,11 +163,15 @@ onAuthStateChanged(auth, user => {
             tabBarShowLabel: false,
             initialRouteName: 'PostsScreen',
             style: { position: 'absolute', bottom: 0 },
+            // tabBarStyle: { display: 'none' },
+
+            tabBarStyle: getTabBarVisible(route),
           })}
         >
           <MainTab.Screen
             name="PostsScreen"
-            component={PostsScreen}
+            component={HomeScreen}
+            // component={PostsScreen}
             options={{
               headerShown: false,
             }}
@@ -124,6 +183,8 @@ onAuthStateChanged(auth, user => {
               headerShown: true,
               headerTitleAlign: 'center',
               headerStyle: styles.bottomBorder,
+
+              tabBarStyle: { display: 'none' },
             }}
           />
           <MainTab.Screen
@@ -136,6 +197,8 @@ onAuthStateChanged(auth, user => {
           {() => <ProfileScreen navigation={navigation} />}
         </MainTab.Navigator>
       ) : (
+        // </VirtualizedList>
+        // </ScrollTab>
         <MainStack.Navigator initialRouteName="Login">
           <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
           <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
