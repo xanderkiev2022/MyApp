@@ -12,7 +12,7 @@ export const register = createAsyncThunk('auth/register', async ({ login, email,
     const user = res.user;
 
     await updateProfile(user, { displayName: login });
-    const photoUrl = photo ? await getUrlofUploadedAvatar(photo, user.uid) : 'https://i.pravatar.cc/300';
+    const photoUrl = photo ? await getUrlofUploadedAvatar(photo, user.uid) : null;
 
     const userData = {
       userId: user.uid,

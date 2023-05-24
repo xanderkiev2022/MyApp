@@ -1,29 +1,20 @@
-import { CommonActions, NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { Feather, SimpleLineIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { StyleSheet, TouchableOpacity, ScrollView, FlatList, VirtualizedList, Dimensions, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useRef } from 'react';
 import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
 import ProfileScreen from './ProfileScreen';
-import Header from './Header';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectEmail, selectIsLoggedIn, selectPass, selectRefreshing, selectUserId } from '../redux/auth/authSelectors';
+import { selectIsLoggedIn } from '../redux/auth/authSelectors';
 import RegistrationScreen from './RegistrationScreen';
 import LoginScreen from './LoginScreen';
-import PostsScreenMain from './PostsScreenMain';
-import { AntDesign } from '@expo/vector-icons';
-import { login, refresh } from '../redux/auth/authOperations';
-import { auth, authAsyncStorage, db } from '../firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth/react-native';
 import { refreshUser } from '../redux/auth/authSlice';
-import { HomeScreen, ScrollTab, WrapperForTabBar } from '../Components/WrapperForTabBar';
-
-// import { onAuthStateChanged, onIdTokenChanged } from 'firebase/auth';
-
-
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -32,99 +23,115 @@ export default function Home() {
   const authCheck = useSelector(selectIsLoggedIn);
   const dispatch = useDispatch();
 
-  const userId = useSelector(selectUserId);
-  const user = auth.currentUser;
-  console.log('auth.currentUser :>> ', auth.currentUser);
-  
   const needToLogin = () => {
-
-onAuthStateChanged(auth, user => {
-
-
-  if (user) {
-    const userData = {
-      userId: user.uid,
-      name: user.displayName,
-      email: user.email,
-      photo: user.photoURL,
-    };
-    // console.log('authAsyncStorage.currentUser :>> ', authAsyncStorage.currentUser);
-    dispatch(refreshUser(userData));
-  }
-});
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        const userData = {
+          userId: user.uid,
+          name: user.displayName,
+          email: user.email,
+          photo: user.photoURL,
+        };
+        dispatch(refreshUser(userData));
+      }
+    });
   };
 
-  // Saving password
+  // Логінемося
   // const needToLogin = async () => {
   //   if (!user) {
   //     const docRef = doc(db, 'users', userId);
   //     const docSnap = await getDoc(docRef);
   //     const docData = docSnap.data();
-  //     console.log('docData :>> ', docData);
-  //     console.log('object :>> ', { email: docData.email, password: docData.password });
   //     dispatch(login({ email: docData.email, password: docData.password }));
   //   }
   // };
-
 
   useEffect(() => {
     needToLogin();
   }, [auth]);
 
-  const getTabBarVisible = route => {
-    const params = route.params;
-    console.log('params :>> ', params);
-    console.log('route :>> ', route);
-    if (params) {
-      if (params.tabBarVisible === false) {
-        return { display: 'none' };
-      }
-    }
-    return  { display: 'flex'  };
+  const opacityAnimation = useRef(new Animated.Value(1)).current;
+  const bottomAnimation = useRef(new Animated.Value(0)).current;
+
+  const animateTabBar = show => {
+    Animated.parallel([
+      Animated.timing(opacityAnimation, {
+        toValue: show ? 1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(bottomAnimation, {
+        toValue: show ? 0 : 50,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
+  const getTabBarVisible = route => {
+    const params = route.params;
+    // const routeName = getFocusedRouteNameFromRoute(route);
+    // console.log('params :>> ', params);
+    // console.log('route :>> ', route);
+    // console.log('routeName :>> ', routeName);
+
+    if (params) {
+      if (params.tabBarVisible === false) {
+        animateTabBar(false);
+        return {
+          position: 'absolute',
+          transform: [{ translateY: bottomAnimation }],
+          opacity: opacityAnimation,
+        };
+      }
+    }
+    animateTabBar(true);
+    return {
+      position: 'absolute',
+      transform: [{ translateY: bottomAnimation }],
+      opacity: opacityAnimation,
+    };
+  };
 
   return (
     <NavigationContainer>
       {authCheck ? (
         <MainTab.Navigator
           screenOptions={({ route }) => ({
-            tabBarIcon: ({ color, size }) => {
+            tabBarIcon: ({ focused, color, size }) => {
               if (route.name === 'Profile') {
-                return <Feather name="user" size={size} color={color} />;
+                return <Feather name="user" size={focused ? size + 2 : size} color={color} />;
               } else if (route.name === 'Create Posts') {
-                return <Feather name="plus" size={size} color="#fff" style={styles.addPost} />;
+                return <Feather name="plus" size={focused ? size + 2 : size} color="#fff" style={styles.addPost} />;
               } else if (route.name === 'PostsScreen') {
-                return <SimpleLineIcons name="grid" size={size} color={color} />;
+                return <SimpleLineIcons name="grid" size={focused ? size + 2 : size} color={color} />;
               }
             },
             tabBarActiveTintColor: '#FF6C00',
             tabBarInactiveTintColor: 'rgba(33, 33, 33, 0.8)',
             tabBarShowLabel: false,
             initialRouteName: 'PostsScreen',
-            style: { position: 'absolute', bottom: 0 },
-            // tabBarStyle: { display: 'none' },
-
             tabBarStyle: getTabBarVisible(route),
           })}
         >
           <MainTab.Screen
             name="PostsScreen"
             component={PostsScreen}
-            options={{
+            options={({ route }) => ({
               headerShown: false,
-            }}
+              tabBarStyle: { display: 'flex' },
+            })}
           />
           <MainTab.Screen
             name="Create Posts"
             component={CreatePostsScreen}
-            options={{
+            options={({ route }) => ({
               headerShown: true,
               headerTitleAlign: 'center',
               headerStyle: styles.bottomBorder,
-
               tabBarStyle: { display: 'none' },
-            }}
+            })}
           />
           <MainTab.Screen
             name="Profile"

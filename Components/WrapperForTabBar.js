@@ -19,18 +19,20 @@ export const onScrollHandler = (e, offset, setOffset, navigation) => {
 
   if (direction === 'down') {
     console.log('down :>> ');
-    console.log('navigation :>> ', navigation);
+    console.log('down2 :>> ');
+    // console.log('navigation :>> ', navigation);
         navigation.dispatch(
           CommonActions.setParams({
             tabBarVisible: false,
-            tabBarStyle: { display: 'none' },
+            // tabBarStyle: { display: 'none' },
           })
         );
-      } else {
+  } else {
+    console.log('up :>> ');
         navigation.dispatch(
           CommonActions.setParams({
             tabBarVisible: true,
-            tabBarStyle: { display: 'flex' },
+            // tabBarStyle: { display: 'flex' },
           })
         );
       }
