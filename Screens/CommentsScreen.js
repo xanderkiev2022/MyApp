@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { Dimensions, StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 
@@ -15,8 +15,8 @@ export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
   const [allComments, setAllComments] = useState();
   const userId = useSelector(selectUserId);
-  const userPhoto = useSelector(selectPhoto);
-  const positionForScrollDownOfComments = useRef(null);
+  const photo = useSelector(selectPhoto);
+  
   const postId = route.params.id;
 
   const addComment = async () => {
@@ -26,7 +26,7 @@ export default function CommentsScreen({ route, navigation }) {
       comment,
       date,
       userId,
-      userPhoto,
+      photo,
       // Вказуємо поля які будуть в цьому записі
     });
 
@@ -55,7 +55,53 @@ export default function CommentsScreen({ route, navigation }) {
     commentsCollection();
   }, []);
 
-  const { photo, id } = route.params;
+
+  const positionForScrollDownOfComments = useRef(null);
+  // const screenHeight = Dimensions.get('window').height;
+  // console.log('screenHeight :>> ', screenHeight);
+  
+  // const scrollToEndIfNeeded = () => {
+  //   const contentHeight = positionForScrollDownOfComments.current?.getContentSize().height || 0;
+  //   const isScrollNeeded = contentHeight > screenHeight;
+  //   if (isScrollNeeded) {
+  //     positionForScrollDownOfComments.current?.scrollToEnd({ animated: true });
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   const contentHeight = positionForScrollDownOfComments.current?.getContentSize().height;
+  //   console.log('screenHeight :>> ', screenHeight);
+  //   console.log('positionForScrollDownOfComments :>> ', positionForScrollDownOfComments);
+  // console.log('contentHeight :>> ', contentHeight);
+  //   // scrollToEndIfNeeded();
+  // }, []);
+
+// const containerRef = useRef(null);
+
+// useEffect(() => {
+//   const updateScreenSize = () => {
+//     const { width, height } = Dimensions.get('window');
+//     console.log('Screen size:', width, height);
+//   };
+
+//   if (containerRef.current) {
+//     containerRef.current.measure(updateScreenSize);
+//   }
+
+//   Dimensions.addEventListener('change', updateScreenSize);
+
+//   return () => {
+//     Dimensions.removeEventListener('change', updateScreenSize);
+//   };
+// }, []);
+
+// useEffect(() => {
+//   commentsCollection();
+// }, []);
+
+
+
+  // const { photo, id } = route.params;
 
   return (
     <View style={styles.container}>
@@ -66,7 +112,9 @@ export default function CommentsScreen({ route, navigation }) {
         data={allComments}
         keyExtractor={item => item.id.toString()}
         renderItem={({ item }) => <CommentComponent item={item} />}
-        onContentSizeChange={() => positionForScrollDownOfComments.current.scrollToEnd({ animated: true })}
+        // onContentSizeChange={() => positionForScrollDownOfComments.current?.scrollToEnd({ animated: true })}
+        onLayout={() => positionForScrollDownOfComments.current?.scrollToEnd({ animated: true })}
+        // onLayout={scrollToEndIfNeeded}
       />
       <View style={styles.inputContainer}>
         <TextInput placeholder="Comment..." style={styles.inputComment} value={comment} onChangeText={text => setComment(text)} />

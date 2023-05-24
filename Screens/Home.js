@@ -2,8 +2,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Feather, SimpleLineIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { StyleSheet, Animated } from 'react-native';
-import React, { useEffect, useRef } from 'react';
+import { StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
 import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
 import ProfileScreen from './ProfileScreen';
@@ -14,7 +14,7 @@ import LoginScreen from './LoginScreen';
 import { auth } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth/react-native';
 import { refreshUser } from '../redux/auth/authSlice';
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { getTabBarVisible } from '../Components/WrapperForTabBar';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -50,49 +50,6 @@ export default function Home() {
   useEffect(() => {
     needToLogin();
   }, [auth]);
-
-  const opacityAnimation = useRef(new Animated.Value(1)).current;
-  const bottomAnimation = useRef(new Animated.Value(0)).current;
-
-  const animateTabBar = show => {
-    Animated.parallel([
-      Animated.timing(opacityAnimation, {
-        toValue: show ? 1 : 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(bottomAnimation, {
-        toValue: show ? 0 : 50,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const getTabBarVisible = route => {
-    const params = route.params;
-    // const routeName = getFocusedRouteNameFromRoute(route);
-    // console.log('params :>> ', params);
-    // console.log('route :>> ', route);
-    // console.log('routeName :>> ', routeName);
-
-    if (params) {
-      if (params.tabBarVisible === false) {
-        animateTabBar(false);
-        return {
-          position: 'absolute',
-          transform: [{ translateY: bottomAnimation }],
-          opacity: opacityAnimation,
-        };
-      }
-    }
-    animateTabBar(true);
-    return {
-      position: 'absolute',
-      transform: [{ translateY: bottomAnimation }],
-      opacity: opacityAnimation,
-    };
-  };
 
   return (
     <NavigationContainer>

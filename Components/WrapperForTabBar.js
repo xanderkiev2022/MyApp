@@ -1,67 +1,66 @@
-import { CommonActions} from '@react-navigation/native';
-import { ScrollView, Dimensions, View, FlatList, Text } from 'react-native';
-import React, { useState } from 'react';
+import { CommonActions } from '@react-navigation/native';
+import { Animated } from 'react-native';
+import React, { useRef, useState } from 'react';
 
- 
-  // const height = Dimensions.get('window').height;
-  // const width = Dimensions.get('window').width;
-
-  // export const WrapperForTabBar = ({ navigation, children }) => {
-    
-    
-    
+// Scroll
 export const onScrollHandler = (e, offset, setOffset, navigation) => {
-  // const [offset, setOffset] = useState(0);
-      
-      const currentOffset = e.nativeEvent.contentOffset.y;
-      const direction = currentOffset > offset ? 'down' : 'up';
-      setOffset(currentOffset);
+  const currentOffset = e.nativeEvent.contentOffset.y;
+  const direction = currentOffset > offset ? 'down' : 'up';
+  setOffset(currentOffset);
 
   if (direction === 'down') {
     console.log('down :>> ');
-    console.log('down2 :>> ');
-    // console.log('navigation :>> ', navigation);
-        navigation.dispatch(
-          CommonActions.setParams({
-            tabBarVisible: false,
-            // tabBarStyle: { display: 'none' },
-          })
-        );
+    navigation.dispatch(
+      CommonActions.setParams({
+        tabBarVisible: false,
+      })
+    );
   } else {
     console.log('up :>> ');
-        navigation.dispatch(
-          CommonActions.setParams({
-            tabBarVisible: true,
-            // tabBarStyle: { display: 'flex' },
-          })
-        );
-      }
-    };
+    navigation.dispatch(
+      CommonActions.setParams({
+        tabBarVisible: true,
+      })
+    );
+  }
+};
 
-  //   return (
-  //     <View onScroll={onScrollHandler} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-  //       {/* <FlatList
-  //         showsVerticalScrollIndicator={false}
-  //         scrollEventThrottle={16}
-  //         onScroll={onScrollHandler}
-  //         data={[{ key: 'dummy' }]}
-  //         renderItem={() => ( */}
-  //           <Text>{children}</Text>
-  //           {/* // {children} */}
-  //           {/* // <View */}
-  //           {/* //   style={{ */}
-  //           {/* //     alignItems: 'center',
-  //           //     height: height * 2,
-  //           //     width: width,
-  //           //     backgroundColor: 'pink',
-  //           //   }}
-  //           // >
-  //           //   <View style={{ backgroundColor: 'turquoise', width: 100, height: height * 2 }} />
-  //           // </View>
-  //         )} */}
-  //       {/* // /> */}
-  //     </View>
-  //   );
-  // };
+// Animation for tabBar
+const opacityAnimation = new Animated.Value(1);
+const bottomAnimation = new Animated.Value(0);
 
-  // <ScrollView showsVerticalScrollIndicator={false} scrollEventThrottle={16} onScroll={onScrollHandler}></ScrollView>
+const animateTabBar = show => {
+  Animated.parallel([
+    Animated.timing(opacityAnimation, {
+      toValue: show ? 1 : 0,
+      duration: 200,
+      useNativeDriver: true,
+    }),
+    Animated.timing(bottomAnimation, {
+      toValue: show ? 0 : 50,
+      duration: 150,
+      useNativeDriver: true,
+    }),
+  ]).start();
+};
+
+export const getTabBarVisible = route => {
+  const params = route.params;
+
+  if (params) {
+    if (params.tabBarVisible === false) {
+      animateTabBar(false);
+      return {
+        position: 'absolute',
+        transform: [{ translateY: bottomAnimation }],
+        opacity: opacityAnimation,
+      };
+    }
+  }
+  animateTabBar(true);
+  return {
+    position: 'absolute',
+    transform: [{ translateY: bottomAnimation }],
+    opacity: opacityAnimation,
+  };
+};
