@@ -1,23 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList, Keyboard } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
+import { useSelector } from 'react-redux';
 
 // Firebase
 import { doc, updateDoc, collection, getDoc, addDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
+
 import CommentComponent from '../Components/CommentComponent';
-import { useSelector } from 'react-redux';
-import { Keyboard } from 'react-native';
 
 export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
-  const [allComments, setAllComments] = useState();
+  const [allComments, setAllComments] = useState(null);
+  const [loading, setLoading] = useState(true);
   const userId = useSelector(selectUserId);
   const photo = useSelector(selectPhoto);
-  
-  const postId = route.params.id;
+  const positionForScrollDownOfComments = useRef(null);
+
+  const { photo: pic, id: postId } = route.params;
 
   const addComment = async () => {
     const date = new Date();
@@ -34,7 +36,7 @@ export default function CommentsScreen({ route, navigation }) {
     const docSnap = await getDoc(docRef); // Отримуємо знімок об"єкта
     const docData = docSnap.data(); // Отримуємо об"єкт
     await updateDoc(docRef, { comments: docData.comments + 1 }); // Оновлюємо запис
-    };
+  };
 
   const commentsCollection = async () => {
     onSnapshot(collection(db, 'posts', postId, 'comments'), querySnapshot => {
@@ -48,6 +50,7 @@ export default function CommentsScreen({ route, navigation }) {
         .sort((a, b) => a.date.seconds - b.date.seconds);
       // сортуємо по даті
       setAllComments(commentsArray);
+      setLoading(false);
     });
   };
 
@@ -55,67 +58,27 @@ export default function CommentsScreen({ route, navigation }) {
     commentsCollection();
   }, []);
 
-
-  const positionForScrollDownOfComments = useRef(null);
-  // const screenHeight = Dimensions.get('window').height;
-  // console.log('screenHeight :>> ', screenHeight);
-  
-  // const scrollToEndIfNeeded = () => {
-  //   const contentHeight = positionForScrollDownOfComments.current?.getContentSize().height || 0;
-  //   const isScrollNeeded = contentHeight > screenHeight;
-  //   if (isScrollNeeded) {
-  //     positionForScrollDownOfComments.current?.scrollToEnd({ animated: true });
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const contentHeight = positionForScrollDownOfComments.current?.getContentSize().height;
-  //   console.log('screenHeight :>> ', screenHeight);
-  //   console.log('positionForScrollDownOfComments :>> ', positionForScrollDownOfComments);
-  // console.log('contentHeight :>> ', contentHeight);
-  //   // scrollToEndIfNeeded();
-  // }, []);
-
-// const containerRef = useRef(null);
-
-// useEffect(() => {
-//   const updateScreenSize = () => {
-//     const { width, height } = Dimensions.get('window');
-//     console.log('Screen size:', width, height);
-//   };
-
-//   if (containerRef.current) {
-//     containerRef.current.measure(updateScreenSize);
-//   }
-
-//   Dimensions.addEventListener('change', updateScreenSize);
-
-//   return () => {
-//     Dimensions.removeEventListener('change', updateScreenSize);
-//   };
-// }, []);
-
-// useEffect(() => {
-//   commentsCollection();
-// }, []);
-
-
-
-  // const { photo, id } = route.params;
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>
-      <Image style={styles.photo} source={{ uri: photo }} />
+      <Image style={styles.photo} source={{ uri: pic }} />
 
-      <FlatList
-        ref={positionForScrollDownOfComments}
-        data={allComments}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({ item }) => <CommentComponent item={item} />}
-        // onContentSizeChange={() => positionForScrollDownOfComments.current?.scrollToEnd({ animated: true })}
-        onLayout={() => positionForScrollDownOfComments.current?.scrollToEnd({ animated: true })}
-        // onLayout={scrollToEndIfNeeded}
-      />
+      {loading
+        ? (<Text>Loading...</Text>)
+        : allComments.length > 0
+          ? (
+            <FlatList
+            ref={positionForScrollDownOfComments}
+            data={allComments || []}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item }) => <CommentComponent item={item} />}
+            onContentSizeChange={(contentWidth, contentHeight) => positionForScrollDownOfComments.current?.scrollToOffset({ offset: contentHeight })}
+            />)
+          : (<Text>No comments yet</Text>)}
+
       <View style={styles.inputContainer}>
         <TextInput placeholder="Comment..." style={styles.inputComment} value={comment} onChangeText={text => setComment(text)} />
         <TouchableOpacity activeOpacity={0.8} style={styles.btnComment}>
@@ -151,8 +114,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 32,
   },
-  inputContainer: {
-  },
+  inputContainer: {},
   inputComment: {
     backgroundColor: '#F6F6F6',
     borderRadius: 50,
