@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList, Keyboard } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
@@ -23,7 +23,7 @@ export default function CommentsScreen({ route, navigation }) {
 
   const addComment = async () => {
     const date = new Date();
-    const commentRef = await addDoc(collection(db, 'posts', postId, 'comments'), {
+    await addDoc(collection(db, 'posts', postId, 'comments'), {
       // Додаємо новий запис до колекції "comments" під шляхом "posts/postId/comments"
       comment,
       date,
@@ -31,8 +31,6 @@ export default function CommentsScreen({ route, navigation }) {
       photo,
       // Вказуємо поля які будуть в цьому записі
     });
-
-    const commentId = commentRef.id;
 
     const docRef = doc(db, 'posts', postId); // Отримуємо посилання на конкретний об"єкт
     const docSnap = await getDoc(docRef); // Отримуємо знімок об"єкта
@@ -77,9 +75,7 @@ const deleteComment = async commentId => {
     commentsCollection();
   }, []);
 
-  if (loading) {
-    return <Text>Loading...</Text>;
-  }
+  const memoizedComments = useMemo(() => allComments, [allComments]);
 
   return (
     <View style={styles.container}>
@@ -90,7 +86,7 @@ const deleteComment = async commentId => {
       ) : allComments.length > 0 ? (
         <FlatList
           ref={positionForScrollDownOfComments}
-          data={allComments || []}
+          data={memoizedComments || []}
           keyExtractor={item => item.id.toString()}
           renderItem={({ item }) => <CommentComponent item={item} onDeleteComment={deleteComment} />}
           onContentSizeChange={(contentWidth, contentHeight) => positionForScrollDownOfComments.current?.scrollToOffset({ offset: contentHeight })}
