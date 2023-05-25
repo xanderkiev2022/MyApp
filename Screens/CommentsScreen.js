@@ -5,7 +5,7 @@ import { useFonts } from 'expo-font';
 import { useSelector } from 'react-redux';
 
 // Firebase
-import { doc, updateDoc, collection, getDoc, addDoc, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc, collection, getDoc, addDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 
@@ -23,7 +23,7 @@ export default function CommentsScreen({ route, navigation }) {
 
   const addComment = async () => {
     const date = new Date();
-    await addDoc(collection(db, 'posts', postId, 'comments'), {
+    const commentRef = await addDoc(collection(db, 'posts', postId, 'comments'), {
       // Додаємо новий запис до колекції "comments" під шляхом "posts/postId/comments"
       comment,
       date,
@@ -32,11 +32,30 @@ export default function CommentsScreen({ route, navigation }) {
       // Вказуємо поля які будуть в цьому записі
     });
 
+    const commentId = commentRef.id;
+
     const docRef = doc(db, 'posts', postId); // Отримуємо посилання на конкретний об"єкт
     const docSnap = await getDoc(docRef); // Отримуємо знімок об"єкта
     const docData = docSnap.data(); // Отримуємо об"єкт
     await updateDoc(docRef, { comments: docData.comments + 1 }); // Оновлюємо запис
   };
+  
+const deleteComment = async commentId => {
+  const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+
+  try {
+    await deleteDoc(commentRef);
+
+    const postRef = doc(db, 'posts', postId);
+    const postSnap = await getDoc(postRef);
+    const postData = postSnap.data();
+
+    await updateDoc(postRef, { comments: postData.comments - 1 });
+  } catch (error) {
+    console.error('Помилка при видаленні коментаря:', error);
+  }
+};
+
 
   const commentsCollection = async () => {
     onSnapshot(collection(db, 'posts', postId, 'comments'), querySnapshot => {
@@ -66,18 +85,19 @@ export default function CommentsScreen({ route, navigation }) {
     <View style={styles.container}>
       <Image style={styles.photo} source={{ uri: pic }} />
 
-      {loading
-        ? (<Text>Loading...</Text>)
-        : allComments.length > 0
-          ? (
-            <FlatList
-            ref={positionForScrollDownOfComments}
-            data={allComments || []}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => <CommentComponent item={item} />}
-            onContentSizeChange={(contentWidth, contentHeight) => positionForScrollDownOfComments.current?.scrollToOffset({ offset: contentHeight })}
-            />)
-          : (<Text>No comments yet</Text>)}
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : allComments.length > 0 ? (
+        <FlatList
+          ref={positionForScrollDownOfComments}
+          data={allComments || []}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }) => <CommentComponent item={item} onDeleteComment={deleteComment} />}
+          onContentSizeChange={(contentWidth, contentHeight) => positionForScrollDownOfComments.current?.scrollToOffset({ offset: contentHeight })}
+        />
+      ) : (
+        <Text>No comments yet</Text>
+      )}
 
       <View style={styles.inputContainer}>
         <TextInput placeholder="Comment..." style={styles.inputComment} value={comment} onChangeText={text => setComment(text)} />

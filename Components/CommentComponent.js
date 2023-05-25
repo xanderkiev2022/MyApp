@@ -3,18 +3,31 @@ import { StyleSheet, View, Text, Image } from 'react-native';
 import { useSelector } from 'react-redux';
 import { selectUserId } from '../redux/auth/authSelectors';
 import moment from 'moment-timezone';
+import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
 
-export default function CommentComponent ({ item }) {
+export default function CommentComponent({ item, onDeleteComment }) {
   const { comment, date, userId, photo } = item;
   const myId = useSelector(selectUserId);
 
+  const handleDelete = () => {
+    onDeleteComment(item.id);
+  };
+
+  const renderDeleteButton = () => {
+    if (userId === myId) {
+      return (
+        <TouchableOpacity onPress={handleDelete}>
+          <Text style={styles.deleteButton}>Delete</Text>
+        </TouchableOpacity>
+      );
+    }
+    return null;
+  };
+
   return (
     <View style={{ ...styles.container, flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
-      <Image
-        source={{ uri: photo }}
-        style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }}
-      />
+      <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
       <View
         style={{
           ...styles.commentContainer,
@@ -29,6 +42,7 @@ export default function CommentComponent ({ item }) {
           {moment(date.seconds * 1000).format('hh:mm')}
         </Text>
       </View>
+      {renderDeleteButton()}
     </View>
   );
 };
