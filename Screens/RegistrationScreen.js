@@ -1,16 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useFonts } from 'expo-font';
 import { AntDesign } from '@expo/vector-icons';
 
@@ -21,6 +10,7 @@ import { selectError, selectPhoto } from '../redux/auth/authSelectors';
 import { removeError } from '../redux/auth/authSlice';
 import { BgImage } from '../Components/BgImage';
 import Avatar from '../Components/Avatar';
+import { listOfEmails } from '../Utils/listOfEmails';
 
 const initialFocus = {
   login: false,
@@ -44,26 +34,35 @@ export default function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
   const [isFocused, setIsFocused] = useState(initialFocus);
   const [isPasswordShown, setIsPasswordShown] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const handleFocus = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: true }));
+    setIsActive(true);
   };
   const handleBlur = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
+    if (state.password && input === 'password') {
+      handleSubmit();
+    }
   };
 
-// Submit
-    useEffect(() => {
-      setState(prevState => ({ ...prevState, photo: avatar }));
-    }, [avatar]);
-  
+  // Submit
+  useEffect(() => {
+    setState(prevState => ({ ...prevState, photo: avatar }));
+  }, [avatar]);
+
   const handleSubmit = () => {
     dispatch(register(state));
+    setState(initialState);
   };
 
-    // WrongPass
+  // WrongPass
   useEffect(() => {
-    if (error) {alert(error); dispatch(removeError());}
+    if (error) {
+      alert(error);
+      dispatch(removeError());
+    }
   }, [error]);
 
   // Login
@@ -71,11 +70,39 @@ export default function RegistrationScreen({ navigation }) {
     navigation.navigate('Login');
   };
 
+  const hideKayboard = () => {
+    Keyboard.dismiss();
+    setIsFocused(initialFocus);
+    setIsActive(false);
+    setKeyboardHeight(0);
+  };
+
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', ({ endCoordinates }) => {
+      setKeyboardHeight(endCoordinates.height);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  const nextInputRef = useRef(null);
+
   return (
-    <View style={styles.container}>
-      <BgImage>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ ...styles.regScr, height: isFocused.login || isFocused.email || isFocused.password ? '85%' : '69%' }}>
+    <TouchableWithoutFeedback onPress={hideKayboard}>
+      <View style={styles.container}>
+        <BgImage>
+          <View
+            style={{
+              ...styles.regScr,
+              // height: isActive ? '76%' : '69%'
+              // height: isActive ? 549+keyboardHeight-150 : '69%',
+              paddingBottom: isActive ? 160 : 78,
+            }}
+          >
             <View style={styles.avatarBox}>
               <Avatar />
             </View>
@@ -105,58 +132,64 @@ export default function RegistrationScreen({ navigation }) {
                   handleBlur('email');
                 }}
                 value={state.email}
-                onChangeText={value => setState(prevState => ({ ...prevState, email: value.trim() }))}
+                onChangeText={value => {
+                  const trimmedValue = value.trim().toLowerCase();
+                  setState(prevState => ({ ...prevState, email: value.trim() }))
+                  if (listOfEmails.some(email => trimmedValue.includes(email))) {
+                    hideKayboard()
+                  }
+                }}
                 autoComplete="email"
               />
 
-              <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
-                <View style={styles.inputPass}>
-                  <TextInput
-                    style={{
-                      ...styles.input,
-                      borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8',
-                      backgroundColor: isFocused.password ? 'white' : '#F6F6F6',
-                    }}
-                    placeholder="Password"
-                    onFocus={() => {
-                      handleFocus('password');
-                    }}
-                    onBlur={() => {
-                      handleBlur('password');
-                    }}
-                    value={state.password}
-                    onChangeText={value => setState(prevState => ({ ...prevState, password: value }))}
-                    autoComplete="password"
-                    secureTextEntry={!isPasswordShown}
-                  />
+              {/* <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}> */}
+              <View style={styles.inputPass}>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8',
+                    backgroundColor: isFocused.password ? 'white' : '#F6F6F6',
+                  }}
+                  placeholder="Password"
+                  onFocus={() => {
+                    handleFocus('password');
+                  }}
+                  onBlur={() => {
+                    handleBlur('password');
+                  }}
+                  value={state.password}
+                  onChangeText={value => setState(prevState => ({ ...prevState, password: value }))}
+                  autoComplete="password"
+                  secureTextEntry={!isPasswordShown}
+                />
 
-                  {isPasswordShown === true ? (
-                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}>
-                      {' '}
-                      Hide{' '}
-                    </Text>
-                  ) : (
-                    <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}>
-                      {' '}
-                      Show{' '}
-                    </Text>
-                  )}
-                </View>
-              </KeyboardAvoidingView>
+                {isPasswordShown === true ? (
+                  <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}>
+                    {' '}
+                    Hide{' '}
+                  </Text>
+                ) : (
+                  <Text style={styles.showPass} onPress={() => setIsPasswordShown(prev => !prev)}>
+                    {' '}
+                    Show{' '}
+                  </Text>
+                )}
+              </View>
+              {/* </KeyboardAvoidingView> */}
 
               <View>
                 <TouchableOpacity style={styles.btn} title="Register" onPress={handleSubmit}>
                   <Text style={styles.btnText}> Register </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.btn2} title="Login" onPress={handleLogin}>
+                <TouchableOpacity title="Login" onPress={handleLogin}>
                   <Text style={styles.haveAccount}>Already have an account? Log in</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
-        </TouchableWithoutFeedback>
-      </BgImage>
-    </View>
+        </BgImage>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -167,9 +200,11 @@ const styles = StyleSheet.create({
     fontFamily: 'RobotoRegular',
   },
   regScr: {
+    paddingTop: 92,
+    // paddingBottom: 30,
     paddingHorizontal: 16,
     width: '100%',
-    height: '69%',
+    // height: '69%',
 
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 25,
@@ -187,7 +222,7 @@ const styles = StyleSheet.create({
     top: -60,
   },
   title: {
-    marginTop: 92,
+    // marginTop: 92,
     fontFamily: 'RobotoMedium',
     fontSize: 30,
     lineHeight: 35,

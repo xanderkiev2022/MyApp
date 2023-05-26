@@ -13,7 +13,7 @@ export const BgImage = ({ children }) => {
 const styles = StyleSheet.create({
   imgBg: {
     justifyContent: 'flex-end',
-    position: 'absolute',
+    position: 'relative',
     left: 0,
     top: 0,
     width: Dimensions.get('window').width,

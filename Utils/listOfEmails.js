@@ -1,0 +1,1 @@
+export const listOfEmails = ['gmail.com', 'mail.com']
