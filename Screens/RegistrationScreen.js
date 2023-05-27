@@ -134,17 +134,20 @@ export default function RegistrationScreen({ navigation }) {
                 value={state.email}
                 onChangeText={value => {
                   const trimmedValue = value.trim().toLowerCase();
-                  setState(prevState => ({ ...prevState, email: value.trim() }))
+                  setState(prevState => ({ ...prevState, email: value.trim() }));
                   if (listOfEmails.some(email => trimmedValue.includes(email))) {
-                    hideKayboard()
+                    inputPass.focus();
+                    // hideKayboard();
                   }
                 }}
                 autoComplete="email"
               />
 
-              {/* <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}> */}
               <View style={styles.inputPass}>
                 <TextInput
+                  ref={ref => {
+                    inputPass = ref; // Зберігаємо посилання на елемент inputPass
+                  }}
                   style={{
                     ...styles.input,
                     borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8',
@@ -175,7 +178,6 @@ export default function RegistrationScreen({ navigation }) {
                   </Text>
                 )}
               </View>
-              {/* </KeyboardAvoidingView> */}
 
               <View>
                 <TouchableOpacity style={styles.btn} title="Register" onPress={handleSubmit}>

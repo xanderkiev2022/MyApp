@@ -105,7 +105,8 @@ export default function LoginScreen({ navigation }) {
                   const trimmedValue = value.trim().toLowerCase();
                   setState(prevState => ({ ...prevState, email: value.trim() }));
                   if (listOfEmails.some(email => trimmedValue.includes(email))) {
-                    hideKayboard();
+                    // hideKayboard();
+                    inputPass.focus();
                   }
                 }}
                 autoComplete="email"
@@ -113,6 +114,9 @@ export default function LoginScreen({ navigation }) {
 
               <View style={styles.inputPass}>
                 <TextInput
+                  ref={ref => {
+                    inputPass = ref; // Зберігаємо посилання на елемент inputPass
+                  }}
                   style={{
                     ...styles.input,
                     borderColor: isFocused.password ? '#FF6C00' : '#E8E8E8',
@@ -163,7 +167,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     fontFamily: 'RobotoRegular',
-    backgroundColor: 'green',
+    // backgroundColor: 'green',
     position: 'absolute',
     justifyContent: 'flex-end',
   },
