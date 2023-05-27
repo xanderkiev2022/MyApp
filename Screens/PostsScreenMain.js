@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
 import { EvilIcons, Feather } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
@@ -49,7 +49,7 @@ const renderPostItem = ({ item, index }) => {
     onScrollHandler(e, offset, setOffset, navigation);
   };
 
-  
+  const memoizedPosts = useMemo(() => posts, [posts]);
 
   return (
     // <WrapperForTabBar navigation={navigation}>
@@ -63,7 +63,7 @@ const renderPostItem = ({ item, index }) => {
           </Text>
         </View>
       </View>
-      <FlatList onScroll={onScroll} data={posts} style={styles.posts} keyExtractor={(__, index) => index.toString()} renderItem={renderPostItem} />
+      <FlatList onScroll={onScroll} data={memoizedPosts} style={styles.posts} keyExtractor={(__, index) => index.toString()} renderItem={renderPostItem} />
     </View>
   );
 }

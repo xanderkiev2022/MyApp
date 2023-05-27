@@ -10,6 +10,7 @@ import { db } from '../firebase/config';
 import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 
 import CommentComponent from '../Components/CommentComponent';
+import { blockScreenshot } from '../Utils/blockScreenshoot';
 
 export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
@@ -18,6 +19,7 @@ export default function CommentsScreen({ route, navigation }) {
   const userId = useSelector(selectUserId);
   const photo = useSelector(selectPhoto);
   const positionForScrollDownOfComments = useRef(null);
+  blockScreenshot();
 
   const { photo: pic, id: postId } = route.params;
 

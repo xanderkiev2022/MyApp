@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { TouchableOpacity, View, Text, StyleSheet, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -47,11 +47,11 @@ const [offset, setOffset] = useState(0);
   onScrollHandler(e, offset, setOffset, navigation);
 };
 
-
+  const memoizedPosts = useMemo(() => posts, [posts]);
 
 
   return (
-     <View style={styles.container}>
+    <View style={styles.container}>
       <BgImage>
         <View style={styles.regScr}>
           <View style={styles.avatarBox}>
@@ -65,7 +65,7 @@ const [offset, setOffset] = useState(0);
             // showsVerticalScrollIndicator={false}
             // scrollEventThrottle={16}
             onScroll={onScroll}
-            data={posts}
+            data={memoizedPosts}
             style={styles.posts}
             keyExtractor={(__, index) => index.toString()}
             renderItem={renderPostItem}
