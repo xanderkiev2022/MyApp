@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "MyApp",
     "name": "MyApp",
     "slug": "MyApp",
     "version": "1.0.0",
@@ -15,7 +16,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bondleIdentifier": "com.xanderkiev.MyApp"
     },
     "android": {
       "adaptiveIcon": {

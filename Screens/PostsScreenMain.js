@@ -28,6 +28,7 @@ export default function PostsScreenMain({ navigation }) {
         id: doc.id,
       }));
       setPosts(postsArray);
+      console.log('userId in posts :>> ', userId);
     });
   }, []);
 

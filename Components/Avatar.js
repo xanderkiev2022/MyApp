@@ -16,13 +16,16 @@ export default function Avatar() {
 
   const handleChooseAvatar = async () => {
     photo = await choseFileOnHardDrive();
+    console.log('userId in change avatar :>> ', userId);
 
-    if (userId) {
+    // if (userId) {
       const photoURL = await getUrlofUploadedAvatar(photo, userId);
+    
+console.log('photoURL in Avatar :>> ', photoURL);
       dispatch(update({ photoURL, userId }));
-    } else {
+    // } else {
       dispatch(refreshAvatar({ photo }));
-    }
+    // }
   };
 
   return (

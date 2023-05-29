@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native';
 
 // Firebase
-import { login } from '../redux/auth/authOperations';
+import { login, loginWithGoogle } from '../redux/auth/authOperations';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectError } from '../redux/auth/authSelectors';
 import { removeError } from '../redux/auth/authSlice';
 import { BgImage } from '../Components/BgImage';
 import { listOfEmails } from '../Utils/listOfEmails';
 import { InputEmail, InputPassword } from '../Components/Inputs';
+import { getAuth, signInWithPopup } from 'firebase/auth';
+import { signInWithGoogle } from '../firebase/config';
+import { GoogleLogin } from '../firebase/GoogleLogin';
 
 const initialFocus = {
   email: false,
@@ -47,6 +50,13 @@ export default function LoginScreen({ navigation }) {
     setState(initialState);
   };
 
+  const handleLoginWithGoogle = () => {
+signInWithGoogle()
+    // await signInUser();
+      // dispatch(loginWithGoogle());
+      // setState(initialState);
+    };
+
   // WrongPass
   useEffect(() => {
     if (error) alert(error); dispatch(removeError());
@@ -63,6 +73,34 @@ export default function LoginScreen({ navigation }) {
     setIsActive(false);
   };
 
+// const auth = getAuth();
+// const provider = new GoogleAuthProvider();
+
+// function signInUser() {
+  
+// signInWithPopup(auth, provider)
+//   .then(result => {
+//     // This gives you a Google Access Token. You can use it to access the Google API.
+//     const credential = GoogleAuthProvider.credentialFromResult(result);
+//     const token = credential.accessToken;
+//     // The signed-in user info.
+//     const user = result.user;
+//     // IdP data available using getAdditionalUserInfo(result)
+//     // ...
+//   })
+//   .catch(error => {
+//     // Handle Errors here.
+//     const errorCode = error.code;
+//     const errorMessage = error.message;
+//     // The email of the user's account used.
+//     const email = error.customData.email;
+//     // The AuthCredential type that was used.
+//     const credential = GoogleAuthProvider.credentialFromError(error);
+//     // ...
+//   });
+// }
+
+
   return (
     <TouchableWithoutFeedback onPress={hideKayboard}>
       <View style={styles.container}>
@@ -70,7 +108,7 @@ export default function LoginScreen({ navigation }) {
           <View
             style={{
               ...styles.regScr,
-              paddingBottom: isActive ? 160 : 144,
+              paddingBottom: isActive ? 164 : 164,
             }}
           >
             <Text style={styles.title}>Log In</Text>
@@ -80,8 +118,12 @@ export default function LoginScreen({ navigation }) {
                 isFocused={isFocused}
                 placeholder="E-mail"
                 autoComplete="email"
-                onFocus={() => {handleFocus('email');}}
-                onBlur={() => {handleBlur('email');}}
+                onFocus={() => {
+                  handleFocus('email');
+                }}
+                onBlur={() => {
+                  handleBlur('email');
+                }}
                 value={state.email}
                 onChangeText={value => {
                   const trimmedValue = value.trim().toLowerCase();
@@ -94,13 +136,19 @@ export default function LoginScreen({ navigation }) {
                 isFocused={isFocused}
                 placeholder="Password"
                 autoComplete="password"
-                onFocus={() => {handleFocus('password');}}
-                onBlur={() => {handleBlur('password');}}
+                onFocus={() => {
+                  handleFocus('password');
+                }}
+                onBlur={() => {
+                  handleBlur('password');
+                }}
                 value={state.password}
                 onChangeText={value => setState(prevState => ({ ...prevState, password: value }))}
                 isPasswordShown={isPasswordShown}
                 onTogglePassword={() => setIsPasswordShown(prev => !prev)}
-                ref={ref => {inputPass = ref;}}
+                ref={ref => {
+                  inputPass = ref;
+                }}
               />
 
               <View>
@@ -111,6 +159,14 @@ export default function LoginScreen({ navigation }) {
                 <TouchableOpacity title="Registration" onPress={handleRegistration}>
                   <Text style={styles.haveAccount}> Don't have an account? Registration </Text>
                 </TouchableOpacity>
+
+                <View style={styles.googleLoginContainer}>
+                  <GoogleLogin />
+                </View>
+
+                {/* <TouchableOpacity title="LoginWithGoogle" onPress={handleLoginWithGoogle}>
+                  <Text style={styles.haveAccount}> Login with google account </Text>
+                </TouchableOpacity> */}
               </View>
             </View>
           </View>
@@ -149,7 +205,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   btn: {
-    marginTop: 27,
+    marginTop: 10,
     backgroundColor: '#FF6C00',
     marginHorizontal: 16,
     padding: 16,
@@ -169,5 +225,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
     // marginBottom: 144,
     // marginBottom: 66,
+  },
+  googleLoginContainer: {
+    marginTop: 16, // або інша відповідна відстань
+    alignItems: 'center',
   },
 });

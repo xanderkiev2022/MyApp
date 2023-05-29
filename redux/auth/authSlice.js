@@ -1,5 +1,5 @@
 import { createSlice, isAnyOf } from '@reduxjs/toolkit';
-import { register, login, update, logout, refresh } from './authOperations';
+import { register, login, update, logout, refresh, loginWithGoogle } from './authOperations';
 
 const initialState = {
   userId: '',
@@ -75,6 +75,25 @@ const handlePendingUpdate = state => {
   state.isLoading = true;
 };
 
+const handleFulfilledLoginWithGoogle = (state, { payload }) => {
+  const { userId, name, email, photo } = payload;
+  state.userId = userId;
+  state.name = name;
+  state.email = email;
+  state.photo = photo;
+  state.error = '';
+  state.isLoading = false;
+};
+
+const handleRejectedLoginWithGoogle = (state, { payload }) => {
+  state.error = payload;
+  state.isLoading = false;
+};
+
+const handlePendingLoginWithGoogle = state => {
+  state.isLoading = true;
+};
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -83,12 +102,22 @@ const authSlice = createSlice({
       state.error = null;
     },
     refreshUser: (state, { payload }) => {
-      state = {
-        userId: payload.userId,
-        // name: payload.name || null,
-        // email: payload.email,
-        // photo: payload.photo || null,
-      };
+      state.userId = payload.userId;
+      state.name = payload.name || null;
+      state.email = payload.email;
+      state.photo = payload.photo || null;
+      state.isLoggedIn = true;
+      state.isLoading = false;
+      state.error = '';
+      // state = {
+      //   userId: payload.userId,
+      //   name: payload.name || null,
+      //   email: payload.email,
+      //   photo: payload.photo || null,
+      //   isLoggedIn: true,
+      //   isLoading: false,
+      //   error: '',
+      // };
     },
     refreshAvatar: (state, { payload }) => {
       state.photo = payload.photo;
@@ -103,6 +132,9 @@ const authSlice = createSlice({
       .addCase(update.pending, handlePendingUpdate)
       .addCase(update.fulfilled, handleUserFulfilledUpdate)
       .addCase(update.rejected, handleRejectedUpdate)
+      .addCase(loginWithGoogle.pending, handlePendingLoginWithGoogle)
+      .addCase(loginWithGoogle.fulfilled, handleFulfilledLoginWithGoogle)
+      .addCase(loginWithGoogle.rejected, handleRejectedLoginWithGoogle)
       .addMatcher(isAnyOf(register.pending, login.pending), handlePending)
       .addMatcher(isAnyOf(register.fulfilled, login.fulfilled), handleFulfilled)
       .addMatcher(isAnyOf(register.rejected, login.rejected), handleRejected);
@@ -110,3 +142,4 @@ const authSlice = createSlice({
 });
 export const { removeError, refreshUser, refreshAvatar } = authSlice.actions;
 export const authReducer = authSlice.reducer;
+

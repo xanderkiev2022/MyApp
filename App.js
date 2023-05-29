@@ -8,6 +8,7 @@ import Home from './Screens/Home';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
 import { store, persistor } from './redux/store';
+import { GoogleLogin } from './firebase/GoogleLogin';
 
 export default function App() {
   // Fonts
@@ -24,7 +25,8 @@ export default function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-          <Home />
+        {/* <GoogleLogin/> */}
+        <Home />
       </PersistGate>
     </Provider>
   );
