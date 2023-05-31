@@ -7,15 +7,23 @@ import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
 import { FontAwesome } from '@expo/vector-icons';
 
-export default function CommentComponent({ item, onDeleteComment }) {
+export default function CommentComponent({ item, onDeleteComment, onEditComment, setCommentId }) {
   const { comment, date, userId, photo } = item;
   const myId = useSelector(selectUserId);
   const [modalVisible, setModalVisible] = useState(false);
+  // const [newComment, setNewComment] = useState(comment);
 
+  setCommentId(item.id);
+  
   const handleDelete = () => {
-    onDeleteComment(item.id);
+    onDeleteComment();
     setModalVisible(false);
-     };
+  };
+
+  const handleEdit = () => {
+    onEditComment();
+    setModalVisible(false);
+  };
 
   const handlePress = () => {
     if (userId === myId) {
@@ -24,9 +32,9 @@ export default function CommentComponent({ item, onDeleteComment }) {
     return null;
   };
 
-    const handleModalClose = () => {
-      setModalVisible(false);
-    };
+  const handleModalClose = () => {
+    setModalVisible(false);
+  };
 
   return (
     <View style={{ ...styles.container, flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
@@ -55,6 +63,10 @@ export default function CommentComponent({ item, onDeleteComment }) {
           <View style={styles.modalContainer}>
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
+                <TouchableOpacity style={styles.deleteButtonContainer} onPress={handleEdit}>
+                  {/* <FontAwesome name="trash" size={20} color="#BDBDBD" /> */}
+                  <Text style={styles.deleteButton}>Edit</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.deleteButtonContainer} onPress={handleDelete}>
                   <FontAwesome name="trash" size={20} color="#BDBDBD" />
                   <Text style={styles.deleteButton}>Delete</Text>
