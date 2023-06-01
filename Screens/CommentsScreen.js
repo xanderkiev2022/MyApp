@@ -20,10 +20,9 @@ export default function CommentsScreen({ route, navigation }) {
   const userId = useSelector(selectUserId);
   const photo = useSelector(selectPhoto);
   const positionForScrollDownOfComments = useRef(null);
+  const commentInputRef = useRef(null);
   const [editMode, setEditMode] = useState(false);
   const [commentId, setCommentId] = useState('');
-
-
 
   blockScreenshot();
 
@@ -33,67 +32,41 @@ export default function CommentsScreen({ route, navigation }) {
     const date = new Date();
 
     if (!editMode) {
-      await addDoc(collection(db, 'posts', postId, 'comments'), {
-        // Додаємо новий запис до колекції "comments" під шляхом "posts/postId/comments"
-        comment,
-        date,
-        userId,
-        photo,
-        // Вказуємо поля які будуть в цьому записі
-      });
+      await addDoc(collection(db, 'posts', postId, 'comments'), { comment, date, userId, photo, edited: false });
 
       const docRef = doc(db, 'posts', postId); // Отримуємо посилання на конкретний об"єкт
       const docSnap = await getDoc(docRef); // Отримуємо знімок об"єкта
       const docData = docSnap.data(); // Отримуємо об"єкт
       await updateDoc(docRef, { comments: docData.comments + 1 }); // Оновлюємо запис
-    }
-    else {
+    } else {
       const editCommentRef = doc(db, 'posts', postId, 'comments', commentId);
-      await updateDoc(editCommentRef, { comment: comment });
+      await updateDoc(editCommentRef, { comment: comment, edited: true });
       setEditMode(false);
-  }
-
-    
+    }
   };
 
-  // let editCommentRef;
   const editComment = async () => {
     const editCommentRef = doc(db, 'posts', postId, 'comments', commentId);
     const commentSnap = await getDoc(editCommentRef);
     setComment(commentSnap.data().comment);
-    setEditMode(true)
-    
-    // 
-
-    // if (commentSnap.exists()) {
-    //   setEditMode(false);
-    //   // Keyboard.show();
-    //   // console.log('newComment :>> ', newComment);
-    // //   await updateDoc(commentRef, { comment: newComment });
-    // //   console.log('Коментар успішно відредаговано');
-    // } else {
-    // //   console.log('Коментар не знайдено');
-    // }
-    // setEditMode(false);
+    setEditMode(true);
+    commentInputRef.current.focus();
   };
-  
-const deleteComment = async () => {
-  const commentRef = doc(db, 'posts', postId, 'comments', commentId);
-  console.log('commentId :>> ', commentId);
 
-  try {
-    await deleteDoc(commentRef);
+  const deleteComment = async () => {
+    const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+    try {
+      await deleteDoc(commentRef);
 
-    const postRef = doc(db, 'posts', postId);
-    const postSnap = await getDoc(postRef);
-    const postData = postSnap.data();
+      const postRef = doc(db, 'posts', postId);
+      const postSnap = await getDoc(postRef);
+      const postData = postSnap.data();
 
-    await updateDoc(postRef, { comments: postData.comments - 1 });
-  } catch (error) {
-    console.error('Помилка при видаленні коментаря:', error);
-  }
-};
-
+      await updateDoc(postRef, { comments: postData.comments - 1 });
+    } catch (error) {
+      console.error('Помилка при видаленні коментаря:', error);
+    }
+  };
 
   const commentsCollection = async () => {
     onSnapshot(collection(db, 'posts', postId, 'comments'), querySnapshot => {
@@ -135,7 +108,7 @@ const deleteComment = async () => {
       )}
 
       <View style={styles.inputContainer}>
-        <TextInput placeholder="Comment..." style={styles.inputComment} value={comment} onChangeText={text => setComment(text)} />
+        <TextInput ref={commentInputRef} placeholder="Comment..." style={styles.inputComment} value={comment} onChangeText={text => setComment(text)} />
 
         <TouchableOpacity activeOpacity={0.8} style={styles.btnComment}>
           <AntDesign
@@ -145,19 +118,9 @@ const deleteComment = async () => {
             style={styles.svgArrow}
             opacity={0.6}
             onPress={() => {
-              // if (editMode) {
-              // updateDoc(editCommentRef, { comment: 'jjj' });
-              // setNewComment('');
-              // Keyboard.dismiss();
-              //   editComment(editedCommentId, comment);
-              // } else {
-              //   setEditMode(true);
-              //   // setEditedCommentId(item.id);
-              //   //  setComment(item.comment);
               setComment('');
               Keyboard.dismiss();
               addComment();
-              // }
             }}
           />
         </TouchableOpacity>

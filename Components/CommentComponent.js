@@ -8,10 +8,9 @@ moment.tz.setDefault('Europe/Kiev');
 import { FontAwesome } from '@expo/vector-icons';
 
 export default function CommentComponent({ item, onDeleteComment, onEditComment, setCommentId }) {
-  const { comment, date, userId, photo } = item;
+  const { comment, date, userId, photo, edited } = item;
   const myId = useSelector(selectUserId);
   const [modalVisible, setModalVisible] = useState(false);
-  // const [newComment, setNewComment] = useState(comment);
 
   setCommentId(item.id);
   
@@ -51,10 +50,13 @@ export default function CommentComponent({ item, onDeleteComment, onEditComment,
           }}
         >
           <Text style={styles.commentText}>{comment}</Text>
-          <Text style={styles.commentDate}>
-            {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
-            {moment(date.seconds * 1000).format('hh:mm')}
-          </Text>
+          <View style={styles.commentDateContainer}>
+            {edited && <Text style={styles.commentEdited}>Edited</Text>}
+            <Text style={styles.commentDate}>
+              {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
+              {moment(date.seconds * 1000).format('hh:mm')}
+            </Text>
+          </View>
         </View>
       </TouchableWithoutFeedback>
 
@@ -106,12 +108,25 @@ const styles = StyleSheet.create({
     color: '#212121',
     marginBottom: 8,
   },
+  commentDateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   commentDate: {
     fontFamily: 'RobotoRegular',
     fontSize: 10,
     lineHeight: 12,
     color: '#BDBDBD',
     textAlign: 'right',
+    marginLeft: 'auto',
+  },
+  commentEdited: {
+    fontFamily: 'RobotoRegular',
+    fontSize: 10,
+    lineHeight: 12,
+    color: '#BDBDBD',
+    marginRight: 'auto',
   },
 
   modalContainer: {
