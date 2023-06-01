@@ -5,22 +5,27 @@ import { selectUserId } from '../redux/auth/authSelectors';
 import moment from 'moment-timezone';
 import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
-import { FontAwesome } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Feather, FontAwesome } from '@expo/vector-icons';
 
-export default function CommentComponent({ item, onDeleteComment, onEditComment, setCommentId }) {
-  const { comment, date, userId, photo, edited } = item;
+export default function CommentComponent({ item, onDeleteComment, onEditComment, onTranslateComment, setCommentId }) {
+  const { comment, date, userId, photo, edited, translatedComment } = item;
   const myId = useSelector(selectUserId);
   const [modalVisible, setModalVisible] = useState(false);
 
-  setCommentId(item.id);
-  
+  // setCommentId(item.id);
+
   const handleDelete = () => {
-    onDeleteComment();
+    onDeleteComment(item.id);
     setModalVisible(false);
   };
 
   const handleEdit = () => {
-    onEditComment();
+    onEditComment(item.id);
+    setModalVisible(false);
+  };
+
+  const handleTranslate = () => {
+    onTranslateComment(item.id);
     setModalVisible(false);
   };
 
@@ -49,7 +54,17 @@ export default function CommentComponent({ item, onDeleteComment, onEditComment,
             backgroundColor: modalVisible ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.03)',
           }}
         >
-          <Text style={styles.commentText}>{comment}</Text>
+          <View style={styles.textContainer}>
+            {translatedComment ? (
+              <>
+                <Text style={styles.commentText}>{translatedComment}</Text>
+                <Text style={styles.commentText}>{comment}</Text>
+              </>
+            ) : (
+              <Text style={styles.commentText}>{comment}</Text>
+            )}
+          </View>
+
           <View style={styles.commentDateContainer}>
             {edited && <Text style={styles.commentEdited}>Edited</Text>}
             <Text style={styles.commentDate}>
@@ -65,13 +80,17 @@ export default function CommentComponent({ item, onDeleteComment, onEditComment,
           <View style={styles.modalContainer}>
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
-                <TouchableOpacity style={styles.deleteButtonContainer} onPress={handleEdit}>
-                  {/* <FontAwesome name="trash" size={20} color="#BDBDBD" /> */}
+                <TouchableOpacity style={styles.svg} onPress={handleEdit}>
+                  <Feather name="edit-2" size={20} color="#BDBDBD" />
                   <Text style={styles.deleteButton}>Edit</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButtonContainer} onPress={handleDelete}>
-                  <FontAwesome name="trash" size={20} color="#BDBDBD" />
+                <TouchableOpacity style={styles.svg} onPress={handleDelete}>
+                  <Feather name="trash" size={20} color="#BDBDBD" />
                   <Text style={styles.deleteButton}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.svg} onPress={handleTranslate}>
+                  <MaterialCommunityIcons name="google-translate" size={20} color="#BDBDBD" />
+                  <Text style={styles.deleteButton}>Translate</Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
@@ -101,6 +120,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.03)',
     padding: 16,
   },
+  textContainer: {
+
+  },
+
   commentText: {
     fontFamily: 'RobotoRegular',
     fontSize: 13,
@@ -140,11 +163,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 6,
     width: 150,
-    flexDirection: 'row',
-    alignItems: 'center',
+    // flexDirection: 'row',
+    // alignItems: 'center',
   },
 
-  deleteButtonContainer: {
+  svg: {
     flexDirection: 'row',
     alignItems: 'center',
   },

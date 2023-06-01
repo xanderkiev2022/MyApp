@@ -3,6 +3,9 @@ import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList, K
 import { AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { useSelector } from 'react-redux';
+// import OpenAI from 'openai';
+// const { Configuration, OpenAIApi } = require('openai');
+import axios from 'axios';
 
 // Firebase
 import { doc, updateDoc, collection, getDoc, addDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
@@ -11,10 +14,11 @@ import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 
 import CommentComponent from '../Components/CommentComponent';
 import { blockScreenshot } from '../Utils/blockScreenshoot';
+import { openai } from '../Utils/openAi';
 
 export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
-  const [newComment, setNewComment] = useState('');
+  const [translatedComment, setTranslatedComment] = useState('');
   const [allComments, setAllComments] = useState(null);
   const [loading, setLoading] = useState(true);
   const userId = useSelector(selectUserId);
@@ -32,28 +36,93 @@ export default function CommentsScreen({ route, navigation }) {
     const date = new Date();
 
     if (!editMode) {
-      await addDoc(collection(db, 'posts', postId, 'comments'), { comment, date, userId, photo, edited: false });
+      await addDoc(collection(db, 'posts', postId, 'comments'), { comment, date, userId, photo, edited: false, translatedComment: '' });
 
       const docRef = doc(db, 'posts', postId); // Отримуємо посилання на конкретний об"єкт
       const docSnap = await getDoc(docRef); // Отримуємо знімок об"єкта
       const docData = docSnap.data(); // Отримуємо об"єкт
       await updateDoc(docRef, { comments: docData.comments + 1 }); // Оновлюємо запис
     } else {
-      const editCommentRef = doc(db, 'posts', postId, 'comments', commentId);
-      await updateDoc(editCommentRef, { comment: comment, edited: true });
+      const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+      await updateDoc(commentRef, { comment: comment, edited: true, });
       setEditMode(false);
     }
   };
 
-  const editComment = async () => {
-    const editCommentRef = doc(db, 'posts', postId, 'comments', commentId);
-    const commentSnap = await getDoc(editCommentRef);
+  const editComment = async commentId => {
+    setCommentId(commentId);
+    const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+    const commentSnap = await getDoc(commentRef);
     setComment(commentSnap.data().comment);
     setEditMode(true);
     commentInputRef.current.focus();
   };
 
-  const deleteComment = async () => {
+
+// const { Configuration, OpenAIApi } = require('openai');
+
+//   const configuration = new Configuration({
+//     organization: 'org-4q3OxHIgnHpOxFNd5IzBGkcT',
+//     apiKey: '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',
+//   });
+//     const openai = new OpenAIApi(configuration);
+
+  const translateComment = async commentId => {
+    const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+    const commentSnap = await getDoc(commentRef);
+    const needToTranslateComment = commentSnap.data().comment;
+
+    try {
+      const response = await axios.post(
+        'https://api.openai.com/v1/completions',
+        // const response = await openai.createCompletion(
+        {
+          prompt: `Translate the following comment from English to Ukrainian: "${needToTranslateComment}"`,
+          max_tokens: 100,
+          temperature: 0.7,
+          n: 1,
+          // stop: '\n',
+          user: 'user-id',
+          model: 'text-davinci-003',
+          // frequency_penalty: 1,
+          // presence_penalty: 0.5,
+          // model: 'gpt-3.5-turbo',
+        },
+        {
+          headers: {
+            // Authorization: 'Bearer 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',
+            Authorization: 'Bearer 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',
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      // const response = await openai.createCompletion({
+      //   prompt: `Translate the following comment from English to Ukrainian: "${needToTranslateComment}"`,
+      //   max_tokens: 100,
+      //   temperature: 0.7,
+      //   n: 1,
+      //   // stop: '\n',
+      //   // user: 'user-id',
+      //   model: 'gpt-3.5-turbo',
+      // });
+
+      const translatedVersion = response.data.choices[0].text.trim();
+      console.log('response.data :>> ', response.data);
+      console.log('translatedVersion :>> ', translatedVersion);
+
+      setTranslatedComment(translatedVersion);
+
+      await updateDoc(commentRef, { translatedComment });
+    } catch (error) {
+      console.error('Error translating comment:', error);
+    }
+  };
+
+
+  
+
+  const deleteComment = async commentId => {
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
     try {
       await deleteDoc(commentRef);
@@ -100,7 +169,15 @@ export default function CommentsScreen({ route, navigation }) {
           ref={positionForScrollDownOfComments}
           data={memoizedComments || []}
           keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => <CommentComponent item={item} setCommentId={setCommentId} onDeleteComment={deleteComment} onEditComment={editComment} />}
+          renderItem={({ item }) => (
+            <CommentComponent
+              item={item}
+              setCommentId={setCommentId}
+              onDeleteComment={deleteComment}
+              onEditComment={editComment}
+              onTranslateComment={translateComment}
+            />
+          )}
           onContentSizeChange={(contentWidth, contentHeight) => positionForScrollDownOfComments.current?.scrollToOffset({ offset: contentHeight })}
         />
       ) : (
