@@ -5,15 +5,16 @@ import { getDownloadURL, getStorage, uploadBytes, ref } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
 import { getReactNativePersistence, initializeAuth } from 'firebase/auth/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_KEY, AUTH_DOMAIN, DATABASE_URL, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID } from '@env';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDJw1Z50ycOABR26n5s4256k7-_EJxl3H8',
-  authDomain: 'webringitapp.firebaseapp.com',
-  databaseURL: 'https://webringitapp-default-rtdb.firebaseio.com',
-  projectId: 'webringitapp',
-  storageBucket: 'webringitapp.appspot.com',
-  messagingSenderId: '750126251136',
-  appId: '1:750126251136:web:1e1c3f5e65967f38573a65',
+  apiKey: API_KEY,
+  authDomain: AUTH_DOMAIN,
+  databaseURL: DATABASE_URL,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);

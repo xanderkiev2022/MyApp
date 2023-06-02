@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList, K
 import { AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { useSelector } from 'react-redux';
+import { OPENAI_API_KEY } from '@env';
 // import OpenAI from 'openai';
 // const { Configuration, OpenAIApi } = require('openai');
 import axios from 'axios';
@@ -14,7 +15,6 @@ import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 
 import CommentComponent from '../Components/CommentComponent';
 import { blockScreenshot } from '../Utils/blockScreenshoot';
-import { openai } from '../Utils/openAi';
 
 export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
@@ -44,7 +44,7 @@ export default function CommentsScreen({ route, navigation }) {
       await updateDoc(docRef, { comments: docData.comments + 1 }); // Оновлюємо запис
     } else {
       const commentRef = doc(db, 'posts', postId, 'comments', commentId);
-      await updateDoc(commentRef, { comment: comment, edited: true, });
+      await updateDoc(commentRef, { comment: comment, edited: true });
       setEditMode(false);
     }
   };
@@ -58,69 +58,42 @@ export default function CommentsScreen({ route, navigation }) {
     commentInputRef.current.focus();
   };
 
-
-// const { Configuration, OpenAIApi } = require('openai');
-
-//   const configuration = new Configuration({
-//     organization: 'org-4q3OxHIgnHpOxFNd5IzBGkcT',
-//     apiKey: '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',
-//   });
-//     const openai = new OpenAIApi(configuration);
-
   const translateComment = async commentId => {
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
     const commentSnap = await getDoc(commentRef);
     const needToTranslateComment = commentSnap.data().comment;
 
+const apiUrl = 'https://api.openai.com/v1/completions';
+// const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-002/completions';
     try {
       const response = await axios.post(
-        'https://api.openai.com/v1/completions',
-        // const response = await openai.createCompletion(
+        apiUrl,
         {
           prompt: `Translate the following comment from English to Ukrainian: "${needToTranslateComment}"`,
-          max_tokens: 100,
+          max_tokens: 1024,
           temperature: 0.7,
           n: 1,
-          // stop: '\n',
           user: 'user-id',
           model: 'text-davinci-003',
-          // frequency_penalty: 1,
-          // presence_penalty: 0.5,
-          // model: 'gpt-3.5-turbo',
         },
         {
           headers: {
-            // Authorization: 'Bearer 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',
-            Authorization: 'Bearer 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',
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
             'Content-Type': 'application/json',
           },
         }
       );
 
-      // const response = await openai.createCompletion({
-      //   prompt: `Translate the following comment from English to Ukrainian: "${needToTranslateComment}"`,
-      //   max_tokens: 100,
-      //   temperature: 0.7,
-      //   n: 1,
-      //   // stop: '\n',
-      //   // user: 'user-id',
-      //   model: 'gpt-3.5-turbo',
-      // });
-
       const translatedVersion = response.data.choices[0].text.trim();
-      console.log('response.data :>> ', response.data);
       console.log('translatedVersion :>> ', translatedVersion);
 
       setTranslatedComment(translatedVersion);
-
       await updateDoc(commentRef, { translatedComment });
     } catch (error) {
-      console.error('Error translating comment:', error);
+      console.error('Error translating comment:', error.message);
+      // You exceeded your current quota, please check your plan and billing details.
     }
   };
-
-
-  
 
   const deleteComment = async commentId => {
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
