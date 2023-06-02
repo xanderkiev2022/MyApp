@@ -26,7 +26,10 @@ export default function CommentsScreen({ route, navigation }) {
   const positionForScrollDownOfComments = useRef(null);
   const commentInputRef = useRef(null);
   const [editMode, setEditMode] = useState(false);
+  const [repliedComment, setRepliedComment] = useState('');
+    // const [commentActive, setCommentActive] = useState(false);
   const [commentId, setCommentId] = useState('');
+
 
   blockScreenshot();
 
@@ -35,18 +38,29 @@ export default function CommentsScreen({ route, navigation }) {
   const addComment = async () => {
     const date = new Date();
 
-    if (!editMode) {
-      await addDoc(collection(db, 'posts', postId, 'comments'), { comment, date, userId, photo, edited: false, translatedComment: '' });
+    if (editMode) {
+      const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+      await updateDoc(commentRef, { comment: comment, edited: true });
+      setEditMode(false);
+    } else {
+      await addDoc(collection(db, 'posts', postId, 'comments'), {
+        comment,
+        date,
+        userId,
+        photo,
+        edited: false,
+        translatedComment: '',
+        repliedComment,
+      });
 
       const docRef = doc(db, 'posts', postId); // Отримуємо посилання на конкретний об"єкт
       const docSnap = await getDoc(docRef); // Отримуємо знімок об"єкта
       const docData = docSnap.data(); // Отримуємо об"єкт
+
       await updateDoc(docRef, { comments: docData.comments + 1 }); // Оновлюємо запис
-    } else {
-      const commentRef = doc(db, 'posts', postId, 'comments', commentId);
-      await updateDoc(commentRef, { comment: comment, edited: true });
-      setEditMode(false);
+      setRepliedComment('');
     }
+    // setCommentActive(false);
   };
 
   const editComment = async commentId => {
@@ -58,13 +72,19 @@ export default function CommentsScreen({ route, navigation }) {
     commentInputRef.current.focus();
   };
 
+  const replyComment = async (repComment) => {
+    setRepliedComment(repComment);
+    commentInputRef.current.focus();
+    // setCommentActive(true);
+  };
+
   const translateComment = async commentId => {
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
     const commentSnap = await getDoc(commentRef);
     const needToTranslateComment = commentSnap.data().comment;
 
-const apiUrl = 'https://api.openai.com/v1/completions';
-// const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-002/completions';
+    const apiUrl = 'https://api.openai.com/v1/completions';
+    // const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-002/completions';
     try {
       const response = await axios.post(
         apiUrl,
@@ -149,6 +169,9 @@ const apiUrl = 'https://api.openai.com/v1/completions';
               onDeleteComment={deleteComment}
               onEditComment={editComment}
               onTranslateComment={translateComment}
+              onReplyComment={replyComment}
+              // commentActive={commentActive}
+              // setCommentActive={setCommentActive}
             />
           )}
           onContentSizeChange={(contentWidth, contentHeight) => positionForScrollDownOfComments.current?.scrollToOffset({ offset: contentHeight })}
@@ -158,6 +181,7 @@ const apiUrl = 'https://api.openai.com/v1/completions';
       )}
 
       <View style={styles.inputContainer}>
+        {repliedComment && <Text style={styles.repliedText}>"{repliedComment}"</Text>}
         <TextInput ref={commentInputRef} placeholder="Comment..." style={styles.inputComment} value={comment} onChangeText={text => setComment(text)} />
 
         <TouchableOpacity activeOpacity={0.8} style={styles.btnComment}>
@@ -193,7 +217,25 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 32,
   },
-  inputContainer: {},
+  inputContainer: {
+    position: 'relative'
+  },
+  repliedText: {
+    marginLeft: 100,
+    position: 'absolute',
+    fontFamily: 'RobotoRegular',
+    top: -20,
+    // marginTop: -43,
+    fontSize: 10,
+    // lineHeight: 10,
+    color: '#212121',
+    // marginBottom: 6,
+    // height: 1, // Висота розділювальної лінії
+    backgroundColor: 'rgba(0, 0, 0, 0.04)', // Колір розділювальної лінії
+    // marginVertical: 5, // Відступи по вертикалі
+    paddingHorizontal: 8,
+    fontStyle: 'italic',
+  },
   inputComment: {
     backgroundColor: '#F6F6F6',
     borderRadius: 50,

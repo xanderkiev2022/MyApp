@@ -1,27 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, Image, Modal, TouchableWithoutFeedback } from 'react-native';
 import { useSelector } from 'react-redux';
 import { selectUserId } from '../redux/auth/authSelectors';
 import moment from 'moment-timezone';
 import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
-import { MaterialCommunityIcons, Feather, FontAwesome } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Feather, FontAwesome, Entypo } from '@expo/vector-icons';
 
-export default function CommentComponent({ item, onDeleteComment, onEditComment, onTranslateComment, setCommentId }) {
-  const { comment, date, userId, photo, edited, translatedComment } = item;
+export default function CommentComponent({ item,
+  // commentActive, setCommentActive,
+  onDeleteComment, onReplyComment, onEditComment, onTranslateComment, setCommentId }) {
+  const { comment, date, userId, photo, edited, translatedComment, repliedComment } = item;
   const myId = useSelector(selectUserId);
   const [modalVisible, setModalVisible] = useState(false);
+  // const [commentActive, setCommentActive] = useState(false);
+
 
   // setCommentId(item.id);
 
   const handleDelete = () => {
-    onDeleteComment(item.id);
-    setModalVisible(false);
+    if (userId === myId) {
+      onDeleteComment(item.id);
+      setModalVisible(false);
+    }
+    return null;
   };
 
   const handleEdit = () => {
-    onEditComment(item.id);
-    setModalVisible(false);
+    if (userId === myId) {
+      onEditComment(item.id);
+      setModalVisible(false);
+    }
+    return null;
   };
 
   const handleTranslate = () => {
@@ -29,16 +39,26 @@ export default function CommentComponent({ item, onDeleteComment, onEditComment,
     setModalVisible(false);
   };
 
+  const handleReply = () => {
+    onReplyComment(item.comment);
+    // setCommentActive(true);
+    setModalVisible(false);
+  };
+
   const handlePress = () => {
-    if (userId === myId) {
-      setModalVisible(true);
-    }
-    return null;
+    setModalVisible(true);
+    // setCommentActive(false);
+    // setCommentActive(true);
   };
 
   const handleModalClose = () => {
     setModalVisible(false);
+    // setCommentActive(false);
   };
+
+  // useEffect(() => {
+  //   // setCommentActive(false);
+  // }, [repliedComment]);
 
   return (
     <View style={{ ...styles.container, flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
@@ -55,14 +75,9 @@ export default function CommentComponent({ item, onDeleteComment, onEditComment,
           }}
         >
           <View style={styles.textContainer}>
-            {translatedComment ? (
-              <>
-                <Text style={styles.commentText}>{translatedComment}</Text>
-                <Text style={styles.commentText}>{comment}</Text>
-              </>
-            ) : (
-              <Text style={styles.commentText}>{comment}</Text>
-            )}
+            {translatedComment && <Text style={styles.commentText}>{translatedComment}</Text>}
+            {repliedComment && <Text style={styles.repliedText}>"{repliedComment}"</Text>}
+            <Text style={styles.commentText}>{comment}</Text>
           </View>
 
           <View style={styles.commentDateContainer}>
@@ -92,6 +107,10 @@ export default function CommentComponent({ item, onDeleteComment, onEditComment,
                   <MaterialCommunityIcons name="google-translate" size={20} color="#BDBDBD" />
                   <Text style={styles.deleteButton}>Translate</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.svg} onPress={handleReply}>
+                  <Entypo name="reply" size={20} color="#BDBDBD" />
+                  <Text style={styles.deleteButton}>Reply</Text>
+                </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -99,7 +118,7 @@ export default function CommentComponent({ item, onDeleteComment, onEditComment,
       </Modal>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -118,23 +137,38 @@ const styles = StyleSheet.create({
     borderBottomEndRadius: 6,
     borderBottomStartRadius: 6,
     backgroundColor: 'rgba(0, 0, 0, 0.03)',
-    padding: 16,
+    // paddingVertical: 8,
+    // padding: 16,
   },
-  textContainer: {
-
+  textContainer: {},
+  repliedText: {
+    fontFamily: 'RobotoRegular',
+    fontSize: 10,
+    // lineHeight: 10,
+    color: '#212121',
+    // marginBottom: 6,
+    // height: 1, // Висота розділювальної лінії
+    backgroundColor: 'rgba(0, 0, 0, 0.04)', // Колір розділювальної лінії
+    // marginVertical: 5, // Відступи по вертикалі
+    paddingHorizontal: 8,
+    fontStyle: 'italic',
   },
-
   commentText: {
     fontFamily: 'RobotoRegular',
+    width: '100%',
     fontSize: 13,
     lineHeight: 18,
     color: '#212121',
-    marginBottom: 8,
+    // marginBottom: 8,
+    paddingHorizontal: 8,
+    paddingTop: 6,
   },
   commentDateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    paddingBottom: 6,
   },
   commentDate: {
     fontFamily: 'RobotoRegular',
@@ -150,6 +184,7 @@ const styles = StyleSheet.create({
     lineHeight: 12,
     color: '#BDBDBD',
     marginRight: 'auto',
+    // paddingHorizontal: 8,
   },
 
   modalContainer: {
