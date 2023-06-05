@@ -7,13 +7,10 @@ import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
 import { MaterialCommunityIcons, Feather, FontAwesome, Entypo } from '@expo/vector-icons';
 
-export default function CommentComponent({ item,
-  // commentActive, setCommentActive,
-  onDeleteComment, onReplyComment, onEditComment, onTranslateComment, setCommentId }) {
+export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment }) {
   const { comment, date, userId, photo, edited, translatedComment, repliedComment } = item;
   const myId = useSelector(selectUserId);
   const [modalVisible, setModalVisible] = useState(false);
-  // const [commentActive, setCommentActive] = useState(false);
 
 
   // setCommentId(item.id);
@@ -76,7 +73,9 @@ export default function CommentComponent({ item,
         >
           <View style={styles.textContainer}>
             {translatedComment && <Text style={styles.commentText}>{translatedComment}</Text>}
-            {repliedComment && <Text style={styles.repliedText}>"{repliedComment}"</Text>}
+            {repliedComment && (
+              <Text style={styles.repliedText}>"{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}"</Text>
+            )}
             <Text style={styles.commentText}>{comment}</Text>
           </View>
 
@@ -84,7 +83,7 @@ export default function CommentComponent({ item,
             {edited && <Text style={styles.commentEdited}>Edited</Text>}
             <Text style={styles.commentDate}>
               {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
-              {moment(date.seconds * 1000).format('hh:mm')}
+              {moment(date.seconds * 1000).format('HH:mm')}
             </Text>
           </View>
         </View>
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     display: 'flex',
-    marginBottom: 24,
+    marginBottom: 19,
   },
   avatar: {
     width: 28,
