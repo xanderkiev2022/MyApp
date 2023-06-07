@@ -46,7 +46,9 @@ export default function PostComponent({ post, navigation, isLastItem, forProfile
     <>
       {!del && (
         <View style={forProfileScreen ? containerStyleProfile : containerStylePosts}>
-          <Image style={styles.photo} source={{ uri: photo }} />
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Comments', post)}>
+            <Image style={styles.photo} source={{ uri: photo }} />
+          </TouchableOpacity>
           <Text style={styles.locationName}>{name}</Text>
 
           <View style={styles.iconsContainer}>

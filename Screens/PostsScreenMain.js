@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
 
 // Firebase
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db, auth } from '../firebase/config';
+import { db } from '../firebase/config';
 import { selectName, selectUserId, selectPhoto, selectEmail, selectPass } from '../redux/auth/authSelectors';
 import { useSelector } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
@@ -45,7 +45,6 @@ const renderPostItem = ({ item, index }) => {
   const memoizedPosts = useMemo(() => posts, [posts]);
 
   return (
-    // <WrapperForTabBar navigation={navigation}>
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
         <Image style={styles.avatarImg} source={{ uri: userPhoto }} />
