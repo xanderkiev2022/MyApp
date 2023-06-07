@@ -8,11 +8,10 @@ import { BgImage } from '../Components/BgImage';
 import PostComponent from '../Components/PostComponent';
 import Avatar from '../Components/Avatar';
 // Firebase
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, query } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { WrapperForTabBar, onScrollHandler } from '../Components/WrapperForTabBar';
-import { ScrollView } from 'react-native';
-import { CommonActions } from '@react-navigation/native';
+import { onScrollHandler } from '../Components/WrapperForTabBar';
+
 
 export default function ProfileScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
@@ -21,7 +20,8 @@ export default function ProfileScreen({ navigation }) {
   const dispatch = useDispatch();
 
   const getAllPost = async () => {
-    onSnapshot(collection(db, 'posts'), snapshot => {
+    const postsCollection = query(collection(db, 'posts'));
+    onSnapshot(postsCollection, snapshot => {
       const postsArray = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
       setPosts(postsArray);
     });

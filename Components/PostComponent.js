@@ -9,7 +9,7 @@ import { db } from '../firebase/config';
 import { selectName, selectUserId } from '../redux/auth/authSelectors';
 
 export default function PostComponent({ post, navigation, isLastItem, forProfileScreen }) {
-  const { photo, name, location, coordinate, id, comments, likes } = post;
+  const { photo, name, location, coordinate, id, comments, likes, del } = post;
 
   const userId = useSelector(selectUserId);
   const userName = useSelector(selectName);
@@ -33,8 +33,9 @@ export default function PostComponent({ post, navigation, isLastItem, forProfile
   };
 
   const deletePost = async () => {
-    const docRef = doc(db, 'posts', id);
-    await deleteDoc(docRef);
+    const postRef = doc(db, 'posts', id);
+    await updateDoc(postRef, { del: true });
+    // await deleteDoc(postRef);
   };
 
   // margin for last child
@@ -42,37 +43,41 @@ export default function PostComponent({ post, navigation, isLastItem, forProfile
    const containerStyleProfile = isLastItem ? styles.lastItemContainerProfile : styles.itemContainer;
 
   return (
-    <View style={forProfileScreen ? containerStyleProfile : containerStylePosts}>
-      <Image style={styles.photo} source={{ uri: photo }} />
-      <Text style={styles.locationName}>{name}</Text>
+    <>
+      {!del && (
+        <View style={forProfileScreen ? containerStyleProfile : containerStylePosts}>
+          <Image style={styles.photo} source={{ uri: photo }} />
+          <Text style={styles.locationName}>{name}</Text>
 
-      <View style={styles.iconsContainer}>
-        <View style={styles.iconsContainer}>
-          <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={() => navigation.navigate('Comments', post)}>
-            <Feather style={styles.flippedIcon} name="message-circle" size={24} color="#BDBDBD" />
-            <Text style={styles.messeges}>{comments}</Text>
-          </TouchableOpacity>
+          <View style={styles.iconsContainer}>
+            <View style={styles.iconsContainer}>
+              <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={() => navigation.navigate('Comments', post)}>
+                <Feather style={styles.flippedIcon} name="message-circle" size={24} color="#BDBDBD" />
+                <Text style={styles.messeges}>{comments}</Text>
+              </TouchableOpacity>
 
-          {!forProfileScreen && (
-            <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={deletePost}>
-              <FontAwesome name="trash" size={24} color="#BDBDBD" />
+              {!forProfileScreen && (
+                <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={deletePost}>
+                  <FontAwesome name="trash" size={24} color="#BDBDBD" />
+                </TouchableOpacity>
+              )}
+
+              {forProfileScreen && (
+                <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons}>
+                  <AntDesign name="like2" size={24} color="#FF6C00" onPress={addLike} />
+                  <Text style={styles.messeges}>{likes.length}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={() => navigation.navigate('Map', coordinate)}>
+              <EvilIcons name="location" size={24} color="#BDBDBD" />
+              <Text style={styles.location}>{location}</Text>
             </TouchableOpacity>
-          )}
-
-          {forProfileScreen && (
-            <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons}>
-              <AntDesign name="like2" size={24} color="#FF6C00" onPress={addLike} />
-              <Text style={styles.messeges}>{likes.length}</Text>
-            </TouchableOpacity>
-          )}
+          </View>
         </View>
-
-        <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={() => navigation.navigate('Map', coordinate)}>
-          <EvilIcons name="location" size={24} color="#BDBDBD" />
-          <Text style={styles.location}>{location}</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      )}
+    </>
   );
 }
 

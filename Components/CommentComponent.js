@@ -8,7 +8,7 @@ moment.tz.setDefault('Europe/Kiev');
 import { MaterialCommunityIcons, Feather, FontAwesome, Entypo } from '@expo/vector-icons';
 
 export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment }) {
-  const { comment, date, userId, photo, edited, translatedComment, repliedComment } = item;
+  const { comment, date, userId, photo, edited, translatedComment, repliedComment, del } = item;
   const myId = useSelector(selectUserId);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -58,64 +58,68 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
   // }, [repliedComment]);
 
   return (
-    <View style={{ ...styles.container, flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
-      <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
+    <>
+      {!del && (
+        <View style={{ ...styles.container, flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
+          <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
 
-      <TouchableWithoutFeedback onPress={handlePress}>
-        <View
-          style={{
-            ...styles.commentContainer,
-            marginLeft: userId !== myId ? 16 : 0,
-            borderTopStartRadius: userId !== myId ? 0 : 6,
-            borderTopEndRadius: userId !== myId ? 6 : 0,
-            backgroundColor: modalVisible ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.03)',
-          }}
-        >
-          <View style={styles.textContainer}>
-            {translatedComment && <Text style={styles.commentText}>{translatedComment}</Text>}
-            {repliedComment && (
-              <Text style={styles.repliedText}>"{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}"</Text>
-            )}
-            <Text style={styles.commentText}>{comment}</Text>
-          </View>
+          <TouchableWithoutFeedback onPress={handlePress}>
+            <View
+              style={{
+                ...styles.commentContainer,
+                marginLeft: userId !== myId ? 16 : 0,
+                borderTopStartRadius: userId !== myId ? 0 : 6,
+                borderTopEndRadius: userId !== myId ? 6 : 0,
+                backgroundColor: modalVisible ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.03)',
+              }}
+            >
+              <View style={styles.textContainer}>
+                {translatedComment && <Text style={styles.commentText}>{translatedComment}</Text>}
+                {repliedComment && (
+                  <Text style={styles.repliedText}>"{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}"</Text>
+                )}
+                <Text style={styles.commentText}>{comment}</Text>
+              </View>
 
-          <View style={styles.commentDateContainer}>
-            {edited && <Text style={styles.commentEdited}>Edited</Text>}
-            <Text style={styles.commentDate}>
-              {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
-              {moment(date.seconds * 1000).format('HH:mm')}
-            </Text>
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
+              <View style={styles.commentDateContainer}>
+                {edited && <Text style={styles.commentEdited}>Edited</Text>}
+                <Text style={styles.commentDate}>
+                  {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
+                  {moment(date.seconds * 1000).format('HH:mm')}
+                </Text>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
 
-      <Modal animationType="fade" transparent visible={modalVisible}>
-        <TouchableWithoutFeedback onPress={handleModalClose}>
-          <View style={styles.modalContainer}>
-            <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
-                <TouchableOpacity style={styles.svg} onPress={handleEdit}>
-                  <Feather name="edit-2" size={20} color="#BDBDBD" />
-                  <Text style={styles.deleteButton}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.svg} onPress={handleDelete}>
-                  <Feather name="trash" size={20} color="#BDBDBD" />
-                  <Text style={styles.deleteButton}>Delete</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.svg} onPress={handleTranslate}>
-                  <MaterialCommunityIcons name="google-translate" size={20} color="#BDBDBD" />
-                  <Text style={styles.deleteButton}>Translate</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.svg} onPress={handleReply}>
-                  <Entypo name="reply" size={20} color="#BDBDBD" />
-                  <Text style={styles.deleteButton}>Reply</Text>
-                </TouchableOpacity>
+          <Modal animationType="fade" transparent visible={modalVisible}>
+            <TouchableWithoutFeedback onPress={handleModalClose}>
+              <View style={styles.modalContainer}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.modalContent}>
+                    <TouchableOpacity style={styles.svg} onPress={handleEdit}>
+                      <Feather name="edit-2" size={20} color="#BDBDBD" />
+                      <Text style={styles.deleteButton}>Edit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.svg} onPress={handleDelete}>
+                      <Feather name="trash" size={20} color="#BDBDBD" />
+                      <Text style={styles.deleteButton}>Delete</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.svg} onPress={handleTranslate}>
+                      <MaterialCommunityIcons name="google-translate" size={20} color="#BDBDBD" />
+                      <Text style={styles.deleteButton}>Translate</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.svg} onPress={handleReply}>
+                      <Entypo name="reply" size={20} color="#BDBDBD" />
+                      <Text style={styles.deleteButton}>Reply</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
             </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    </View>
+          </Modal>
+        </View>
+      )}
+    </>
   );
 }
 

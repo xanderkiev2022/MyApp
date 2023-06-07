@@ -53,6 +53,7 @@ export default function CommentsScreen({ route, navigation }) {
         edited: false,
         translatedComment: '',
         repliedComment,
+        del: false,
       });
 
       const docRef = doc(db, 'posts', postId); // Отримуємо посилання на конкретний об"єкт
@@ -64,11 +65,14 @@ export default function CommentsScreen({ route, navigation }) {
     }
   };
 
-  const editComment = async commentId => {
+  const editComment = async (commentId) => {
     setCommentId(commentId);
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
     const commentSnap = await getDoc(commentRef);
     setComment(commentSnap.data().comment);
+
+    const prevComment = `comment old ${new Date().getTime()}`;
+    await updateDoc(commentRef, { [prevComment]: commentSnap.data().comment });
     setEditMode(true);
     commentInputRef.current.focus();
   };
@@ -117,13 +121,14 @@ export default function CommentsScreen({ route, navigation }) {
 
   const deleteComment = async commentId => {
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+    
     try {
-      await deleteDoc(commentRef);
-
+      await updateDoc(commentRef, { del: true });
+      // await deleteDoc(commentRef);
+      
       const postRef = doc(db, 'posts', postId);
       const postSnap = await getDoc(postRef);
       const postData = postSnap.data();
-
       await updateDoc(postRef, { comments: postData.comments - 1 });
     } catch (error) {
       console.error('Помилка при видаленні коментаря:', error);

@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
-import { EvilIcons, Feather } from '@expo/vector-icons';
-import { useFonts } from 'expo-font';
+import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
 
 // Firebase
-import { collection, query, where, onSnapshot, updateProfile } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../firebase/config';
 import { selectName, selectUserId, selectPhoto, selectEmail, selectPass } from '../redux/auth/authSelectors';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
-import { WrapperForTabBar, onScrollHandler } from '../Components/WrapperForTabBar';
+import { onScrollHandler } from '../Components/WrapperForTabBar';
 
 export default function PostsScreenMain({ navigation }) {
   const [posts, setPosts] = useState([]);
@@ -18,19 +16,17 @@ export default function PostsScreenMain({ navigation }) {
   const userEmail = useSelector(selectEmail);
   const userPhoto = useSelector(selectPhoto);
 
-  useEffect(() => {
-    const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
-    onSnapshot(postsCollection, querySnapshot => {
-      // прослуховування колекції posts
-      const postsArray = querySnapshot.docs.map(doc => ({
-        // при зміні posts querySnapshot викликається повторно з оновленими даними
-        ...doc.data(), // Для кожного поста створюється новий об'єкт, який містить всі дані про пост, а також його id.
-        id: doc.id,
-      }));
-      setPosts(postsArray);
-      console.log('userId in posts :>> ', userId);
-    });
-  }, []);
+  const getAllPost = async () => {
+      const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
+      onSnapshot(postsCollection, snapshot => {
+        const postsArray = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        setPosts(postsArray);
+      });
+    };
+
+    useEffect(() => {
+      getAllPost();
+    }, []);
 
 
 // margin for last child
@@ -39,11 +35,7 @@ const renderPostItem = ({ item, index }) => {
   return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} />;
   };
   
-    // const email = useSelector(selectEmail);
-    const pass = useSelector(selectPass);
-    // console.log('email :>> ', email);
-    // console.log('pass :>> ', pass);
-  
+  const pass = useSelector(selectPass);
   const [offset, setOffset] = useState(0);
 
   const onScroll = e => {

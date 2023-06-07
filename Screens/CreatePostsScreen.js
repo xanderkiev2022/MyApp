@@ -87,6 +87,7 @@ const uploadPost = async () => {
       userId,
       likes: [],
       comments: 0,
+      del: false,
     };
     await addDoc(collection(db, 'posts'), uploadedInfo);
     Keyboard.dismiss();
