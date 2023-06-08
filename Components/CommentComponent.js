@@ -7,17 +7,17 @@ import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
 import { MaterialCommunityIcons, Feather, FontAwesome, Entypo } from '@expo/vector-icons';
 
-export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment }) {
+export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment, selectedComments, setSelectedComments }) {
   const { comment, date, userId, photo, edited, translatedComment, repliedComment, del } = item;
   const myId = useSelector(selectUserId);
   const [modalVisible, setModalVisible] = useState(false);
-
 
   // setCommentId(item.id);
 
   const handleDelete = () => {
     if (userId === myId) {
-      onDeleteComment(item.id);
+      // onDeleteComment(item.id);
+      onDeleteComment(selectedComments);
       setModalVisible(false);
     }
     return null;
@@ -58,42 +58,59 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
   // }, [repliedComment]);
 
   const [expanded, setExpanded] = useState(false);
-  
-    const toggleExpanded = () => {
-      setExpanded(!expanded);
-  };
-  
-    const renderCommentText = () => {
-      if (expanded) {
-        return (
-          <View style={styles.replyContainer}>
-            <Text style={styles.repliedText}>"{repliedComment}"</Text>
-            {renderMoreButton()}
-          </View>
-        );
-      } else {
-        return (
-          <View style={styles.replyContainer}>
-            <Text style={styles.repliedText}>"{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}"</Text>
-            {renderMoreButton()}
-          </View>
-        );
-      }
-  };
-  
-    const renderMoreButton = () => {
-      if (repliedComment.length <= 35) {
-        return null;
-      } else {
-        return (
-          <TouchableOpacity style={styles.replyBtn} onPress={toggleExpanded}>
-            <Text style={styles.moreLessBtn}>{expanded ? 'less' : 'more'}</Text>
-          </TouchableOpacity>
-        );
-      }
-    };
 
+  const toggleExpanded = () => {
+    setExpanded(!expanded);
+  };
 
+  const renderCommentText = () => {
+    if (expanded) {
+      return (
+        <View style={styles.replyContainer}>
+          <Text style={styles.repliedText}>"{repliedComment}"</Text>
+          {renderMoreButton()}
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.replyContainer}>
+          <Text style={styles.repliedText}>"{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}"</Text>
+          {renderMoreButton()}
+        </View>
+      );
+    }
+  };
+
+  const renderMoreButton = () => {
+    if (repliedComment.length <= 35) {
+      return null;
+    } else {
+      return (
+        <TouchableOpacity style={styles.replyBtn} onPress={toggleExpanded}>
+          <Text style={styles.moreLessBtn}>{expanded ? 'less' : 'more'}</Text>
+        </TouchableOpacity>
+      );
+    }
+  };
+
+  const [selected, setSelected] = useState(false);
+  // const [selectedComments, setSelectedComments] = useState([]);
+
+  const handleLongPress = () => {
+    setSelected(!selected);
+    console.log('handleLongPress :>> ');
+
+    if (selectedComments.includes(item.id)) {
+    //   // Коментар уже вибрано, тому видаляємо його зі списку вибраних
+      setSelectedComments(selectedComments.filter(commentId => commentId !== item.id));
+    //     console.log('selectedComments :>> ', selectedComments);
+    } else {
+    // Коментар не вибрано, тому додаємо його до списку вибраних
+    // setSelectedComments(selectedComments.filter(commentId => commentId !== item.id));
+    setSelectedComments(prevState => [...prevState, item.id]);
+    // console.log('selectedComments :>> ', selectedComments);
+    }
+  };
 
   return (
     <>
@@ -101,14 +118,14 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
         <View style={{ ...styles.container, flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
           <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
 
-          <TouchableWithoutFeedback onPress={handlePress}>
+          <TouchableWithoutFeedback onPress={handlePress} onLongPress={handleLongPress}>
             <View
               style={{
                 ...styles.commentContainer,
                 marginLeft: userId !== myId ? 16 : 0,
                 borderTopStartRadius: userId !== myId ? 0 : 6,
                 borderTopEndRadius: userId !== myId ? 6 : 0,
-                backgroundColor: modalVisible ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.03)',
+                backgroundColor: modalVisible || selected ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.03)',
               }}
             >
               <View style={styles.textContainer}>

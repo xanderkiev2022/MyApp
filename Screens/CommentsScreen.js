@@ -22,7 +22,7 @@ import { OPENAI_API_KEY, RAPID_API_KEY } from '@env';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 
 // Firebase
-import { doc, updateDoc, collection, getDoc, addDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, getDoc, addDoc, onSnapshot, deleteDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 
@@ -104,19 +104,40 @@ export default function CommentsScreen({ route, navigation }) {
     }
   };
 
-  const deleteComment = async commentId => {
-    const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+  const [selectedComments, setSelectedComments] = useState([]);
 
-    try {
-      // await updateDoc(commentRef, { del: true });
-      await deleteDoc(commentRef);
-      const postRef = doc(db, 'posts', postId);
-      const postSnap = await getDoc(postRef);
-      const postData = postSnap.data();
-      await updateDoc(postRef, { comments: postData.comments - 1 });
-    } catch (error) {
-      console.error('Помилка при видаленні коментаря:', error);
-    }
+  const deleteComment = async commentIds => {
+    // v2 del of several comments
+  try {
+    const batch = writeBatch(db);
+    commentIds.forEach(commentId => {
+      const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+      batch.delete(commentRef);
+    });
+    await batch.commit();
+
+    const postRef = doc(db, 'posts', postId);
+    const postSnap = await getDoc(postRef);
+    const postData = postSnap.data();
+    const updatedCommentsCount = postData.comments - commentIds.length;
+    await updateDoc(postRef, { comments: updatedCommentsCount });
+    setSelectedComments([]);
+  } catch (error) {
+    console.error('Помилка при видаленні коментарів:', error);
+  }
+
+    // v1 del of 1 comment
+    // const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+    // try {
+    //   // await updateDoc(commentRef, { del: true });
+    //   await deleteDoc(commentRef);
+    //   const postRef = doc(db, 'posts', postId);
+    //   const postSnap = await getDoc(postRef);
+    //   const postData = postSnap.data();
+    //   await updateDoc(postRef, { comments: postData.comments - 1 });
+    // } catch (error) {
+    //   console.error('Помилка при видаленні коментаря:', error);
+    // }
   };
 
   const commentsCollection = async () => {
@@ -184,6 +205,8 @@ export default function CommentsScreen({ route, navigation }) {
             onEditComment={editComment}
             onTranslateComment={translateComment}
             onReplyComment={replyComment}
+            selectedComments={selectedComments}
+            setSelectedComments={setSelectedComments}
           />
         )}
         onScroll={({ nativeEvent }) => {
