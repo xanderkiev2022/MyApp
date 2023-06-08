@@ -1,14 +1,25 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, KeyboardAvoidingView, Platform, StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList, Keyboard, ScrollView, VirtualizedList, Easing } from 'react-native';
+import {
+  Animated,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  Keyboard,
+  ScrollView,
+  VirtualizedList,
+  Easing,
+} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { useSelector } from 'react-redux';
-import { OPENAI_API_KEY } from '@env';
-// import OpenAI from 'openai';
-// const { Configuration, OpenAIApi } = require('openai');
-import axios from 'axios';
+import { OPENAI_API_KEY, RAPID_API_KEY } from '@env';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
-
 
 // Firebase
 import { doc, updateDoc, collection, getDoc, addDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
@@ -17,10 +28,10 @@ import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 
 import CommentComponent from '../Components/CommentComponent';
 import { blockScreenshot } from '../Utils/blockScreenshoot';
+import { openAiTranslate } from '../Utils/openAiTranslate';
 
 export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
-  const [translatedComment, setTranslatedComment] = useState('');
   const [allComments, setAllComments] = useState(null);
   const [loading, setLoading] = useState(true);
   const userId = useSelector(selectUserId);
@@ -31,7 +42,6 @@ export default function CommentsScreen({ route, navigation }) {
   const [repliedComment, setRepliedComment] = useState('');
   const [commentId, setCommentId] = useState('');
   const [isAtEnd, setIsAtEnd] = useState(false);
-
 
   blockScreenshot();
 
@@ -65,7 +75,7 @@ export default function CommentsScreen({ route, navigation }) {
     }
   };
 
-  const editComment = async (commentId) => {
+  const editComment = async commentId => {
     setCommentId(commentId);
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
     const commentSnap = await getDoc(commentRef);
@@ -77,55 +87,29 @@ export default function CommentsScreen({ route, navigation }) {
     commentInputRef.current.focus();
   };
 
-  const replyComment = async (repComment) => {
+  const replyComment = async repComment => {
     setRepliedComment(repComment);
     commentInputRef.current.focus();
   };
 
   const translateComment = async commentId => {
-    const commentRef = doc(db, 'posts', postId, 'comments', commentId);
-    const commentSnap = await getDoc(commentRef);
-    const needToTranslateComment = commentSnap.data().comment;
-
-    const apiUrl = 'https://api.openai.com/v1/completions';
-    // const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-002/completions';
     try {
-      const response = await axios.post(
-        apiUrl,
-        {
-          prompt: `Translate the following comment from English to Ukrainian: "${needToTranslateComment}"`,
-          max_tokens: 1024,
-          temperature: 0.7,
-          n: 1,
-          user: 'user-id',
-          model: 'text-davinci-003',
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      const translatedVersion = response.data.choices[0].text.trim();
-      console.log('translatedVersion :>> ', translatedVersion);
-
-      setTranslatedComment(translatedVersion);
+      const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+      const commentSnap = await getDoc(commentRef);
+      const needToTranslateComment = commentSnap.data().comment;
+      const translatedComment = await openAiTranslate(needToTranslateComment);
       await updateDoc(commentRef, { translatedComment });
     } catch (error) {
-      console.error('Error translating comment:', error.message);
-      // You exceeded your current quota, please check your plan and billing details.
+      console.error(error);
     }
   };
 
   const deleteComment = async commentId => {
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
-    
+
     try {
       await updateDoc(commentRef, { del: true });
       // await deleteDoc(commentRef);
-      
       const postRef = doc(db, 'posts', postId);
       const postSnap = await getDoc(postRef);
       const postData = postSnap.data();
@@ -157,10 +141,9 @@ export default function CommentsScreen({ route, navigation }) {
 
   const memoizedComments = useMemo(() => allComments, [allComments]);
 
-
   // const [containerHeight, setContainerHeight] = useState(0);
   // const scrollY = useRef(new Animated.Value(0)).current;
-    
+
   // const scrollToBottom = () => {
   //     Animated.timing(scrollY, {
   //       toValue: 1, // Анімаційне значення для прокрутки до кінця
@@ -184,8 +167,7 @@ export default function CommentsScreen({ route, navigation }) {
     }
     return () => clearTimeout(timeout);
   }, [isAtEnd]);
-  
-  
+
   return (
     <>
       <KeyboardAwareFlatList

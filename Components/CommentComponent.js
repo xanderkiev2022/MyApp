@@ -74,11 +74,11 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
               }}
             >
               <View style={styles.textContainer}>
-                {translatedComment && <Text style={styles.commentText}>{translatedComment}</Text>}
                 {repliedComment && (
                   <Text style={styles.repliedText}>"{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}"</Text>
                 )}
                 <Text style={styles.commentText}>{comment}</Text>
+                {translatedComment && <Text style={styles.repliedText}>UA: {translatedComment}</Text>}
               </View>
 
               <View style={styles.commentDateContainer}>
