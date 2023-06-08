@@ -57,6 +57,42 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
   //   // setCommentActive(false);
   // }, [repliedComment]);
 
+  const [expanded, setExpanded] = useState(false);
+  
+    const toggleExpanded = () => {
+      setExpanded(!expanded);
+  };
+  
+    const renderCommentText = () => {
+      if (expanded) {
+        return (
+          <Text style={styles.repliedText}>
+            "{repliedComment}" {renderMoreButton()}
+          </Text>
+        );
+      } else {
+        return (
+            <Text style={styles.repliedText}>
+              "{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}" {renderMoreButton()}
+            </Text>
+        );
+      }
+  };
+  
+    const renderMoreButton = () => {
+      if (repliedComment.length <= 35) {
+        return null;
+      } else {
+        return (
+          <TouchableOpacity onPress={toggleExpanded}>
+            <Text style={styles.moreLessBtn}>{expanded ? 'Less' : 'More'}</Text>
+          </TouchableOpacity>
+        );
+      }
+    };
+
+
+
   return (
     <>
       {!del && (
@@ -74,11 +110,9 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
               }}
             >
               <View style={styles.textContainer}>
-                {repliedComment && (
-                  <Text style={styles.repliedText}>"{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}"</Text>
-                )}
-                <Text style={styles.commentText}>{comment}</Text>
+                {repliedComment && renderCommentText()}
                 {translatedComment && <Text style={styles.repliedText}>UA: {translatedComment}</Text>}
+                <Text style={styles.commentText}>{comment}</Text>
               </View>
 
               <View style={styles.commentDateContainer}>
@@ -134,27 +168,46 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 50,
   },
-
   commentContainer: {
     flex: 1,
     borderBottomEndRadius: 6,
     borderBottomStartRadius: 6,
     backgroundColor: 'rgba(0, 0, 0, 0.03)',
-    // paddingVertical: 8,
-    // padding: 16,
   },
   textContainer: {},
+  replyContainer: {
+    // backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    // width: 250,
+
+    // justifyContent: 'center',
+  },
+  repliedContainer: {
+    // justifyContent: 'center',
+    // flexDirection: 'row',
+    // alignItems: 'center',
+  },
   repliedText: {
     fontFamily: 'RobotoRegular',
-    fontSize: 10,
-    // lineHeight: 10,
+    fontSize: 11,
     color: '#212121',
-    // marginBottom: 6,
-    // height: 1, // Висота розділювальної лінії
-    backgroundColor: 'rgba(0, 0, 0, 0.04)', // Колір розділювальної лінії
-    // marginVertical: 5, // Відступи по вертикалі
+    // backgroundColor: 'green',
+    // textAlign: 'center',
     paddingHorizontal: 8,
-    fontStyle: 'italic',
+    // display: 'flex',
+    // alignItems: 'center',
+    // justifyContent: 'center',
+    // flex: 1,
+  },
+  moreLessBtn: {
+    flex: 1,
+    fontFamily: 'RobotoRegular',
+    fontSize: 13,
+    textDecorationLine: 'underline',
+    color: '#212121',
+    marginLeft: 5,
+    // display: 'flex',
+    // alignItems: 'center',
+    // justifyContent: 'center',
   },
   commentText: {
     fontFamily: 'RobotoRegular',
