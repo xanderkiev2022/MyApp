@@ -108,8 +108,8 @@ export default function CommentsScreen({ route, navigation }) {
     const commentRef = doc(db, 'posts', postId, 'comments', commentId);
 
     try {
-      await updateDoc(commentRef, { del: true });
-      // await deleteDoc(commentRef);
+      // await updateDoc(commentRef, { del: true });
+      await deleteDoc(commentRef);
       const postRef = doc(db, 'posts', postId);
       const postSnap = await getDoc(postRef);
       const postData = postSnap.data();

@@ -66,15 +66,17 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
     const renderCommentText = () => {
       if (expanded) {
         return (
-          <Text style={styles.repliedText}>
-            "{repliedComment}" {renderMoreButton()}
-          </Text>
+          <View style={styles.replyContainer}>
+            <Text style={styles.repliedText}>"{repliedComment}"</Text>
+            {renderMoreButton()}
+          </View>
         );
       } else {
         return (
-            <Text style={styles.repliedText}>
-              "{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}" {renderMoreButton()}
-            </Text>
+          <View style={styles.replyContainer}>
+            <Text style={styles.repliedText}>"{repliedComment.length > 35 ? repliedComment.substring(0, 35) + '...' : repliedComment}"</Text>
+            {renderMoreButton()}
+          </View>
         );
       }
   };
@@ -84,8 +86,8 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
         return null;
       } else {
         return (
-          <TouchableOpacity onPress={toggleExpanded}>
-            <Text style={styles.moreLessBtn}>{expanded ? 'Less' : 'More'}</Text>
+          <TouchableOpacity style={styles.replyBtn} onPress={toggleExpanded}>
+            <Text style={styles.moreLessBtn}>{expanded ? 'less' : 'more'}</Text>
           </TouchableOpacity>
         );
       }
@@ -176,38 +178,25 @@ const styles = StyleSheet.create({
   },
   textContainer: {},
   replyContainer: {
-    // backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    // width: 250,
-
-    // justifyContent: 'center',
-  },
-  repliedContainer: {
-    // justifyContent: 'center',
-    // flexDirection: 'row',
-    // alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
   },
   repliedText: {
     fontFamily: 'RobotoRegular',
     fontSize: 11,
     color: '#212121',
     // backgroundColor: 'green',
-    // textAlign: 'center',
     paddingHorizontal: 8,
-    // display: 'flex',
-    // alignItems: 'center',
-    // justifyContent: 'center',
-    // flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
   },
   moreLessBtn: {
-    flex: 1,
     fontFamily: 'RobotoRegular',
-    fontSize: 13,
+    fontSize: 11,
     textDecorationLine: 'underline',
     color: '#212121',
-    marginLeft: 5,
-    // display: 'flex',
-    // alignItems: 'center',
-    // justifyContent: 'center',
+    paddingHorizontal: 8,
   },
   commentText: {
     fontFamily: 'RobotoRegular',
