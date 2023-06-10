@@ -6,7 +6,7 @@ import moment from 'moment-timezone';
 import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
 import { MaterialCommunityIcons, Feather, FontAwesome, Entypo } from '@expo/vector-icons';
-import Checkbox from 'expo-checkbox';
+import { CheckBox } from './CheckBox';
 
 export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment, selectedComments, setSelectedComments }) {
   const { comment, date, userId, photo, edited, translatedComment, repliedComment, del } = item;
@@ -110,20 +110,17 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
       {!del && (
         <View style={styles.checkContainer}>
           {isAnyCheckboxSelected && (
-            <Checkbox
-              disabled={false}
-              value={isSelected}
-              onValueChange={handleLongPress}
-              color={isSelected ? 'orange' : undefined}
-              style={{ ...styles.checkbox }}
-            />
+            <CheckBox disabled={false} isSelected={isSelected} onSelectChange={handleLongPress} />
           )}
           <View style={{ ...styles.container, width: isAnyCheckboxSelected ? '93%' : '100%', flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
             {!isAnyCheckboxSelected && (
               <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
             )}
 
-            <TouchableWithoutFeedback onPress={handlePress} onLongPress={handleLongPress}>
+            <TouchableWithoutFeedback
+              onPress={isAnyCheckboxSelected ? handleLongPress : handlePress}
+              onLongPress={isAnyCheckboxSelected ? handlePress : handleLongPress}
+            >
               <View
                 style={{
                   ...styles.commentContainer,
@@ -191,20 +188,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     marginBottom: 19,
   },
-  checkbox: {
-    borderWidth: 1,
-    borderColor: 'white',
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
-    borderRadius: 50,
-    padding: 5,
-    marginRight: 5,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-  },
-  checkedIcon: {
-    alignSelf: 'center',
-  },
-
   avatar: {
     width: 28,
     height: 28,
