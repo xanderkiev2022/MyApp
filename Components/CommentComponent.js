@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, Image, Modal, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableWithoutFeedback } from 'react-native';
 import { useSelector } from 'react-redux';
 import { selectUserId } from '../redux/auth/authSelectors';
 import moment from 'moment-timezone';
 import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
-import { MaterialCommunityIcons, Feather, FontAwesome, Entypo } from '@expo/vector-icons';
 import { CheckBox } from './CheckBox';
+import ContextMenu from './ContextMenu';
 
 export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment, selectedComments, setSelectedComments }) {
   const { comment, date, userId, photo, edited, translatedComment, repliedComment, del } = item;
@@ -16,8 +16,11 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
 
   const handleDelete = () => {
     if (userId === myId) {
-      // onDeleteComment(item.id);
-      onDeleteComment(selectedComments);
+      if (!selectedComments.length) {
+        onDeleteComment([item.id]);
+      } else {
+        onDeleteComment(selectedComments);
+      }
       setModalVisible(false);
     }
     return null;
@@ -85,12 +88,15 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
     }
   };
 
- const isSelected = selectedComments.includes(item.id);
+  const isSelected = selectedComments.includes(item.id);
 
   const handleLongPress = () => {
     setSelected(!selected);
     console.log('handleLongPress :>> ');
+    handleSelectComments();
+  };
 
+  const handleSelectComments = () => {
     if (isSelected) {
       setSelectedComments(selectedComments.filter(commentId => commentId !== item.id));
     } else {
@@ -104,14 +110,11 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
     setIsAnyCheckboxSelected(selectedComments.length > 0);
   }, [selectedComments]);
 
-
   return (
     <>
       {!del && (
         <View style={styles.checkContainer}>
-          {isAnyCheckboxSelected && (
-            <CheckBox disabled={false} isSelected={isSelected} onSelectChange={handleLongPress} />
-          )}
+          {isAnyCheckboxSelected && <CheckBox disabled={false} isSelected={isSelected} onSelectChange={handleLongPress} />}
           <View style={{ ...styles.container, width: isAnyCheckboxSelected ? '93%' : '100%', flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
             {!isAnyCheckboxSelected && (
               <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
@@ -146,32 +149,14 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
               </View>
             </TouchableWithoutFeedback>
 
-            <Modal animationType="fade" transparent visible={modalVisible}>
-              <TouchableWithoutFeedback onPress={handleModalClose}>
-                <View style={styles.modalContainer}>
-                  <TouchableWithoutFeedback>
-                    <View style={styles.modalContent}>
-                      <TouchableOpacity style={styles.svg} onPress={handleEdit}>
-                        <Feather name="edit-2" size={20} color="#BDBDBD" />
-                        <Text style={styles.deleteButton}>Edit</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.svg} onPress={handleDelete}>
-                        <Feather name="trash" size={20} color="#BDBDBD" />
-                        <Text style={styles.deleteButton}>Delete</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.svg} onPress={handleTranslate}>
-                        <MaterialCommunityIcons name="google-translate" size={20} color="#BDBDBD" />
-                        <Text style={styles.deleteButton}>Translate</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.svg} onPress={handleReply}>
-                        <Entypo name="reply" size={20} color="#BDBDBD" />
-                        <Text style={styles.deleteButton}>Reply</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </TouchableWithoutFeedback>
-                </View>
-              </TouchableWithoutFeedback>
-            </Modal>
+            <ContextMenu
+              visible={modalVisible}
+              modalClose={handleModalClose}
+              edit={handleEdit}
+              del={handleDelete}
+              translate={handleTranslate}
+              reply={handleReply}
+            />
           </View>
         </View>
       )}
@@ -250,29 +235,5 @@ const styles = StyleSheet.create({
     lineHeight: 12,
     color: '#BDBDBD',
     marginRight: 'auto',
-  },
-
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 6,
-    width: 150,
-  },
-
-  svg: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  deleteButton: {
-    fontFamily: 'RobotoRegular',
-    fontSize: 16,
-    color: '#212121',
-    marginLeft: 8,
   },
 });
