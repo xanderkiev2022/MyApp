@@ -291,11 +291,11 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: 33,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    right: 10,
+    right: 9,
     bottom: 50,
   },
 
@@ -309,7 +309,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  btnClose: {},
+  btnClose: {
+    marginRight: 9,
+  },
 
   repliedText: {
     fontFamily: 'RobotoRegular',

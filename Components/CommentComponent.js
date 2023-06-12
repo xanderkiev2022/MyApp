@@ -7,7 +7,7 @@ import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
 import { CheckBox } from './CheckBox';
 import ContextMenu from './ContextMenu';
-import { SwipeToDeleteMessage } from './SwipeToDel';
+import { SwipeMessage } from './SwipeMessage';
 
 export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment, selectedComments, setSelectedComments }) {
   const { comment, date, userId, photo, edited, translatedComment, repliedComment, del } = item;
@@ -114,52 +114,56 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
   return (
     <>
       {!del && (
-        <View style={styles.checkContainer}>
-          {isAnyCheckboxSelected && <CheckBox disabled={false} isSelected={isSelected} onSelectChange={handleLongPress} />}
-          <View style={{ ...styles.container, width: isAnyCheckboxSelected ? '93%' : '100%', flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
-            {!isAnyCheckboxSelected && (
-              <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
-            )}
-            <SwipeToDeleteMessage onDelete={handleDelete}>
-              <TouchableWithoutFeedback
-                onPress={isAnyCheckboxSelected ? handleLongPress : handlePress}
-                onLongPress={isAnyCheckboxSelected ? handlePress : handleLongPress}
-              >
-                <View
-                  style={{
-                    ...styles.commentContainer,
-                    marginLeft: userId !== myId ? 16 : 0,
-                    borderTopStartRadius: userId !== myId ? 0 : 6,
-                    borderTopEndRadius: userId !== myId ? 6 : 0,
-                    backgroundColor: modalVisible || selected ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.03)',
-                  }}
+        <View style={styles.linesBetweenMessages}>
+          <SwipeMessage onDelete={handleDelete} onReply={handleReply}>
+            <View style={styles.checkContainer}>
+              {isAnyCheckboxSelected && <CheckBox disabled={false} isSelected={isSelected} onSelectChange={handleLongPress} />}
+
+              <View style={{ ...styles.container, width: isAnyCheckboxSelected ? '93%' : '100%', flexDirection: userId !== myId ? 'row' : 'row-reverse' }}>
+                {!isAnyCheckboxSelected && (
+                  <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
+                )}
+
+                <TouchableWithoutFeedback
+                  onPress={isAnyCheckboxSelected ? handleLongPress : handlePress}
+                  onLongPress={isAnyCheckboxSelected ? handlePress : handleLongPress}
                 >
-                  <View style={styles.textContainer}>
-                    {repliedComment && renderCommentText()}
-                    {translatedComment && <Text style={styles.repliedText}>UA: {translatedComment}</Text>}
-                    <Text style={styles.commentText}>{comment}</Text>
-                  </View>
+                  <View
+                    style={{
+                      ...styles.commentContainer,
+                      marginLeft: userId !== myId ? 16 : 0,
+                      borderTopStartRadius: userId !== myId ? 0 : 6,
+                      borderTopEndRadius: userId !== myId ? 6 : 0,
+                      backgroundColor: modalVisible || selected ? 'rgba(0, 0, 0, 0.25)' : 'rgb(229, 229, 229)',
+                    }}
+                  >
+                    <View style={styles.textContainer}>
+                      {repliedComment && renderCommentText()}
+                      {translatedComment && <Text style={styles.repliedText}>UA: {translatedComment}</Text>}
+                      <Text style={styles.commentText}>{comment}</Text>
+                    </View>
 
-                  <View style={styles.commentDateContainer}>
-                    {edited && <Text style={styles.commentEdited}>Edited</Text>}
-                    <Text style={styles.commentDate}>
-                      {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
-                      {moment(date.seconds * 1000).format('HH:mm')}
-                    </Text>
+                    <View style={styles.commentDateContainer}>
+                      {edited && <Text style={styles.commentEdited}>Edited</Text>}
+                      <Text style={styles.commentDate}>
+                        {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
+                        {moment(date.seconds * 1000).format('HH:mm')}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </SwipeToDeleteMessage>
+                </TouchableWithoutFeedback>
 
-            <ContextMenu
-              visible={modalVisible}
-              modalClose={handleModalClose}
-              edit={handleEdit}
-              del={handleDelete}
-              translate={handleTranslate}
-              reply={handleReply}
-            />
-          </View>
+                <ContextMenu
+                  visible={modalVisible}
+                  modalClose={handleModalClose}
+                  edit={handleEdit}
+                  del={handleDelete}
+                  translate={handleTranslate}
+                  reply={handleReply}
+                />
+              </View>
+            </View>
+          </SwipeMessage>
         </View>
       )}
     </>
@@ -167,13 +171,16 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
 }
 
 const styles = StyleSheet.create({
+  linesBetweenMessages: {
+    marginBottom: 19,
+    
+  },
   checkContainer: {
     width: '100%',
     flexDirection: 'row',
   },
   container: {
     display: 'flex',
-    marginBottom: 19,
   },
   avatar: {
     width: 28,
@@ -184,7 +191,9 @@ const styles = StyleSheet.create({
     flex: 1,
     borderBottomEndRadius: 6,
     borderBottomStartRadius: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    // width: '100%'
+    // width: 200,
+    // backgroundColor: 'rgba(0, 0, 0, 0.03)',
   },
   textContainer: {},
   replyContainer: {
