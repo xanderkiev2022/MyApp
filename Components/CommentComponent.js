@@ -7,6 +7,7 @@ import { TouchableOpacity } from 'react-native';
 moment.tz.setDefault('Europe/Kiev');
 import { CheckBox } from './CheckBox';
 import ContextMenu from './ContextMenu';
+import { SwipeToDeleteMessage } from './SwipeToDel';
 
 export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment, selectedComments, setSelectedComments }) {
   const { comment, date, userId, photo, edited, translatedComment, repliedComment, del } = item;
@@ -119,35 +120,36 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
             {!isAnyCheckboxSelected && (
               <Image source={{ uri: photo }} style={{ ...styles.avatar, marginLeft: userId !== myId ? 0 : 16, marginRight: userId !== myId ? 16 : 0 }} />
             )}
-
-            <TouchableWithoutFeedback
-              onPress={isAnyCheckboxSelected ? handleLongPress : handlePress}
-              onLongPress={isAnyCheckboxSelected ? handlePress : handleLongPress}
-            >
-              <View
-                style={{
-                  ...styles.commentContainer,
-                  marginLeft: userId !== myId ? 16 : 0,
-                  borderTopStartRadius: userId !== myId ? 0 : 6,
-                  borderTopEndRadius: userId !== myId ? 6 : 0,
-                  backgroundColor: modalVisible || selected ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.03)',
-                }}
+            <SwipeToDeleteMessage onDelete={handleDelete}>
+              <TouchableWithoutFeedback
+                onPress={isAnyCheckboxSelected ? handleLongPress : handlePress}
+                onLongPress={isAnyCheckboxSelected ? handlePress : handleLongPress}
               >
-                <View style={styles.textContainer}>
-                  {repliedComment && renderCommentText()}
-                  {translatedComment && <Text style={styles.repliedText}>UA: {translatedComment}</Text>}
-                  <Text style={styles.commentText}>{comment}</Text>
-                </View>
+                <View
+                  style={{
+                    ...styles.commentContainer,
+                    marginLeft: userId !== myId ? 16 : 0,
+                    borderTopStartRadius: userId !== myId ? 0 : 6,
+                    borderTopEndRadius: userId !== myId ? 6 : 0,
+                    backgroundColor: modalVisible || selected ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.03)',
+                  }}
+                >
+                  <View style={styles.textContainer}>
+                    {repliedComment && renderCommentText()}
+                    {translatedComment && <Text style={styles.repliedText}>UA: {translatedComment}</Text>}
+                    <Text style={styles.commentText}>{comment}</Text>
+                  </View>
 
-                <View style={styles.commentDateContainer}>
-                  {edited && <Text style={styles.commentEdited}>Edited</Text>}
-                  <Text style={styles.commentDate}>
-                    {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
-                    {moment(date.seconds * 1000).format('HH:mm')}
-                  </Text>
+                  <View style={styles.commentDateContainer}>
+                    {edited && <Text style={styles.commentEdited}>Edited</Text>}
+                    <Text style={styles.commentDate}>
+                      {moment(date.seconds * 1000).format('DD MMMM, YYYY')}&nbsp;|&nbsp;
+                      {moment(date.seconds * 1000).format('HH:mm')}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableWithoutFeedback>
+              </TouchableWithoutFeedback>
+            </SwipeToDeleteMessage>
 
             <ContextMenu
               visible={modalVisible}
