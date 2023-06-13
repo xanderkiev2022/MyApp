@@ -8,8 +8,17 @@ moment.tz.setDefault('Europe/Kiev');
 import { CheckBox } from './CheckBox';
 import ContextMenu from './ContextMenu';
 import { SwipeMessage } from './SwipeMessage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function CommentComponent({ item, onDeleteComment, onReplyComment, onEditComment, onTranslateComment, selectedComments, setSelectedComments }) {
+export default function CommentComponent({
+  item,
+  onDeleteComment,
+  onReplyComment,
+  onEditComment,
+  onTranslateComment,
+  selectedComments,
+  setSelectedComments,
+}) {
   const { comment, date, userId, photo, edited, translatedComment, repliedComment, del } = item;
   const myId = useSelector(selectUserId);
   const [modalVisible, setModalVisible] = useState(false);
@@ -17,12 +26,12 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
 
   const handleDelete = () => {
     // if (userId === myId) {
-      if (!selectedComments.length) {
-        onDeleteComment([item.id]);
-      } else {
-        onDeleteComment(selectedComments);
-      }
-      setModalVisible(false);
+    if (!selectedComments.length) {
+      onDeleteComment([item.id]);
+    } else {
+      onDeleteComment(selectedComments);
+    }
+    setModalVisible(false);
     // }
     // return null;
   };
@@ -111,9 +120,35 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
     setIsAnyCheckboxSelected(selectedComments.length > 0);
   }, [selectedComments]);
 
+  // Рендер з затримкою
+  const [scheduledRender, setScheduledRender] = useState(false);
+  useEffect(() => {
+    const checkScheduledDate = async () => {
+      const scheduledDate = new Date().getTime() + 10000; // Приклад затримки 10 секунд
+      await AsyncStorage.setItem('scheduledDate', scheduledDate.toString());
+      const scheduledDateReceivedFromStorrage = await AsyncStorage.getItem('scheduledDate');
+      const renderDate = parseInt(scheduledDateReceivedFromStorrage, 10);
+
+      if (renderDate) {
+        const currentDate = new Date().getTime();
+        if (currentDate >= renderDate) {
+          setScheduledRender(true);
+        } else {
+          const timeout = setTimeout(() => {
+            setScheduledRender(true);
+            console.log('time to render :>> ');
+            AsyncStorage.setItem('scheduledDate', '0');
+          }, renderDate - currentDate);
+          return () => clearTimeout(timeout);
+        }
+      }
+    };
+    checkScheduledDate();
+  }, []);
+
   return (
     <>
-      {!del && (
+      {!del && scheduledRender && (
         <View style={styles.linesBetweenMessages}>
           <SwipeMessage onDelete={handleDelete} onReply={handleReply}>
             <View style={styles.checkContainer}>
@@ -173,7 +208,6 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
 const styles = StyleSheet.create({
   linesBetweenMessages: {
     marginBottom: 19,
-    
   },
   checkContainer: {
     width: '100%',
