@@ -1,21 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Animated,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  Keyboard,
-  ScrollView,
-  VirtualizedList,
-  Easing,
-  Dimensions,
-} from 'react-native';
+import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, Keyboard } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
@@ -28,6 +12,7 @@ import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
 import CommentComponent from '../Components/CommentComponent';
 import { blockScreenshot } from '../Utils/blockScreenshoot';
 import { openAiTranslate } from '../Utils/openAiTranslate';
+import { ScrollToEnd } from '../Components/ScrollToEnd';
 
 export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
@@ -174,40 +159,10 @@ export default function CommentsScreen({ route, navigation }) {
   //   };
 
 
-  // Затримка 0,5 секунд на відображення кнопки скролу вниз
-  const [shouldRenderButton, setShouldRenderButton] = useState(false);
-  useEffect(() => {
-    let timeout;
-    if (!isAtEnd && sizeOfContentIsBig) {
-      timeout = setTimeout(() => {
-        setShouldRenderButton(true);
-      }, 500);
-    } else {
-      setShouldRenderButton(false);
-    }
-    return () => clearTimeout(timeout);
-  }, [isAtEnd]);
-
   const [textInputHeight, setTextInputHeight] = useState(45);
 
-// міряємо розмір контенту
+
   const [contentHeight, setContentHeight] = useState(0);
-  const windowHeight = Dimensions.get('window').height;
-  const sizeOfContentIsBig = contentHeight > windowHeight;
-  const renderScrollToEnd = () => {
-    if (!isAtEnd && sizeOfContentIsBig && shouldRenderButton) {
-      return (
-        <TouchableOpacity
-          style={styles.scrollDownButton}
-          onPress={() => {
-            positionForScrollDownOfComments.current?.scrollToEnd({ animated: true });
-          }}
-        >
-          <AntDesign name="arrowdown" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      );
-    } 
-  }
 
   return (
     <>
@@ -218,7 +173,7 @@ export default function CommentsScreen({ route, navigation }) {
         ref={positionForScrollDownOfComments}
         data={memoizedComments || []}
         keyExtractor={item => item.id.toString()}
-        onLayout={e => {setContentHeight(e.nativeEvent.layout.height)}}
+        onLayout={e => {setContentHeight(e.nativeEvent.layout.height);}}
         renderItem={({ item }) => (
           <CommentComponent
             item={item}
@@ -232,7 +187,7 @@ export default function CommentsScreen({ route, navigation }) {
         )}
         onScroll={({ nativeEvent }) => {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          const isEnd = layoutMeasurement.height + contentOffset.y >= contentSize.height - 50; // 50 is a threshold value
+          const isEnd = layoutMeasurement.height + contentOffset.y >= contentSize.height; // 50 is a threshold value
           setIsAtEnd(isEnd);
         }}
         onContentSizeChange={(contentWidth, contentHeight) => {
@@ -242,7 +197,7 @@ export default function CommentsScreen({ route, navigation }) {
           }
         }}
       />
-      {renderScrollToEnd()}
+      <ScrollToEnd isAtEnd={isAtEnd} positionRef={positionForScrollDownOfComments} contentHeight={contentHeight}/>
 
       <View style={styles.inputContainer}>
         {repliedComment && (
@@ -308,20 +263,6 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   inputContainer: {},
-  scrollDownButton: {
-    height: 34,
-    width: 34,
-    borderRadius: 50,
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    alignSelf: 'center',
-    marginBottom: 33,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    right: 9,
-    bottom: 50,
-  },
-
   replyContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
     borderRadius: 8,
