@@ -107,7 +107,7 @@ export const SwipeMessage = ({ onDelete, onReply, children }) => {
         <Animated.Text
           style={{
             opacity: interpolatedLeftOpacity,
-            marginLeft: 16,
+            marginLeft: 50,
             fontWeight: 'bold',
             color: 'black',
             position: 'absolute',
@@ -121,7 +121,7 @@ export const SwipeMessage = ({ onDelete, onReply, children }) => {
         <Animated.Text
           style={{
             opacity: interpolatedRightOpacity,
-            marginRight: 16,
+            marginRight: 50,
             fontWeight: 'bold',
             color: 'white',
             position: 'absolute',

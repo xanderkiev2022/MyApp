@@ -189,6 +189,8 @@ export default function CommentsScreen({ route, navigation }) {
     return () => clearTimeout(timeout);
   }, [isAtEnd]);
 
+  const [textInputHeight, setTextInputHeight] = useState(45);
+
   return (
     <>
       <KeyboardAwareFlatList
@@ -247,23 +249,37 @@ export default function CommentsScreen({ route, navigation }) {
             </TouchableOpacity>
           </View>
         )}
-
-        <TextInput ref={commentInputRef} placeholder="Comment..." style={styles.inputComment} value={comment} onChangeText={text => setComment(text)} />
-
-        <TouchableOpacity activeOpacity={0.8} style={styles.btnComment}>
-          <AntDesign
-            name="arrowup"
-            size={24}
-            color="#FFFFFF"
-            style={styles.svgArrow}
-            opacity={0.6}
-            onPress={() => {
-              setComment('');
-              Keyboard.dismiss();
-              addComment();
+        <View style={styles.commentInputContainer}>
+          <TextInput
+            ref={commentInputRef}
+            placeholder="Comment..."
+            style={{
+              ...styles.inputComment,
+              height: textInputHeight,
             }}
+            value={comment}
+            onChangeText={text => setComment(text)}
+            multiline
+            numberOfLines={1}
+            onContentSizeChange={e => setTextInputHeight(e.nativeEvent.contentSize.height)}
           />
-        </TouchableOpacity>
+
+          <TouchableOpacity activeOpacity={0.8} style={styles.btnComment}>
+            <AntDesign
+              name="arrowup"
+              size={24}
+              color="#FFFFFF"
+              style={styles.svgArrow}
+              opacity={0.6}
+              onPress={() => {
+                setComment('');
+                Keyboard.dismiss();
+                addComment();
+                setTextInputHeight(45);
+              }}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     </>
   );
@@ -281,10 +297,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 32,
   },
-  inputContainer: {
-    marginBottom: 8,
-    position: 'relative',
-  },
+  inputContainer: {},
   scrollDownButton: {
     height: 34,
     width: 34,
@@ -320,25 +333,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     fontStyle: 'italic',
   },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+
   inputComment: {
+    flex: 1,
     backgroundColor: '#F6F6F6',
-    borderRadius: 50,
     borderWidth: 1,
     borderColor: '#E8E8E8',
-    padding: 16,
     fontFamily: 'RobotoMedium',
     fontSize: 16,
     lineHeight: 19,
-    height: 51,
+    paddingRight: 50,
+    paddingLeft: 16,
+    paddingVertical: 5,
+    maxHeight: 120,
+    minHeight:45
   },
   btnComment: {
     height: 34,
     width: 34,
     borderRadius: 50,
     backgroundColor: '#FF6C00',
-    alignSelf: 'flex-end',
-    marginTop: -43,
-    marginRight: 8,
+    position: 'absolute',
+    alignItems: 'center',
+    zIndex: 1,
+    right: 8,
   },
   svgArrow: {
     alignSelf: 'center',
