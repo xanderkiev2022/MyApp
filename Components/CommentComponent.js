@@ -16,15 +16,15 @@ export default function CommentComponent({ item, onDeleteComment, onReplyComment
   const [selected, setSelected] = useState(false);
 
   const handleDelete = () => {
-    if (userId === myId) {
+    // if (userId === myId) {
       if (!selectedComments.length) {
         onDeleteComment([item.id]);
       } else {
         onDeleteComment(selectedComments);
       }
       setModalVisible(false);
-    }
-    return null;
+    // }
+    // return null;
   };
 
   const handleEdit = () => {

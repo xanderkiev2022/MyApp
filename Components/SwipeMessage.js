@@ -4,10 +4,21 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
 export const SwipeMessage = ({ onDelete, onReply, children }) => {
   const position = useRef(new Animated.ValueXY()).current;
+  const scale = useRef(new Animated.Value(1)).current;
 
-  const onPanGestureEvent = Animated.event([{ nativeEvent: { translationX: position.x } }], {
-    useNativeDriver: false,
-  });
+  const onPanGestureEvent = Animated.event(
+    [
+      {
+        nativeEvent: {
+          translationX: position.x,
+          // translationY: position.y
+        },
+      },
+    ],
+    {
+      useNativeDriver: false,
+    }
+  );
 
   const interpolatedColor = position.x.interpolate({
     inputRange: [-150, -20, 0, 20, 150],
@@ -16,7 +27,7 @@ export const SwipeMessage = ({ onDelete, onReply, children }) => {
   });
 
   const interpolatedLeftOpacity = position.x.interpolate({
-    inputRange: [0, 500],
+    inputRange: [0, 200],
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
@@ -24,6 +35,18 @@ export const SwipeMessage = ({ onDelete, onReply, children }) => {
   const interpolatedRightOpacity = position.x.interpolate({
     inputRange: [-200, 0],
     outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const interpolatedLeftScale = position.x.interpolate({
+    inputRange: [0, 200],
+    outputRange: [0.2, 1],
+    extrapolate: 'clamp',
+  });
+
+  const interpolatedRightScale = position.x.interpolate({
+    inputRange: [-200, 0],
+    outputRange: [1, 0.2],
     extrapolate: 'clamp',
   });
 
@@ -52,6 +75,10 @@ export const SwipeMessage = ({ onDelete, onReply, children }) => {
           toValue: { x: 0, y: 0 },
           useNativeDriver: false,
         }).start();
+        Animated.spring(scale, {
+          toValue: 1,
+          useNativeDriver: true,
+        }).start();
       } else {
         // If not swiped far enough, return the message to its original position
         Animated.spring(position, {
@@ -66,7 +93,7 @@ export const SwipeMessage = ({ onDelete, onReply, children }) => {
   };
 
   return (
-    <PanGestureHandler onGestureEvent={onPanGestureEvent} onHandlerStateChange={onPanHandlerStateChange}>
+    <PanGestureHandler onGestureEvent={onPanGestureEvent} onHandlerStateChange={onPanHandlerStateChange} activeOffsetX={[-25, 25]}>
       <Animated.View
         style={{
           backgroundColor: interpolatedColor,
@@ -85,6 +112,7 @@ export const SwipeMessage = ({ onDelete, onReply, children }) => {
             color: 'black',
             position: 'absolute',
             zIndex: 1,
+            transform: [{ scale: interpolatedLeftScale }],
           }}
         >
           Reply
@@ -99,6 +127,7 @@ export const SwipeMessage = ({ onDelete, onReply, children }) => {
             position: 'absolute',
             right: 0,
             zIndex: 1,
+            transform: [{ scale: interpolatedRightScale }],
           }}
         >
           Delete
