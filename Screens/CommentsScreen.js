@@ -14,11 +14,10 @@ import {
   ScrollView,
   VirtualizedList,
   Easing,
+  Dimensions,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import { useFonts } from 'expo-font';
 import { useSelector } from 'react-redux';
-import { OPENAI_API_KEY, RAPID_API_KEY } from '@env';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 
 // Firebase
@@ -174,12 +173,12 @@ export default function CommentsScreen({ route, navigation }) {
   //     }).start();
   //   };
 
+
   // Затримка 0,5 секунд на відображення кнопки скролу вниз
   const [shouldRenderButton, setShouldRenderButton] = useState(false);
-
   useEffect(() => {
     let timeout;
-    if (!isAtEnd) {
+    if (!isAtEnd && sizeOfContentIsBig) {
       timeout = setTimeout(() => {
         setShouldRenderButton(true);
       }, 500);
@@ -191,6 +190,25 @@ export default function CommentsScreen({ route, navigation }) {
 
   const [textInputHeight, setTextInputHeight] = useState(45);
 
+// міряємо розмір контенту
+  const [contentHeight, setContentHeight] = useState(0);
+  const windowHeight = Dimensions.get('window').height;
+  const sizeOfContentIsBig = contentHeight > windowHeight;
+  const renderScrollToEnd = () => {
+    if (!isAtEnd && sizeOfContentIsBig && shouldRenderButton) {
+      return (
+        <TouchableOpacity
+          style={styles.scrollDownButton}
+          onPress={() => {
+            positionForScrollDownOfComments.current?.scrollToEnd({ animated: true });
+          }}
+        >
+          <AntDesign name="arrowdown" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      );
+    } 
+  }
+
   return (
     <>
       <KeyboardAwareFlatList
@@ -200,6 +218,7 @@ export default function CommentsScreen({ route, navigation }) {
         ref={positionForScrollDownOfComments}
         data={memoizedComments || []}
         keyExtractor={item => item.id.toString()}
+        onLayout={e => {setContentHeight(e.nativeEvent.layout.height)}}
         renderItem={({ item }) => (
           <CommentComponent
             item={item}
@@ -215,24 +234,15 @@ export default function CommentsScreen({ route, navigation }) {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
           const isEnd = layoutMeasurement.height + contentOffset.y >= contentSize.height - 50; // 50 is a threshold value
           setIsAtEnd(isEnd);
-          // scrollY.setValue(nativeEvent.contentOffset.y);
         }}
         onContentSizeChange={(contentWidth, contentHeight) => {
           if (contentHeight > 0) {
+            setContentHeight(contentHeight);
             positionForScrollDownOfComments.current?.scrollToEnd({ animated: true });
           }
         }}
       />
-      {!isAtEnd && shouldRenderButton && (
-        <TouchableOpacity
-          style={styles.scrollDownButton}
-          onPress={() => {
-            positionForScrollDownOfComments.current?.scrollToEnd({ animated: true });
-          }}
-        >
-          <AntDesign name="arrowdown" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      )}
+      {renderScrollToEnd()}
 
       <View style={styles.inputContainer}>
         {repliedComment && (
