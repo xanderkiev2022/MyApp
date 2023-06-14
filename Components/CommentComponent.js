@@ -121,30 +121,31 @@ export default function CommentComponent({
   }, [selectedComments]);
 
   // Рендер з затримкою
-  const [scheduledRender, setScheduledRender] = useState(false);
-  useEffect(() => {
-    const checkScheduledDate = async () => {
-      const scheduledDate = new Date().getTime() + 10000; // Приклад затримки 10 секунд
-      await AsyncStorage.setItem('scheduledDate', scheduledDate.toString());
-      const scheduledDateReceivedFromStorrage = await AsyncStorage.getItem('scheduledDate');
-      const renderDate = parseInt(scheduledDateReceivedFromStorrage, 10);
+  // const [scheduledRender, setScheduledRender] = useState(false);
+  const [scheduledRender, setScheduledRender] = useState(true);
+  // useEffect(() => {
+  //   const checkScheduledDate = async () => {
+  //     const scheduledDate = new Date().getTime() + 10000; // Приклад затримки 10 секунд
+  //     await AsyncStorage.setItem('scheduledDate', scheduledDate.toString());
+  //     const scheduledDateReceivedFromStorrage = await AsyncStorage.getItem('scheduledDate');
+  //     const renderDate = parseInt(scheduledDateReceivedFromStorrage, 10);
 
-      if (renderDate) {
-        const currentDate = new Date().getTime();
-        if (currentDate >= renderDate) {
-          setScheduledRender(true);
-        } else {
-          const timeout = setTimeout(() => {
-            setScheduledRender(true);
-            console.log('time to render :>> ');
-            AsyncStorage.setItem('scheduledDate', '0');
-          }, renderDate - currentDate);
-          return () => clearTimeout(timeout);
-        }
-      }
-    };
-    checkScheduledDate();
-  }, []);
+  //     if (renderDate) {
+  //       const currentDate = new Date().getTime();
+  //       if (currentDate >= renderDate) {
+  //         setScheduledRender(true);
+  //       } else {
+  //         const timeout = setTimeout(() => {
+  //           setScheduledRender(true);
+  //           console.log('time to render :>> ');
+  //           AsyncStorage.setItem('scheduledDate', '0');
+  //         }, renderDate - currentDate);
+  //         return () => clearTimeout(timeout);
+  //       }
+  //     }
+  //   };
+  //   checkScheduledDate();
+  // }, []);
 
   return (
     <>

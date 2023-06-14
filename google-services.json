@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "750126251136",
+    "firebase_url": "https://webringitapp-default-rtdb.firebaseio.com",
+    "project_id": "webringitapp",
+    "storage_bucket": "webringitapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750126251136:android:91430b41bf83196e573a65",
+        "android_client_info": {
+          "package_name": "com.xanderkiev.MyApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "750126251136-in811sje73buo1h5o5383t653l2rocr4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeKCrFH6iB_f23zzr4zCO8-I0c4jO60j4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "750126251136-6glaaagrp1q3q4ev0k0fqdt0en5ncluq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "750126251136-kelln54601b7dok4ee6idojqdpoe1lbk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.xanderkiev.MyApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

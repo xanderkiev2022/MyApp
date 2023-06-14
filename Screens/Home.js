@@ -102,7 +102,7 @@ export default function Home() {
         </MainTab.Navigator>
       ) : (
         <MainStack.Navigator initialRouteName="Login">
-          <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
+          {/* <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} /> */}
           <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         </MainStack.Navigator>
       )}
