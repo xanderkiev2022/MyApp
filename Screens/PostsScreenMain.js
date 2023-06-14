@@ -19,7 +19,15 @@ export default function PostsScreenMain({ navigation }) {
   const getAllPost = async () => {
       const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
       onSnapshot(postsCollection, snapshot => {
-        const postsArray = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        const postsArray = snapshot.docs
+        .map(doc => ({ ...doc.data(), id: doc.id }))
+        .sort((a, b) => {
+          if (a.date && b.date) {
+            console.log('сортуємо :>> ');
+            return b.date.seconds - a.date.seconds;
+          }
+          return 0;
+        });
         setPosts(postsArray);
       });
     };

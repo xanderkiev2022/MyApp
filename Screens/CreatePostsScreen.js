@@ -77,8 +77,10 @@ export default function CreatePostsScreen({ navigation }) {
 
 const uploadPost = async () => {
   try {
+    const date = new Date();
     const photoUrl = await uploadPhoto();
     const uploadedInfo = {
+      date,
       displayName: userName,
       photo: photoUrl,
       name: state.name,

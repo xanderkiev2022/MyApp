@@ -13,6 +13,7 @@ import CommentComponent from '../Components/CommentComponent';
 import { blockScreenshot } from '../Utils/blockScreenshoot';
 import { openAiTranslate } from '../Utils/openAiTranslate';
 import { ScrollToEnd } from '../Components/ScrollToEnd';
+import { pushNotification } from '../Components/PushNotification';
 
 export default function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState('');
@@ -26,6 +27,7 @@ export default function CommentsScreen({ route, navigation }) {
   const [repliedComment, setRepliedComment] = useState('');
   const [commentId, setCommentId] = useState('');
   const [isAtEnd, setIsAtEnd] = useState(false);
+  const [lastComment, setLastComment] = useState(null);
 
   blockScreenshot();
 
@@ -92,23 +94,23 @@ export default function CommentsScreen({ route, navigation }) {
 
   const deleteComment = async commentIds => {
     // v2 del of several comments
-  try {
-    const batch = writeBatch(db);
-    commentIds.forEach(commentId => {
-      const commentRef = doc(db, 'posts', postId, 'comments', commentId);
-      batch.delete(commentRef);
-    });
-    await batch.commit();
+    try {
+      const batch = writeBatch(db);
+      commentIds.forEach(commentId => {
+        const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+        batch.delete(commentRef);
+      });
+      await batch.commit();
 
-    const postRef = doc(db, 'posts', postId);
-    const postSnap = await getDoc(postRef);
-    const postData = postSnap.data();
-    const updatedCommentsCount = postData.comments - commentIds.length;
-    await updateDoc(postRef, { comments: updatedCommentsCount });
-    setSelectedComments([]);
-  } catch (error) {
-    console.error('Помилка при видаленні коментарів:', error);
-  }
+      const postRef = doc(db, 'posts', postId);
+      const postSnap = await getDoc(postRef);
+      const postData = postSnap.data();
+      const updatedCommentsCount = postData.comments - commentIds.length;
+      await updateDoc(postRef, { comments: updatedCommentsCount });
+      setSelectedComments([]);
+    } catch (error) {
+      console.error('Помилка при видаленні коментарів:', error);
+    }
 
     // v1 del of 1 comment
     // const commentRef = doc(db, 'posts', postId, 'comments', commentId);
@@ -137,6 +139,19 @@ export default function CommentsScreen({ route, navigation }) {
       // сортуємо по даті
       setAllComments(commentsArray);
       setLoading(false);
+
+      // нотіфікашка
+      if (lastComment && commentsArray.length > 0) {
+        const lastCommentIndex = commentsArray.findIndex(comment => comment.id === lastComment.id);
+        const newComments = commentsArray.slice(lastCommentIndex + 1);
+
+        if (newComments.length > 0) {
+          pushNotification();
+        }
+      }
+      if (commentsArray.length > 0) {
+        setLastComment(commentsArray[commentsArray.length - 1]);
+      }
     });
   };
 
@@ -158,9 +173,7 @@ export default function CommentsScreen({ route, navigation }) {
   //     }).start();
   //   };
 
-
   const [textInputHeight, setTextInputHeight] = useState(45);
-
 
   const [contentHeight, setContentHeight] = useState(0);
 
@@ -173,7 +186,9 @@ export default function CommentsScreen({ route, navigation }) {
         ref={positionForScrollDownOfComments}
         data={memoizedComments || []}
         keyExtractor={item => item.id.toString()}
-        onLayout={e => {setContentHeight(e.nativeEvent.layout.height);}}
+        onLayout={e => {
+          setContentHeight(e.nativeEvent.layout.height);
+        }}
         renderItem={({ item }) => (
           <CommentComponent
             item={item}
@@ -197,7 +212,7 @@ export default function CommentsScreen({ route, navigation }) {
           }
         }}
       />
-      <ScrollToEnd isAtEnd={isAtEnd} positionRef={positionForScrollDownOfComments} contentHeight={contentHeight}/>
+      <ScrollToEnd isAtEnd={isAtEnd} positionRef={positionForScrollDownOfComments} contentHeight={contentHeight} />
 
       <View style={styles.inputContainer}>
         {repliedComment && (
@@ -303,7 +318,7 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingVertical: 5,
     maxHeight: 120,
-    minHeight:45
+    minHeight: 45,
   },
   btnComment: {
     height: 34,

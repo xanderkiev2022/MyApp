@@ -34,8 +34,8 @@ export default function PostComponent({ post, navigation, isLastItem, forProfile
 
   const deletePost = async () => {
     const postRef = doc(db, 'posts', id);
-    await updateDoc(postRef, { del: true });
-    // await deleteDoc(postRef);
+    // await updateDoc(postRef, { del: true });
+    await deleteDoc(postRef);
   };
 
   // margin for last child
