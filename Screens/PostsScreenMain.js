@@ -17,13 +17,14 @@ export default function PostsScreenMain({ navigation }) {
   const userPhoto = useSelector(selectPhoto);
 
   const getAllPost = async () => {
-      const postsCollection = query(collection(db, 'posts'), where('userId', '==', userId));
+    const postsCollection = query(collection(db, 'posts'),
+      // where('userId', '==', userId)
+    );
       onSnapshot(postsCollection, snapshot => {
         const postsArray = snapshot.docs
         .map(doc => ({ ...doc.data(), id: doc.id }))
         .sort((a, b) => {
           if (a.date && b.date) {
-            console.log('сортуємо :>> ');
             return b.date.seconds - a.date.seconds;
           }
           return 0;
@@ -40,7 +41,7 @@ export default function PostsScreenMain({ navigation }) {
 // margin for last child
 const renderPostItem = ({ item, index }) => {
   const isLastItem = index === posts.length - 1;
-  return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} />;
+  return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} forNewProfileScreen />;
   };
   
   const pass = useSelector(selectPass);

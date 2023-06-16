@@ -25,7 +25,7 @@ export default function Home() {
 
   const needToLogin = () => {
     onAuthStateChanged(auth, user => {
-      console.log('user in home :>> ', user);
+      console.log('user in home :>> ', user.email);
       if (user) {
         const userData = {
           userId: user.uid,

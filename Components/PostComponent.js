@@ -8,7 +8,7 @@ import { doc, updateDoc, collection, getDoc, deleteDoc } from 'firebase/firestor
 import { db } from '../firebase/config';
 import { selectName, selectUserId } from '../redux/auth/authSelectors';
 
-export default function PostComponent({ post, navigation, isLastItem, forProfileScreen }) {
+export default function PostComponent({ post, navigation, isLastItem, forProfileScreen, forNewProfileScreen }) {
   const { photo, name, location, coordinate, id, comments, likes, del } = post;
 
   const userId = useSelector(selectUserId);
@@ -40,7 +40,7 @@ export default function PostComponent({ post, navigation, isLastItem, forProfile
 
   // margin for last child
   const containerStylePosts = isLastItem ? styles.lastItemContainer : styles.itemContainer;
-   const containerStyleProfile = isLastItem ? styles.lastItemContainerProfile : styles.itemContainer;
+  const containerStyleProfile = isLastItem ? styles.lastItemContainerProfile : styles.itemContainer;
 
   return (
     <>
@@ -57,6 +57,13 @@ export default function PostComponent({ post, navigation, isLastItem, forProfile
                 <Feather style={styles.flippedIcon} name="message-circle" size={24} color="#BDBDBD" />
                 <Text style={styles.messeges}>{comments}</Text>
               </TouchableOpacity>
+
+              {forNewProfileScreen && (
+                <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons}>
+                  <AntDesign name="like2" size={24} color="#FF6C00" onPress={addLike} />
+                  <Text style={styles.messeges}>{likes.length}</Text>
+                </TouchableOpacity>
+              )}
 
               {!forProfileScreen && (
                 <TouchableOpacity activeOpacity={0.8} style={styles.innerWrapperIcons} onPress={deletePost}>
@@ -92,7 +99,7 @@ const styles = StyleSheet.create({
     marginBottom: 100,
   },
   lastItemContainerProfile: {
-    marginBottom: 25
+    marginBottom: 25,
   },
   photo: {
     width: '100%',

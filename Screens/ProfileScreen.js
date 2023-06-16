@@ -1,120 +1,134 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { TouchableOpacity, View, Text, StyleSheet, FlatList } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { selectName } from '../redux/auth/authSelectors';
+import {
+  TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Keyboard,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
+  ScrollView,
+  SafeAreaView,
+} from 'react-native';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
+import { selectEmail, selectName } from '../redux/auth/authSelectors';
 import { logout } from '../redux/auth/authOperations';
-import { BgImage } from '../Components/BgImage';
-import PostComponent from '../Components/PostComponent';
 import Avatar from '../Components/Avatar';
-// Firebase
-import { collection, onSnapshot, query } from 'firebase/firestore';
-import { db } from '../firebase/config';
-import { onScrollHandler } from '../Components/WrapperForTabBar';
-
 
 export default function ProfileScreen({ navigation }) {
-  const [posts, setPosts] = useState([]);
-  const userName = useSelector(selectName);
-
+  const name = useSelector(selectName);
+  const email = useSelector(selectEmail);
   const dispatch = useDispatch();
+  const [state, setState] = useState({ photo: null, name, email });
 
-  const getAllPost = async () => {
-    const postsCollection = query(collection(db, 'posts'));
-    onSnapshot(postsCollection, snapshot => {
-      const postsArray = snapshot.docs
-        .map(doc => ({ ...doc.data(), id: doc.id }))
-        .sort((a, b) => {
-          if (a.date && b.date) {
-            console.log('сортуємо :>> ');
-            return b.date.seconds - a.date.seconds;
-          }
-          return 0;
-        });
-      setPosts(postsArray);
-    });
+  const initialFocus = {
+    login: false,
+    email: false,
+    name: false,
+  };
+  const [isFocused, setIsFocused] = useState(initialFocus);
+
+  const handleFocus = input => {
+    setIsFocused(prevState => ({ ...prevState, [input]: true }));
+  };
+  const handleBlur = input => {
+    setIsFocused(prevState => ({ ...prevState, [input]: false }));
   };
 
-  useEffect(() => {
-    getAllPost();
-  }, []);
-
-  // margin for last child
-  const renderPostItem = ({ item, index }) => {
-    const isLastItem = index === posts.length - 1;
-    return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} forProfileScreen />
+  const hideKayboard = () => {
+    Keyboard.dismiss();
+    setIsFocused(initialFocus);
   };
 
-  const [state, setState] = useState({ photo: null });
-
-
-
-const [offset, setOffset] = useState(0);
-
-  const onScroll = e => {
-  onScrollHandler(e, offset, setOffset, navigation);
-};
-
-  const memoizedPosts = useMemo(() => posts, [posts]);
-
+  const fields = [
+    { name: 'name', placeholder: 'Name', svg: 'user' },
+    { name: 'email', placeholder: 'Email', svg: 'mail' },
+    { name: 'phone', placeholder: '+ 380', svg: 'phone' },
+    { name: 'birth', placeholder: 'Date of birth', svg: 'calendar' },
+    { name: 'country', placeholder: 'Country', svg: 'calendar' },
+    { name: 'region', placeholder: 'Region', svg: 'calendar' },
+    { name: 'city', placeholder: 'City', svg: 'calendar' },
+  ];
 
   return (
-    <View style={styles.container}>
-      <BgImage>
-        <View style={styles.regScr}>
-          <View style={styles.avatarBox}>
-            <Avatar setState={setState} />
-            <TouchableOpacity style={styles.exitSvg} onPress={() => dispatch(logout())}>
-              <Ionicons name="exit-outline" size={28} color="#BDBDBD" backgroundColor="transparent" />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.avatarName}>{userName}</Text>
-          <FlatList
-            // showsVerticalScrollIndicator={false}
-            // scrollEventThrottle={16}
-            onScroll={onScroll}
-            data={memoizedPosts}
-            style={styles.posts}
-            keyExtractor={(__, index) => index.toString()}
-            renderItem={renderPostItem}
-          />
+    // <SafeAreaView style={{ flex: 1, justifyContent: 'flex-end' }}>
+    <KeyboardAvoidingView
+      style={{
+        ...styles.keyboardContainer,
+      }}
+      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={()=> {hideKayboard()}}>
+        <View style={styles.container}>
+          <ScrollView>
+            <View style={styles.avatarBox}>
+              <Avatar setState={setState} />
+              <TouchableOpacity style={styles.exitSvg} onPress={() => dispatch(logout())}>
+                <Ionicons name="exit-outline" size={28} color="#BDBDBD" backgroundColor="transparent" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.avatarName}>{name}</Text>
+            <View style={styles.personalDataForm}>
+              {fields.map(field => (
+                <View style={styles.inputContainer} key={field.name}>
+                  <AntDesign style={styles.inputSvg} name={field.svg} size={24} />
+                  <TextInput
+                    key={field.name}
+                    isFocused={isFocused[field.name]}
+                    placeholder={field.placeholder}
+                    onFocus={() => {
+                      handleFocus(field.name);
+                    }}
+                    onBlur={() => {
+                      handleBlur(field.name);
+                    }}
+                    value={state[field.name]}
+                    onChangeText={value =>
+                      setState(prevState => ({
+                        ...prevState,
+                        [field.name]: value,
+                      }))
+                    }
+                    style={{
+                      ...styles.inputData,
+                      borderColor: isFocused[field.name] ? '#FF6C00' : '#E8E8E8',
+                    }}
+                  />
+                </View>
+              ))}
+            </View>
+          </ScrollView>
         </View>
-      </BgImage>
-    </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    // paddingBottom: 50,
+  },
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    fontFamily: 'RobotoRegular',
-  },
-  regScr: {
     paddingHorizontal: 16,
-    width: '100%',
-    height: '85%',
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    position: 'relative',
+    paddingBottom: 60,
+    justifyContent: 'flex-end',
+    paddingTop: 30,
   },
   avatarBox: {
     width: 120,
     height: 120,
     backgroundColor: '#F6F6F6',
     borderRadius: 16,
-    marginTop: -60,
+    marginTop: 60,
     alignSelf: 'center',
     marginBottom: 32,
-    alignItems: 'flex-end',
-  },
-  addRemovePhoto: {
-    backgroundColor: '#fff',
-    position: 'absolute',
-    left: 108,
-    top: 80,
-    borderRadius: 25,
   },
   exitSvg: {
     position: 'absolute',
@@ -125,13 +139,27 @@ const styles = StyleSheet.create({
   avatarName: {
     fontFamily: 'RobotoMedium',
     fontSize: 30,
-    lineHeight: 35,
     color: '#212121',
-    marginBottom: 32,
     alignSelf: 'center',
   },
-  posts: {
-    marginHorizontal: 8,
-    height: '50%',
+  personalDataForm: {
+    marginTop: 33,
+    gap: 12,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inputSvg: {
+    position: 'absolute',
+    color: '#FF6C00',
+  },
+  inputData: {
+    width: '50%',
+    height: 40,
+    paddingLeft: 34,
+    position: 'relative',
+    fontSize: 16,
+    borderBottomWidth: 1,
   },
 });
