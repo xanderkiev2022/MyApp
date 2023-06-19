@@ -15,6 +15,8 @@ import { auth } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth/react-native';
 import { refreshUser } from '../redux/auth/authSlice';
 import { getTabBarVisible } from '../Components/WrapperForTabBar';
+import SearchScreen from './SearchScreen';
+import EmptyScreen from './EmptyScreen';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -64,6 +66,11 @@ export default function Home() {
                 return <Feather name="plus" size={focused ? size + 2 : size} color="#fff" style={styles.addPost} />;
               } else if (route.name === 'PostsScreen') {
                 return <SimpleLineIcons name="grid" size={focused ? size + 2 : size} color={color} />;
+              } else if (route.name === 'SearchScreen') {
+                return <SimpleLineIcons name="heart" size={focused ? size + 2 : size} color={color} />;
+              }
+              else if (route.name === 'Empty') {
+                return <SimpleLineIcons name="eye" size={focused ? size + 2 : size} color={color} />;
               }
             },
             tabBarActiveTintColor: '#FF6C00',
@@ -82,6 +89,14 @@ export default function Home() {
             })}
           />
           <MainTab.Screen
+            name="SearchScreen"
+            component={SearchScreen}
+            options={({ route }) => ({
+              headerShown: false,
+              tabBarStyle: { display: 'flex' },
+            })}
+          />
+          <MainTab.Screen
             name="Create Posts"
             component={CreatePostsScreen}
             options={({ route }) => ({
@@ -90,6 +105,13 @@ export default function Home() {
               headerStyle: styles.bottomBorder,
               tabBarStyle: { display: 'none' },
             })}
+          />
+          <MainTab.Screen
+            name="Empty"
+            component={EmptyScreen}
+            options={{
+              headerShown: false,
+            }}
           />
           <MainTab.Screen
             name="Profile"
@@ -114,7 +136,7 @@ const styles = StyleSheet.create({
   addPost: {
     textAlign: 'center',
     backgroundColor: '#FF6C00',
-    width: 70,
+    width: 50,
     height: 40,
     borderRadius: 20,
     paddingTop: 9,
