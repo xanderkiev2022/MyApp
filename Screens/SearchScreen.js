@@ -1,21 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { BgImage } from '../Components/BgImage';
 import Slider from '../Components/Slider';
 
 export default function SearchScreen({ navigation }) {
- 
+  const [sliderAge, setSliderAge] = useState(20); // Початкове значення sliderAge
 
   return (
     <View style={styles.container}>
       <BgImage>
         <View style={styles.regScr}>
-          <View style={styles.ageContainer}>
-            <View style={styles.ageHeader}>
+          <Text>Set your preferences</Text>
+          <View style={styles.sliderContainer}>
+            <View style={styles.sliderHeader}>
               <Text>Age</Text>
-              <Text>20-28</Text>
+              <Text style={styles.sliderAge}>{sliderAge}-45</Text>
             </View>
-            <Slider />
+            <Slider sliderAge={sliderAge} setSliderAge={setSliderAge} />
           </View>
         </View>
       </BgImage>
@@ -35,12 +36,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
   },
-  ageContainer: {
-
-  },
-  ageHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between'
-      
+  sliderContainer: {},
+  sliderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });

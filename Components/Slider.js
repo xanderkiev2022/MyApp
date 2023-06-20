@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, PanResponder, Animated } from 'react-native';
-import { useState } from 'react';
 import { useRef } from 'react';
+import { FontAwesome5 } from '@expo/vector-icons';
 
-export default function Slider({ navigation }) {
-  const [leftHandlePosition, setLeftHandlePosition] = useState(5);
+export default function Slider({ sliderAge, setSliderAge }) {
+  const [leftHandlePosition, setLeftHandlePosition] = useState(10);
   const [rightHandlePosition, setRightHandlePosition] = useState(92);
 
   const leftHandleAnimation = useRef(new Animated.Value(leftHandlePosition)).current;
@@ -13,6 +13,17 @@ export default function Slider({ navigation }) {
   const updateLeftHandlePosition = position => {
     leftHandleAnimation.setValue(position);
     setLeftHandlePosition(position);
+
+    const ageRange = 45 - 18;
+    const valueRange = 92 - 5;
+    const valueOffset = position - 5;
+
+    const newSliderAge = Math.floor((valueOffset / valueRange) * ageRange) + 18;
+    // Застосовуємо обмеження від 18 до 45
+    const clampedSliderAge = Math.max(18, Math.min(newSliderAge, 45));
+
+    // Оновлюємо значення sliderAge
+    setSliderAge(clampedSliderAge);
   };
 
   const updateRightHandlePosition = position => {
@@ -37,7 +48,7 @@ export default function Slider({ navigation }) {
     onPanResponderMove: (event, gestureState) => {
       const { dx } = gestureState;
       const adjustedDx = dx / 3.65;
-      const newLeftHandlePosition = Math.max(5, Math.min(leftHandlePosition + adjustedDx, rightHandlePosition - 5));
+      const newLeftHandlePosition = Math.max(10, Math.min(leftHandlePosition + adjustedDx, rightHandlePosition - 5));
       updateLeftHandlePosition(newLeftHandlePosition);
     },
     onPanResponderRelease: () => {},
@@ -58,11 +69,17 @@ export default function Slider({ navigation }) {
     onPanResponderRelease: () => {},
   });
 
+  // const [sliderAge, setSliderAge] = useState(18);
+
   return (
     <View style={styles.slider}>
       <Animated.View style={{ ...styles.sliderTrack, left: leftHandlePosition + '%', right: 99 - rightHandlePosition + '%' }} />
-      <Animated.View style={{ ...styles.handle, left: leftHandleTranslation }} {...leftPanResponder.panHandlers} />
-      <Animated.View style={{ ...styles.handle, left: rightHandleTranslation }} {...rightPanResponder.panHandlers} />
+      <Animated.View style={{ ...styles.handle, left: leftHandleTranslation }} {...leftPanResponder.panHandlers}>
+        <FontAwesome5 name="grip-lines-vertical" size={13} color="white" />
+      </Animated.View>
+      <Animated.View style={{ ...styles.handle, left: rightHandleTranslation }} {...rightPanResponder.panHandlers}>
+        <FontAwesome5 name="grip-lines-vertical" size={13} color="white" />
+      </Animated.View>
     </View>
   );
 }
@@ -75,16 +92,6 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
     marginTop: 10,
   },
-  handle: {
-    position: 'absolute',
-    top: -8,
-    width: 13,
-    height: 20,
-    // borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#000000',
-  },
   sliderTrack: {
     position: 'absolute',
     top: 0,
@@ -93,11 +100,17 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     borderRadius: 2.5,
   },
-  sliderTrackInner: {
+  handle: {
     position: 'absolute',
-    top: 0,
-    bottom: 0,
-    backgroundColor: 'white',
-    borderRadius: 2.5,
+    top: -8,
+    marginLeft: -10,
+    width: 13,
+    height: 20,
+    borderRadius: 4,
+    backgroundColor: 'orange',
+    borderWidth: 0,
+    borderColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
