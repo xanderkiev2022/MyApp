@@ -105,7 +105,7 @@ const authSlice = createSlice({
       state.userId = payload.userId;
       state.name = payload.name || null;
       state.email = payload.email;
-      state.photo = payload.photo || null;
+      state.photo = payload.photo || '';
       state.isLoggedIn = true;
       state.isLoading = false;
       state.error = '';
@@ -120,7 +120,7 @@ const authSlice = createSlice({
       // };
     },
     refreshAvatar: (state, { payload }) => {
-      state.photo = payload.photo;
+      state.photo = payload.photoOnHardDrive;
       },
   },
   extraReducers: builder => {

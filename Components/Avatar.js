@@ -11,20 +11,21 @@ import { update } from '../redux/auth/authOperations';
 export default function Avatar() {
   const dispatch = useDispatch();
   const avatar = useSelector(selectPhoto);
+  console.log('avatar :>> ', avatar);
   const userId = useSelector(selectUserId);
-  let photo;
+  let photoOnHardDrive;
 
   const handleChooseAvatar = async () => {
-    photo = await choseFileOnHardDrive();
+    photoOnHardDrive = await choseFileOnHardDrive();
     console.log('userId in change avatar :>> ', userId);
 
     // if (userId) {
-      const photoURL = await getUrlofUploadedAvatar(photo, userId);
+    const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
     
-console.log('photoURL in Avatar :>> ', photoURL);
-      dispatch(update({ photoURL, userId }));
+    console.log('photoURL in Avatar :>> ', photo);
+    dispatch(update({ userId, state: {photo}}));
     // } else {
-      dispatch(refreshAvatar({ photo }));
+    dispatch(refreshAvatar({ photoOnHardDrive }));
     // }
   };
 
@@ -32,7 +33,7 @@ console.log('photoURL in Avatar :>> ', photoURL);
     <View style={styles.container}>
       {avatar ? (
         <>
-          <Image style={styles.avatarImg} source={{ uri: avatar }} />
+          <Image style={styles.avatarImg} source={{ uri: avatar || null }} />
           <TouchableOpacity onPress={handleChooseAvatar}>
             <AntDesign name="closecircleo" style={styles.addRemoveAvatar} size={25} color="#E8E8E8" />
           </TouchableOpacity>

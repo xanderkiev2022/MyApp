@@ -3,6 +3,8 @@ import { View, StyleSheet, Text } from 'react-native';
 import { BgImage } from '../Components/BgImage';
 import Slider from '../Components/Slider';
 import { CheckBox } from '../Components/CheckBox';
+import { Keyboard } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 
 export default function SearchScreen({ navigation }) {
 
@@ -33,7 +35,7 @@ export default function SearchScreen({ navigation }) {
           <View style={styles.checkboxTitle}>
             <Text style={styles.titleText}>Title of CheckBox</Text>
             {fields.map(field => (
-              <View style={styles.checkboxContainer}>
+              <View key={field.text} style={styles.checkboxContainer}>
                 <CheckBox
                   disabled={field.disabled}
                   isSelected={field.isSelected}
@@ -44,6 +46,19 @@ export default function SearchScreen({ navigation }) {
                 <Text style={styles.checkboxText}>{field.text}</Text>
               </View>
             ))}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.btnComment}
+              // disabled={!comment}
+              onPress={() => {
+                // setComment('');
+                Keyboard.dismiss();
+                // addComment();
+                // setTextInputHeight(45);
+              }}
+            >
+              <Text>Submit</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </BgImage>

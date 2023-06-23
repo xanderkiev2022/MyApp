@@ -1,10 +1,18 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Firebase
-import { GoogleAuthProvider, createUserWithEmailAndPassword, onIdTokenChanged, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  onIdTokenChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+} from 'firebase/auth';
 import { app, auth, auth2, database, db, getUrlofUploadedAvatar, storage } from '../../firebase/config';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 // FirebaseLogin
 import * as WebBrowser from 'expo-web-browser';
@@ -16,7 +24,7 @@ export const register = createAsyncThunk('auth/register', async ({ login, email,
     const user = res.user;
 
     await updateProfile(user, { displayName: login });
-    const photoUrl = photo ? await getUrlofUploadedAvatar(photo, user.uid) : null;
+    const photoUrl = photo ? await getUrlofUploadedAvatar(photo, user.uid) : '';
 
     const userData = {
       userId: user.uid,
@@ -48,19 +56,45 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }, 
   }
 });
 
-export const update = createAsyncThunk('auth/update', async ({ photoURL, userId }, thunkAPI) => {
+export const update = createAsyncThunk('auth/update', async (data, thunkAPI) => {
   try {
-    const uploadedInfo = {
-      photo: photoURL,
-      userId,
-    };
+    const { userId, state } = data;
     const userRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(userRef);
+    const existingData = docSnap.data();
+    const uploadedInfo = { ...existingData };
+
+    for (const field in state) {
+      console.log('existingData[field] :>> ', existingData[field]);
+      console.log('state[field] :>> ', state[field]);
+
+      if (
+        state.hasOwnProperty(field) &&
+        existingData.hasOwnProperty(field) &&
+        state[field] &&
+        state[field] !== '' &&
+        existingData[field] !== state[field] &&
+        !existingData[field].includes(state[field])
+      ) {
+        uploadedInfo[field] = [...existingData[field], state[field]];
+
+        if (Array.isArray(existingData[field])) {
+          uploadedInfo[field] = [...existingData[field], state[field]];
+        } else {
+          uploadedInfo[field] = [existingData[field], state[field]];
+        }
+
+        updateProfile(auth.currentUser, { photoURL: state[field] });
+      } else if (!existingData.hasOwnProperty(field)) {
+        uploadedInfo[field] = state[field];
+        // updateProfile(auth.currentUser, { photoURL: state[field] });
+      }
+    }
+    console.log('uploadedInfo :>> ', uploadedInfo);
+
     await updateDoc(userRef, uploadedInfo);
-    // if (userId.length > 22) { 
-      await updateProfile(auth.currentUser, { photoURL });
-    // }
     return {
-      photo: photoURL,
+      photo: state.photo,
     };
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
@@ -173,17 +207,15 @@ export const refresh = () => dispatch => {
   // }
 };
 
-
 WebBrowser.maybeCompleteAuthSession();
 export const loginWithGoogle = createAsyncThunk('auth/loginWithGoogle', async (req, thunkAPI) => {
   try {
+    const [request, response, promptAsync] = Google.useAuthRequest({
+      androidClientId: '750126251136-p8p4ibgra5ur49j93vdsaoj3qf5e20s6.apps.googleusercontent.com',
+      iosClientId: '750126251136-kelln54601b7dok4ee6idojqdpoe1lbk.apps.googleusercontent.com',
+      expoClientId: '750126251136-6glaaagrp1q3q4ev0k0fqdt0en5ncluq.apps.googleusercontent.com',
+    });
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: '750126251136-p8p4ibgra5ur49j93vdsaoj3qf5e20s6.apps.googleusercontent.com',
-    iosClientId: '750126251136-kelln54601b7dok4ee6idojqdpoe1lbk.apps.googleusercontent.com',
-    expoClientId: '750126251136-6glaaagrp1q3q4ev0k0fqdt0en5ncluq.apps.googleusercontent.com',
-  });
-    
     if (response?.type === 'success') {
       const token = response.authentication.accessToken;
       const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
@@ -191,15 +223,14 @@ export const loginWithGoogle = createAsyncThunk('auth/loginWithGoogle', async (r
       });
       const user = await res.json();
 
-const userData = {
-  name: user.name,
-  email: user.email,
-  photo: user.picture,
-};
+      const userData = {
+        name: user.name,
+        email: user.email,
+        photo: user.picture,
+      };
 
       return userData;
     }
-
 
     // // const provider = new GoogleAuthProvider();
     // // const res = await signInWithPopup(auth, provider)
@@ -207,7 +238,7 @@ const userData = {
     // // const credential = GoogleAuthProvider.credentialFromResult(res);
     // // const token = credential.accessToken;
     // const user = res.user;
-   
+
     // const userData = {
     //   userId: user.uid,
     //   name: user.displayName,
@@ -216,12 +247,10 @@ const userData = {
     // };
     // // const userRef = doc(db, 'users', user.uid);
     // // await setDoc(userRef, userData);
-
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }
 });
-
 
 // export const forgotPassword = createAsyncThunk('user/forgotPassword', async (email: string) => {
 //   await sendPasswordResetEmail(auth, email);

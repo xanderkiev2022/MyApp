@@ -56,7 +56,7 @@ const renderPostItem = ({ item, index }) => {
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
-        <Image style={styles.avatarImg} source={{ uri: userPhoto }} />
+        <Image style={styles.avatarImg} source={{ uri: userPhoto || null }} />
         <View style={styles.avatarData}>
           <Text style={styles.avatarName}>{userName}</Text>
           <Text style={styles.avatarEmail}>

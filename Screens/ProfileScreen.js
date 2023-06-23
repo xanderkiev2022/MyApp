@@ -14,15 +14,16 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
-import { selectEmail, selectName } from '../redux/auth/authSelectors';
-import { logout } from '../redux/auth/authOperations';
+import { selectEmail, selectName, selectUserId } from '../redux/auth/authSelectors';
+import { logout, update } from '../redux/auth/authOperations';
 import Avatar from '../Components/Avatar';
 
 export default function ProfileScreen({ navigation }) {
   const name = useSelector(selectName);
   const email = useSelector(selectEmail);
+  const userId = useSelector(selectUserId);
   const dispatch = useDispatch();
-  const [state, setState] = useState({ photo: null, name, email });
+  const [state, setState] = useState({ photo: '', name, email });
 
   const initialFocus = {
     login: false,
@@ -36,6 +37,7 @@ export default function ProfileScreen({ navigation }) {
   };
   const handleBlur = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
+    dispatch(update({ userId, state }));
   };
 
   const hideKayboard = () => {
@@ -61,11 +63,15 @@ export default function ProfileScreen({ navigation }) {
       }}
       behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
     >
-      <TouchableWithoutFeedback onPress={()=> {hideKayboard()}}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          hideKayboard();
+        }}
+      >
         <View style={styles.container}>
           <ScrollView>
             <View style={styles.avatarBox}>
-              <Avatar setState={setState} />
+              <Avatar />
               <TouchableOpacity style={styles.exitSvg} onPress={() => dispatch(logout())}>
                 <Ionicons name="exit-outline" size={28} color="#BDBDBD" backgroundColor="transparent" />
               </TouchableOpacity>
@@ -99,7 +105,21 @@ export default function ProfileScreen({ navigation }) {
                   />
                 </View>
               ))}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.btnComment}
+                // disabled={!comment}
+                onPress={() => {
+                  // setComment('');
+                  Keyboard.dismiss();
+                  // addComment();
+                  // setTextInputHeight(45);
+                }}
+              >
+                <Text>Submit</Text>
+              </TouchableOpacity>
             </View>
+            {/* <Text>{state}</Text> */}
           </ScrollView>
         </View>
       </TouchableWithoutFeedback>
