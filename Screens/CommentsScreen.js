@@ -244,20 +244,18 @@ export default function CommentsScreen({ route, navigation }) {
             onContentSizeChange={e => setTextInputHeight(e.nativeEvent.contentSize.height)}
           />
 
-          <TouchableOpacity activeOpacity={0.8} style={styles.btnComment}>
-            <AntDesign
-              name="arrowup"
-              size={24}
-              color="#FFFFFF"
-              style={styles.svgArrow}
-              opacity={0.6}
-              onPress={() => {
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.btnComment}
+            disabled={!comment}
+            onPress={() => {
                 setComment('');
                 Keyboard.dismiss();
                 addComment();
                 setTextInputHeight(45);
-              }}
-            />
+            }}
+          >
+            <AntDesign name="arrowup" size={24} color="#FFFFFF" style={styles.svgArrow} opacity={0.6} />
           </TouchableOpacity>
         </View>
       </View>
