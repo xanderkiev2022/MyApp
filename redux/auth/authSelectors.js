@@ -7,3 +7,7 @@ export const selectIsLoading = state => state.auth.isLoading;
 export const selectError = state => state.auth.error;
 export const selectRefreshing = state => state.auth.isRefreshing;
 export const selectPass = state => state.auth.password;
+export const selectPhone = state => state.auth.phone;
+export const selectDOB = state => state.auth.birth;
+
+export const selectUserData = state => state.auth;

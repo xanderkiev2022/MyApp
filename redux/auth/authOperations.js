@@ -56,18 +56,14 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }, 
   }
 });
 
-export const update = createAsyncThunk('auth/update', async (data, thunkAPI) => {
+export const update = createAsyncThunk('auth/update', async ({ userId, state }, thunkAPI) => {
   try {
-    const { userId, state } = data;
     const userRef = doc(db, 'users', userId);
     const docSnap = await getDoc(userRef);
     const existingData = docSnap.data();
-    const uploadedInfo = { ...existingData };
+    let uploadedInfo = { ...existingData };
 
     for (const field in state) {
-      console.log('existingData[field] :>> ', existingData[field]);
-      console.log('state[field] :>> ', state[field]);
-
       if (
         state.hasOwnProperty(field) &&
         existingData.hasOwnProperty(field) &&
@@ -76,67 +72,25 @@ export const update = createAsyncThunk('auth/update', async (data, thunkAPI) => 
         existingData[field] !== state[field] &&
         !existingData[field].includes(state[field])
       ) {
-        uploadedInfo[field] = [...existingData[field], state[field]];
-
         if (Array.isArray(existingData[field])) {
           uploadedInfo[field] = [...existingData[field], state[field]];
         } else {
           uploadedInfo[field] = [existingData[field], state[field]];
         }
-
-        updateProfile(auth.currentUser, { photoURL: state[field] });
       } else if (!existingData.hasOwnProperty(field)) {
         uploadedInfo[field] = state[field];
-        // updateProfile(auth.currentUser, { photoURL: state[field] });
-      }
+      } 
     }
+    updateProfile(auth.currentUser, { photoURL: state.photo ?? state.photo });
     console.log('uploadedInfo :>> ', uploadedInfo);
-
     await updateDoc(userRef, uploadedInfo);
     return {
-      photo: state.photo,
+      photo: state.photo ? state.photo : existingData.photo,
     };
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }
 });
-
-// export const update = createAsyncThunk('auth/update', async ({ photoUrl: photoURL }, thunkAPI) => {
-//   try {
-//     // onAuthStateChanged(auth, (user) => {
-//     // const id= user.uid;
-//     // console.log('id :>> ', id);
-//     // console.log('user :>> ', user);
-//     // const user = auth.currentUser;
-
-// //  const user = onAuthStateChanged(auth);
-// //  const currentUser = res.currentUser;
-
-//     // const auth = getAuth();
-//     const { currentUser } = auth;
-//     // await currentUser.getIdToken(true);
-//     // console.log('token :>> ', token);
-//     // console.log('user :>> ', user);
-//     // console.log('auth :>> ', auth);
-//     currentUser.getIdToken(true);
-//     // then(function (idToken) {
-//     await updateProfile(currentUser, { photoURL });
-//     // await currentUser.reload();
-//     // res.reload()
-//     return {
-//       photo: photoURL,
-//     };
-//     // });
-//     // console.log('idToken :>> ', idToken);
-
-//     //  user.reload();
-//     // console.log('Profile updated successfully');
-
-//     // })
-//   } catch (error) {
-//     return thunkAPI.rejectWithValue(error.message);
-//   }
-// });
 
 export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
   try {

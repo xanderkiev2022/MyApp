@@ -14,16 +14,25 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
-import { selectEmail, selectName, selectUserId } from '../redux/auth/authSelectors';
+import { selectDOB, selectEmail, selectName, selectPhone, selectPhoto, selectUserData, selectUserId } from '../redux/auth/authSelectors';
 import { logout, update } from '../redux/auth/authOperations';
 import Avatar from '../Components/Avatar';
 
 export default function ProfileScreen({ navigation }) {
   const name = useSelector(selectName);
-  const email = useSelector(selectEmail);
   const userId = useSelector(selectUserId);
+  const userData = useSelector(selectUserData);
   const dispatch = useDispatch();
-  const [state, setState] = useState({ photo: '', name, email });
+
+  const [state, setState] = useState(() => {
+    let initialState = {};
+    for (const key in userData) {
+      if (userData.hasOwnProperty(key)) {
+        initialState[key] = userData[key];
+      }
+    }
+    return initialState;
+  });
 
   const initialFocus = {
     login: false,
@@ -37,7 +46,7 @@ export default function ProfileScreen({ navigation }) {
   };
   const handleBlur = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
-    dispatch(update({ userId, state }));
+    dispatch(update({userId, state}));
   };
 
   const hideKayboard = () => {

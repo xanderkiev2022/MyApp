@@ -8,6 +8,7 @@ import { selectName, selectUserId, selectPhoto, selectEmail, selectPass } from '
 import { useSelector } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
 import { onScrollHandler } from '../Components/WrapperForTabBar';
+import Avatar from '../Components/Avatar';
 
 export default function PostsScreenMain({ navigation }) {
   const [posts, setPosts] = useState([]);
@@ -56,7 +57,11 @@ const renderPostItem = ({ item, index }) => {
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
-        <Image style={styles.avatarImg} source={{ uri: userPhoto || null }} />
+        {/* <Image style={styles.avatarImg} source={{ uri: userPhoto}} /> */}
+        <View style={styles.avatarImg}>
+          <Avatar changeAvatarSvg={true} />
+        </View>
+
         <View style={styles.avatarData}>
           <Text style={styles.avatarName}>{userName}</Text>
           <Text style={styles.avatarEmail}>
@@ -78,6 +83,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginVertical: 32,
     alignItems: 'center',
+    // width: 60,
+    // height: 60,
   },
 
   avatarImg: {

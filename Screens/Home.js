@@ -11,12 +11,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectIsLoggedIn } from '../redux/auth/authSelectors';
 import RegistrationScreen from './RegistrationScreen';
 import LoginScreen from './LoginScreen';
-import { auth } from '../firebase/config';
+import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth/react-native';
 import { refreshUser } from '../redux/auth/authSlice';
 import { getTabBarVisible } from '../Components/WrapperForTabBar';
 import SearchScreen from './SearchScreen';
 import EmptyScreen from './EmptyScreen';
+import { doc, getDoc } from 'firebase/firestore';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -25,19 +26,34 @@ export default function Home() {
   const authCheck = useSelector(selectIsLoggedIn);
   const dispatch = useDispatch();
 
-  const needToLogin = () => {
-    onAuthStateChanged(auth, user => {
-      console.log('user in home :>> ', user.email);
+  const needToLogin = async () => {
+    onAuthStateChanged(auth, async (user) => {
+      console.log('user in home!!! :>> ', user.email);
+
+
+    const userRef = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(userRef);
+    const existingData = docSnap.data();
+    console.log('existingData :>> ', existingData);
+
+let userData = {};
       if (user) {
-        const userData = {
-          userId: user.uid,
-          name: user.displayName,
-          email: user.email,
-          photo: user.photoURL,
-        };
-        dispatch(refreshUser(userData));
+        for (const field in existingData) {
+          userData[field] = existingData[field];}
+                //  userData = {
+                  // userId: user.uid,
+                  // name: user.displayName,
+                  // email: user.email,
+                  // photo: user.photoURL,
+                  // photo: lastPhoto,
+                // };
+        
+        // console.log('lastPhoto :>> ', lastPhoto);
+        console.log('userData :>> ', userData);
+        dispatch(refreshUser(existingData));
       }
     });
+   
   };
 
   // Логінемося

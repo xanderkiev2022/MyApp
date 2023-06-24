@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TouchableOpacity, View, StyleSheet, Image } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { selectPhoto, selectUserId } from '../redux/auth/authSelectors';
@@ -8,7 +8,7 @@ import { choseFileOnHardDrive } from '../Utils/hardDriveUtils';
 import { getUrlofUploadedAvatar } from '../firebase/config';
 import { update } from '../redux/auth/authOperations';
 
-export default function Avatar() {
+export default function Avatar({changeAvatarSvg}) {
   const dispatch = useDispatch();
   const avatar = useSelector(selectPhoto);
   console.log('avatar :>> ', avatar);
@@ -17,33 +17,29 @@ export default function Avatar() {
 
   const handleChooseAvatar = async () => {
     photoOnHardDrive = await choseFileOnHardDrive();
-    console.log('userId in change avatar :>> ', userId);
-
-    // if (userId) {
     const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
-    
-    console.log('photoURL in Avatar :>> ', photo);
-    dispatch(update({ userId, state: {photo}}));
-    // } else {
+    dispatch(update({ userId, state: { photo }}));
     dispatch(refreshAvatar({ photoOnHardDrive }));
-    // }
   };
 
   return (
     <View style={styles.container}>
       {avatar ? (
         <>
-          <Image style={styles.avatarImg} source={{ uri: avatar || null }} />
-          <TouchableOpacity onPress={handleChooseAvatar}>
-            <AntDesign name="closecircleo" style={styles.addRemoveAvatar} size={25} color="#E8E8E8" />
-          </TouchableOpacity>
+          <Image style={styles.avatarImg} source={{ uri: avatar }} />
+          {!changeAvatarSvg && (
+            <TouchableOpacity onPress={handleChooseAvatar}>
+              <AntDesign name="closecircleo" style={styles.addRemoveAvatar} size={25} color="#E8E8E8" />
+            </TouchableOpacity>
+          )}
         </>
       ) : (
         <>
-          <Image style={styles.avatarImg} />
-          <TouchableOpacity onPress={handleChooseAvatar}>
-            <AntDesign name="pluscircleo" style={styles.addRemoveAvatar} size={25} color="#FF6C00" backgroundColor="white" />
-          </TouchableOpacity>
+            <Image style={styles.avatarImg} />
+            {!changeAvatarSvg && (
+              <TouchableOpacity onPress={handleChooseAvatar}>
+                <AntDesign name="pluscircleo" style={styles.addRemoveAvatar} size={25} color="#FF6C00" backgroundColor="white" />
+              </TouchableOpacity>)}
         </>
       )}
     </View>

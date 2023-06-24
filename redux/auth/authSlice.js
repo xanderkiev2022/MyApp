@@ -50,7 +50,6 @@ const handleUserFulfilledRefreshing = (state, { payload }) => {
   state.isLoggedIn = isLoggedIn;
   state.error = '';
   state.isRefreshing = false;
-  
 };
 const handleRejectedRefreshing = (state, action) => {
   state.isRefreshing = false;
@@ -66,8 +65,8 @@ const handleUserFulfilledUpdate = (state, { payload }) => {
   state.isLoading = false;
 };
 
-const handleRejectedUpdate = (state, {payload}) => {
-   state.error = payload;
+const handleRejectedUpdate = (state, { payload }) => {
+  state.error = payload;
   state.isLoading = false;
 };
 
@@ -105,23 +104,19 @@ const authSlice = createSlice({
       state.userId = payload.userId;
       state.name = payload.name || null;
       state.email = payload.email;
-      state.photo = payload.photo || '';
+      state.photo = payload.photo;
       state.isLoggedIn = true;
       state.isLoading = false;
       state.error = '';
-      // state = {
-      //   userId: payload.userId,
-      //   name: payload.name || null,
-      //   email: payload.email,
-      //   photo: payload.photo || null,
-      //   isLoggedIn: true,
-      //   isLoading: false,
-      //   error: '',
-      // };
+      for (const key in payload) {
+        if (payload.hasOwnProperty(key)) {
+          state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
+        }
+      }
     },
     refreshAvatar: (state, { payload }) => {
       state.photo = payload.photoOnHardDrive;
-      },
+    },
   },
   extraReducers: builder => {
     builder
@@ -142,4 +137,3 @@ const authSlice = createSlice({
 });
 export const { removeError, refreshUser, refreshAvatar } = authSlice.actions;
 export const authReducer = authSlice.reducer;
-
