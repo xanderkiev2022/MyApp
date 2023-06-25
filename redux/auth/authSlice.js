@@ -18,6 +18,11 @@ const handlePending = state => {
 };
 const handleFulfilled = (state, { payload }) => {
   const { userId, name, email, photo, password } = payload;
+  // for (const key in payload) {
+  //   if (payload.hasOwnProperty(key)) {
+  //     state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
+  //   }
+  // }
   state.userId = userId;
   state.name = name;
   state.email = email;
@@ -32,6 +37,11 @@ const handleRejected = (state, { payload }) => {
   state.isLoading = false;
 };
 const handleLogoutFulfilled = state => {
+  for (const key in state) {
+    if (state.hasOwnProperty(key)) {
+      state[key] = '';
+    }
+  }
   state.userId = '';
   state.name = '';
   state.email = '';
@@ -59,8 +69,13 @@ const handlePendingRefreshing = state => {
 };
 
 const handleUserFulfilledUpdate = (state, { payload }) => {
-  const { photo } = payload;
-  state.photo = photo;
+  // const { photo } = payload;
+  for (const key in payload) {
+    if (payload.hasOwnProperty(key)) {
+      state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
+    }
+  }
+  // state.photo = photo;
   state.error = '';
   state.isLoading = false;
 };
@@ -105,14 +120,15 @@ const authSlice = createSlice({
       state.name = payload.name || null;
       state.email = payload.email;
       state.photo = payload.photo;
-      state.isLoggedIn = true;
-      state.isLoading = false;
-      state.error = '';
+
       for (const key in payload) {
         if (payload.hasOwnProperty(key)) {
           state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
         }
       }
+      state.isLoggedIn = true;
+      state.isLoading = false;
+      state.error = '';
     },
     refreshAvatar: (state, { payload }) => {
       state.photo = payload.photoOnHardDrive;

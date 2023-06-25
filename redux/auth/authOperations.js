@@ -65,28 +65,30 @@ export const update = createAsyncThunk('auth/update', async ({ userId, state }, 
 
     for (const field in state) {
       if (
-        state.hasOwnProperty(field) &&
+        // state.hasOwnProperty(field) &&
+        // state[field] &&
+        // state[field] !== '' &&
         existingData.hasOwnProperty(field) &&
-        state[field] &&
-        state[field] !== '' &&
-        existingData[field] !== state[field] &&
-        !existingData[field].includes(state[field])
+        existingData[field] !== state[field]
       ) {
         if (Array.isArray(existingData[field])) {
-          uploadedInfo[field] = [...existingData[field], state[field]];
+          // uploadedInfo[field] = [...existingData[field], state[field]];
+          const updatedField = existingData[field].filter(item => item !== state[field]);
+          updatedField.push(state[field]);
+          uploadedInfo[field] = updatedField;
         } else {
           uploadedInfo[field] = [existingData[field], state[field]];
         }
-      } else if (!existingData.hasOwnProperty(field)) {
+      } else if (!existingData.hasOwnProperty(field) && state[field] !== '') {
         uploadedInfo[field] = state[field];
-      } 
+      }
     }
     updateProfile(auth.currentUser, { photoURL: state.photo ?? state.photo });
-    console.log('uploadedInfo :>> ', uploadedInfo);
     await updateDoc(userRef, uploadedInfo);
-    return {
-      photo: state.photo ? state.photo : existingData.photo,
-    };
+    // return {
+    //   photo: state.photo ? state.photo : existingData.photo,
+    // };
+    return uploadedInfo; 
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }

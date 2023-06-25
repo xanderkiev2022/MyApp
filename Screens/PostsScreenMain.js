@@ -4,7 +4,7 @@ import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
 // Firebase
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { selectName, selectUserId, selectPhoto, selectEmail, selectPass } from '../redux/auth/authSelectors';
+import { selectUserId, selectUserData } from '../redux/auth/authSelectors';
 import { useSelector } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
 import { onScrollHandler } from '../Components/WrapperForTabBar';
@@ -13,16 +13,25 @@ import Avatar from '../Components/Avatar';
 export default function PostsScreenMain({ navigation }) {
   const [posts, setPosts] = useState([]);
   const userId = useSelector(selectUserId);
-  const userName = useSelector(selectName);
-  const userEmail = useSelector(selectEmail);
-  const userPhoto = useSelector(selectPhoto);
+  const userData = useSelector(selectUserData);
+
+  const [state, setState] = useState(() => {
+    let initialState = {};
+    for (const key in userData) {
+      if (userData.hasOwnProperty(key)) {
+        initialState[key] = userData[key];
+      }
+    }
+    return initialState;
+  });
 
   const getAllPost = async () => {
-    const postsCollection = query(collection(db, 'posts'),
+    const postsCollection = query(
+      collection(db, 'posts')
       // where('userId', '==', userId)
     );
-      onSnapshot(postsCollection, snapshot => {
-        const postsArray = snapshot.docs
+    onSnapshot(postsCollection, snapshot => {
+      const postsArray = snapshot.docs
         .map(doc => ({ ...doc.data(), id: doc.id }))
         .sort((a, b) => {
           if (a.date && b.date) {
@@ -30,22 +39,20 @@ export default function PostsScreenMain({ navigation }) {
           }
           return 0;
         });
-        setPosts(postsArray);
-      });
-    };
-
-    useEffect(() => {
-      getAllPost();
-    }, []);
-
-
-// margin for last child
-const renderPostItem = ({ item, index }) => {
-  const isLastItem = index === posts.length - 1;
-  return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} forNewProfileScreen />;
+      setPosts(postsArray);
+    });
   };
-  
-  const pass = useSelector(selectPass);
+
+  useEffect(() => {
+    getAllPost();
+  }, []);
+
+  // margin for last child
+  const renderPostItem = ({ item, index }) => {
+    const isLastItem = index === posts.length - 1;
+    return <PostComponent post={item} navigation={navigation} isLastItem={isLastItem} forNewProfileScreen />;
+  };
+
   const [offset, setOffset] = useState(0);
 
   const onScroll = e => {
@@ -57,15 +64,14 @@ const renderPostItem = ({ item, index }) => {
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
-        {/* <Image style={styles.avatarImg} source={{ uri: userPhoto}} /> */}
         <View style={styles.avatarImg}>
           <Avatar changeAvatarSvg={true} />
         </View>
 
         <View style={styles.avatarData}>
-          <Text style={styles.avatarName}>{userName}</Text>
+          <Text style={styles.avatarName}>{state.name}</Text>
           <Text style={styles.avatarEmail}>
-            {userEmail}, {pass}
+            {state.email}, {state.password}
           </Text>
         </View>
       </View>
@@ -83,8 +89,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginVertical: 32,
     alignItems: 'center',
-    // width: 60,
-    // height: 60,
   },
 
   avatarImg: {

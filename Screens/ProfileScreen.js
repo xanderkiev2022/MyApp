@@ -14,12 +14,11 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
-import { selectDOB, selectEmail, selectName, selectPhone, selectPhoto, selectUserData, selectUserId } from '../redux/auth/authSelectors';
+import { selectUserData, selectUserId } from '../redux/auth/authSelectors';
 import { logout, update } from '../redux/auth/authOperations';
 import Avatar from '../Components/Avatar';
 
 export default function ProfileScreen({ navigation }) {
-  const name = useSelector(selectName);
   const userId = useSelector(selectUserId);
   const userData = useSelector(selectUserData);
   const dispatch = useDispatch();
@@ -46,7 +45,7 @@ export default function ProfileScreen({ navigation }) {
   };
   const handleBlur = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
-    dispatch(update({userId, state}));
+    dispatch(update({ userId, state: { [input]: state[input] } }));
   };
 
   const hideKayboard = () => {
@@ -85,7 +84,7 @@ export default function ProfileScreen({ navigation }) {
                 <Ionicons name="exit-outline" size={28} color="#BDBDBD" backgroundColor="transparent" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.avatarName}>{name}</Text>
+            <Text style={styles.avatarName}>{state.name}</Text>
             <View style={styles.personalDataForm}>
               {fields.map(field => (
                 <View style={styles.inputContainer} key={field.name}>

@@ -8,7 +8,7 @@ import { choseFileOnHardDrive } from '../Utils/hardDriveUtils';
 import { getUrlofUploadedAvatar } from '../firebase/config';
 import { update } from '../redux/auth/authOperations';
 
-export default function Avatar({changeAvatarSvg}) {
+export default function Avatar({ changeAvatarSvg }) {
   const dispatch = useDispatch();
   const avatar = useSelector(selectPhoto);
   console.log('avatar :>> ', avatar);
@@ -18,8 +18,8 @@ export default function Avatar({changeAvatarSvg}) {
   const handleChooseAvatar = async () => {
     photoOnHardDrive = await choseFileOnHardDrive();
     const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
-    dispatch(update({ userId, state: { photo }}));
     dispatch(refreshAvatar({ photoOnHardDrive }));
+    dispatch(update({ userId, state: { photo } }));
   };
 
   return (
@@ -35,11 +35,12 @@ export default function Avatar({changeAvatarSvg}) {
         </>
       ) : (
         <>
-            <Image style={styles.avatarImg} />
-            {!changeAvatarSvg && (
-              <TouchableOpacity onPress={handleChooseAvatar}>
-                <AntDesign name="pluscircleo" style={styles.addRemoveAvatar} size={25} color="#FF6C00" backgroundColor="white" />
-              </TouchableOpacity>)}
+          <Image style={styles.avatarImg} />
+          {!changeAvatarSvg && (
+            <TouchableOpacity onPress={handleChooseAvatar}>
+              <AntDesign name="pluscircleo" style={styles.addRemoveAvatar} size={25} color="#FF6C00" backgroundColor="white" />
+            </TouchableOpacity>
+          )}
         </>
       )}
     </View>

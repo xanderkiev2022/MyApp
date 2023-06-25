@@ -27,33 +27,19 @@ export default function Home() {
   const dispatch = useDispatch();
 
   const needToLogin = async () => {
-    onAuthStateChanged(auth, async (user) => {
-      console.log('user in home!!! :>> ', user.email);
+    onAuthStateChanged(auth, async user => {
+      const userRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userRef);
+      const existingData = docSnap.data();
 
-
-    const userRef = doc(db, 'users', user.uid);
-    const docSnap = await getDoc(userRef);
-    const existingData = docSnap.data();
-    console.log('existingData :>> ', existingData);
-
-let userData = {};
+      let userData = {};
       if (user) {
         for (const field in existingData) {
-          userData[field] = existingData[field];}
-                //  userData = {
-                  // userId: user.uid,
-                  // name: user.displayName,
-                  // email: user.email,
-                  // photo: user.photoURL,
-                  // photo: lastPhoto,
-                // };
-        
-        // console.log('lastPhoto :>> ', lastPhoto);
-        console.log('userData :>> ', userData);
+          userData[field] = existingData[field];
+        }
         dispatch(refreshUser(existingData));
       }
     });
-   
   };
 
   // Логінемося
@@ -84,8 +70,7 @@ let userData = {};
                 return <SimpleLineIcons name="grid" size={focused ? size + 2 : size} color={color} />;
               } else if (route.name === 'SearchScreen') {
                 return <SimpleLineIcons name="heart" size={focused ? size + 2 : size} color={color} />;
-              }
-              else if (route.name === 'Empty') {
+              } else if (route.name === 'Empty') {
                 return <SimpleLineIcons name="eye" size={focused ? size + 2 : size} color={color} />;
               }
             },
@@ -140,7 +125,7 @@ let userData = {};
         </MainTab.Navigator>
       ) : (
         <MainStack.Navigator initialRouteName="Login">
-          {/* <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} /> */}
+          <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
           <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         </MainStack.Navigator>
       )}
