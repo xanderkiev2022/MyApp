@@ -7,6 +7,7 @@ import { refreshAvatar } from '../redux/auth/authSlice';
 import { choseFileOnHardDrive } from '../Utils/hardDriveUtils';
 import { getUrlofUploadedAvatar } from '../firebase/config';
 import { update } from '../redux/auth/authOperations';
+import * as Location from 'expo-location';
 
 export default function Avatar({ changeAvatarSvg }) {
   const dispatch = useDispatch();
@@ -19,7 +20,30 @@ export default function Avatar({ changeAvatarSvg }) {
     photoOnHardDrive = await choseFileOnHardDrive();
     const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
     dispatch(refreshAvatar({ photoOnHardDrive }));
-    dispatch(update({ userId, state: { photo } }));
+
+
+    const location = await Location.getCurrentPositionAsync({});
+    const coords = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+    // const coords2 = [`latitude:${location.coords.latitude}`, `longitude:${location.coords.longitude}`];
+
+    const parsedLocation = await Location.reverseGeocodeAsync(coords);
+
+    dispatch(
+      update({
+        userId,
+        state: {
+          photo,
+          coordinate: coords,
+          country: parsedLocation[0].country,
+          region: parsedLocation[0].region,
+          city: parsedLocation[0].city,
+          street: parsedLocation[0].street,
+        },
+      })
+    );
   };
 
   return (

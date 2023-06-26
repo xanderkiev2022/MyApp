@@ -27,7 +27,8 @@ export default function ProfileScreen({ navigation }) {
     let initialState = {};
     for (const key in userData) {
       if (userData.hasOwnProperty(key)) {
-        initialState[key] = userData[key];
+        initialState[key] = userData[key]; 
+          if (userData.phone === '') { initialState.phone = '+380' }
       }
     }
     return initialState;
@@ -37,6 +38,7 @@ export default function ProfileScreen({ navigation }) {
     login: false,
     email: false,
     name: false,
+    birth: false,
   };
   const [isFocused, setIsFocused] = useState(initialFocus);
 
@@ -57,7 +59,7 @@ export default function ProfileScreen({ navigation }) {
     { name: 'name', placeholder: 'Name', svg: 'user' },
     { name: 'email', placeholder: 'Email', svg: 'mail' },
     { name: 'phone', placeholder: '+ 380', svg: 'phone' },
-    { name: 'birth', placeholder: 'Date of birth', svg: 'calendar' },
+    { name: 'birth', placeholder: '30.01.2001 Date of birth', svg: 'calendar' },
     { name: 'country', placeholder: 'Country', svg: 'calendar' },
     { name: 'region', placeholder: 'Region', svg: 'calendar' },
     { name: 'city', placeholder: 'City', svg: 'calendar' },
@@ -94,6 +96,27 @@ export default function ProfileScreen({ navigation }) {
   return formattedNumber;
   };
 
+  const formatBirthDate = value => {
+    const cleaned = value.replace(/\D/g, ''); // Видаляємо всі нецифрові символи
+    const match = cleaned.match(/^(\d{0,2})(\d{0,2})(\d{0,4})$/); // Розбиваємо на групи (DD, MM, YYYY)
+    let formattedDate = '';
+    if (match) {
+      const [, day, month, year] = match;
+      formattedDate = '';
+
+      if (day) {
+        formattedDate += day;
+        if (month) {
+          formattedDate += '.' + month;
+          if (year) {
+            formattedDate += '.' + year;
+          }
+        }
+      }
+    }
+    return formattedDate;
+  };
+
   const handleChangePhone = value => {
     const formattedNumber = formatPhoneNumber(value);
     setState(prevState => ({
@@ -101,6 +124,14 @@ export default function ProfileScreen({ navigation }) {
       phone: formattedNumber,
     }));
   };
+
+    const handleChangeBirth = value => {
+      const formattedDate = formatBirthDate(value);
+      setState(prevState => ({
+        ...prevState,
+        birth: formattedDate,
+      }));
+    };
 
   return (
     // <SafeAreaView style={{ flex: 1, justifyContent: 'flex-end' }}>
@@ -140,14 +171,12 @@ export default function ProfileScreen({ navigation }) {
                     }}
                     value={state[field.name]}
                     onChangeText={value =>
-                      // setState(prevState => ({
-                      //   ...prevState,
-                      //   [field.name]: value,
-                      // }))
                       {
                         if (field.name === 'phone') {
                           handleChangePhone(value);
-                        } else {
+                        } else if (field.name === 'birth') {
+                        handleChangeBirth(value);
+                      } else {
                           setState(prevState => ({
                             ...prevState,
                             [field.name]: value,
@@ -232,7 +261,7 @@ const styles = StyleSheet.create({
     color: '#FF6C00',
   },
   inputData: {
-    width: '50%',
+    width: '60%',
     height: 40,
     paddingLeft: 34,
     position: 'relative',
