@@ -53,12 +53,20 @@ const handleLogoutFulfilled = state => {
 
 const handleUserFulfilledRefreshing = (state, { payload }) => {
   const { userId, name, email, photo, isLoggedIn } = payload;
-  state.userId = userId;
-  state.name = name;
-  state.email = email;
-  state.photo = photo;
-  state.isLoggedIn = isLoggedIn;
-  state.error = '';
+  // state.userId = userId;
+  // state.name = name;
+  // state.email = email;
+  // state.photo = photo;
+        for (const key in payload) {
+          if (payload.hasOwnProperty(key)) {
+            state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
+          }
+        }
+        state.isLoggedIn = true;
+        state.isLoading = false;
+        state.error = '';
+  // state.isLoggedIn = isLoggedIn;
+  // state.error = '';
   state.isRefreshing = false;
 };
 const handleRejectedRefreshing = (state, action) => {
@@ -132,6 +140,7 @@ const authSlice = createSlice({
     },
     refreshAvatar: (state, { payload }) => {
       state.photo = payload.photoOnHardDrive;
+      
     },
   },
   extraReducers: builder => {

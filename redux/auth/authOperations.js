@@ -17,6 +17,7 @@ import { arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 // FirebaseLogin
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
+import { getRefreshUserAction } from './authActions';
 
 export const register = createAsyncThunk('auth/register', async ({ login, email, password, photo }, thunkAPI) => {
   try {
@@ -103,65 +104,69 @@ export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
   }
 });
 
-// export const refresh = createAsyncThunk('auth/refresh', async (_, { dispatch }) => {
-//   try {
-//     console.log('Виконуємо рефреш');
-//     const unsubscribe = onAuthStateChanged(auth, user => {
-//       // if (user) {
-//         // console.log('Користувач залогінений:', user.uid);
-//         const userData = {
-//           userId: user.uid,
-//           name: user.displayName,
-//           email: user.email,
-//           photo: user.photoURL,
-//           isLoggedIn: true,
-//         };
-//         return userData;
-//         // handleUserFulfilledRefreshing(userData)
-//       // }
-//       // else {
-//       //   console.log('Користувач вийшов з системи або ще не увійшов');
-//       //   dispatch(
-//       //     handleRejectedRefreshing({
-//       //       userId: '',
-//       //       name: '',
-//       //       email: '',
-//       //       photo: '',
-//       //       isLoggedIn: false,
-//       //     })
-//       //   );
-//       // }
-//     });
-//     return () => {
-//       unsubscribe();
-//     };
-//   } catch (error) {
-//     return thunkAPI.rejectWithValue(error.message);
-//   }
-// });
+export const refresh = () =>  (dispatch) => {
+  try {
+    console.log('Виконуємо рефреш');
+    // const unsubscribe =
+      onAuthStateChanged(auth, async user => {
+      if (user) {
+        console.log('Користувач залогінений:', user.uid);
+          const userRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userRef);
+      const existingData = docSnap.data();
 
-export const refresh = () => dispatch => {
-  // try {
-  //   // console.log('Виконуємо рефреш');
-  //   onAuthStateChanged(auth2, user => {
-  //     // const user2 = auth;
-  //     // const user2 = user?.reload();
-  //     // const user2 = auth?.currentUser?.getIdToken(true);
-  //     // console.log('user2 в рефреш :>> ', user2);
-  //     if (user) {
-  //       const userData = {
-  //         userId: user.uid,
-  //         name: user.displayName,
-  //         email: user.email,
-  //         photo: user.photoURL,
-  //       };
-  //       dispatch(refreshUser(userData));
-  //     }
-  //   });
-  // } catch (err) {
-  //   console.log(err.toString());
-  // }
+      let userData = {};
+        for (const field in existingData) {
+          userData[field] = existingData[field];
+        }
+        // return userData;
+        dispatch(getRefreshUserAction(existingData));
+      }
+      else {
+        console.log('Користувач вийшов з системи або ще не увійшов');
+        // dispatch(
+        //   handleRejectedRefreshing({
+        //     userId: '',
+        //     name: '',
+        //     email: '',
+        //     photo: '',
+        //     isLoggedIn: false,
+        //   })
+        // );
+      }
+    });
+    // return () => {
+    //   unsubscribe();
+    // };
+  } catch (error) {
+    // return thunkAPI.rejectWithValue(error.message);
+    console.log(error.toString());
+  }
 };
+
+
+// export const refresh = () => dispatch => {
+//   // try {
+//   //   // console.log('Виконуємо рефреш');
+//   //   onAuthStateChanged(auth2, user => {
+//   //     // const user2 = auth;
+//   //     // const user2 = user?.reload();
+//   //     // const user2 = auth?.currentUser?.getIdToken(true);
+//   //     // console.log('user2 в рефреш :>> ', user2);
+//   //     if (user) {
+//   //       const userData = {
+//   //         userId: user.uid,
+//   //         name: user.displayName,
+//   //         email: user.email,
+//   //         photo: user.photoURL,
+//   //       };
+//   //       dispatch(refreshUser(userData));
+//   //     }
+//   //   });
+//   // } catch (err) {
+//   //   console.log(err.toString());
+//   // }
+// };
 
 WebBrowser.maybeCompleteAuthSession();
 export const loginWithGoogle = createAsyncThunk('auth/loginWithGoogle', async (req, thunkAPI) => {

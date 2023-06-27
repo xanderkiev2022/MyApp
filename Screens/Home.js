@@ -18,6 +18,7 @@ import { getTabBarVisible } from '../Components/WrapperForTabBar';
 import SearchScreen from './SearchScreen';
 import EmptyScreen from './EmptyScreen';
 import { doc, getDoc } from 'firebase/firestore';
+import { refresh } from '../redux/auth/authOperations';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -27,19 +28,20 @@ export default function Home() {
   const dispatch = useDispatch();
 
   const needToLogin = async () => {
-    onAuthStateChanged(auth, async user => {
-      const userRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(userRef);
-      const existingData = docSnap.data();
+    
+    // onAuthStateChanged(auth, async user => {
+    //   const userRef = doc(db, 'users', user.uid);
+    //   const docSnap = await getDoc(userRef);
+    //   const existingData = docSnap.data();
 
-      let userData = {};
-      if (user) {
-        for (const field in existingData) {
-          userData[field] = existingData[field];
-        }
-        dispatch(refreshUser(existingData));
-      }
-    });
+    //   let userData = {};
+    //   if (user) {
+    //     for (const field in existingData) {
+    //       userData[field] = existingData[field];
+    //     }
+    //     dispatch(refreshUser(existingData));
+    //   }
+    // });
   };
 
   // Логінемося
@@ -53,7 +55,7 @@ export default function Home() {
   // };
 
   useEffect(() => {
-    needToLogin();
+    dispatch(refresh());
   }, [auth]);
 
   return (

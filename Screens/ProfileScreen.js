@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   TouchableOpacity,
@@ -15,8 +15,9 @@ import {
 } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { selectUserData, selectUserId } from '../redux/auth/authSelectors';
-import { logout, update } from '../redux/auth/authOperations';
+import { logout, refresh, update } from '../redux/auth/authOperations';
 import Avatar from '../Components/Avatar';
+import { auth } from '../firebase/config';
 
 export default function ProfileScreen({ navigation }) {
   const userId = useSelector(selectUserId);
@@ -47,6 +48,7 @@ export default function ProfileScreen({ navigation }) {
   };
   const handleBlur = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
+    setState(prevState => ({ ...prevState, [input]: state[input] }));
     dispatch(update({ userId, state: { [input]: state[input] } }));
   };
 
@@ -131,7 +133,19 @@ export default function ProfileScreen({ navigation }) {
         ...prevState,
         birth: formattedDate,
       }));
-    };
+  };
+  
+    useEffect(() => {
+      // dispatch(refresh());
+      console.log('state змінився :>> ');
+    }, [state]);
+  
+  const handleUpdateProfileData = newData => {
+    setState(prevState => ({
+      ...prevState,
+      ...newData,
+    }));
+  };
 
   return (
     // <SafeAreaView style={{ flex: 1, justifyContent: 'flex-end' }}>
@@ -149,12 +163,13 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.container}>
           <ScrollView>
             <View style={styles.avatarBox}>
-              <Avatar />
+              <Avatar updateProfileData={handleUpdateProfileData} />
               <TouchableOpacity style={styles.exitSvg} onPress={() => dispatch(logout())}>
                 <Ionicons name="exit-outline" size={28} color="#BDBDBD" backgroundColor="transparent" />
               </TouchableOpacity>
             </View>
             <Text style={styles.avatarName}>{state.name}</Text>
+            <Text style={styles.avatarName}>{state.country}</Text>
             <View style={styles.personalDataForm}>
               {fields.map(field => (
                 <View style={styles.inputContainer} key={field.name}>
@@ -170,20 +185,18 @@ export default function ProfileScreen({ navigation }) {
                       handleBlur(field.name);
                     }}
                     value={state[field.name]}
-                    onChangeText={value =>
-                      {
-                        if (field.name === 'phone') {
-                          handleChangePhone(value);
-                        } else if (field.name === 'birth') {
+                    onChangeText={value => {
+                      if (field.name === 'phone') {
+                        handleChangePhone(value);
+                      } else if (field.name === 'birth') {
                         handleChangeBirth(value);
                       } else {
-                          setState(prevState => ({
-                            ...prevState,
-                            [field.name]: value,
-                          }));
-                        }
+                        setState(prevState => ({
+                          ...prevState,
+                          [field.name]: value,
+                        }));
                       }
-                    }
+                    }}
                     style={{
                       ...styles.inputData,
                       borderColor: isFocused[field.name] ? '#FF6C00' : '#E8E8E8',

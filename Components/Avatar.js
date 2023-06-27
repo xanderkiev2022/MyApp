@@ -6,10 +6,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { refreshAvatar } from '../redux/auth/authSlice';
 import { choseFileOnHardDrive } from '../Utils/hardDriveUtils';
 import { getUrlofUploadedAvatar } from '../firebase/config';
-import { update } from '../redux/auth/authOperations';
+import { refresh, update } from '../redux/auth/authOperations';
 import * as Location from 'expo-location';
+import gpsLocation from '../Utils/gpsLocation';
 
-export default function Avatar({ changeAvatarSvg }) {
+export default function Avatar({ changeAvatarSvg, updateProfileData }) {
   const dispatch = useDispatch();
   const avatar = useSelector(selectPhoto);
   console.log('avatar :>> ', avatar);
@@ -17,22 +18,13 @@ export default function Avatar({ changeAvatarSvg }) {
   let photoOnHardDrive;
 
   const handleChooseAvatar = async () => {
-    photoOnHardDrive = await choseFileOnHardDrive();
-    const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
-    dispatch(refreshAvatar({ photoOnHardDrive }));
+    try {
+      photoOnHardDrive = await choseFileOnHardDrive();
+      const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
+      const { coords, parsedLocation } = await gpsLocation();
+      dispatch(refreshAvatar({ photoOnHardDrive }));
 
-
-    const location = await Location.getCurrentPositionAsync({});
-    const coords = {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    };
-    // const coords2 = [`latitude:${location.coords.latitude}`, `longitude:${location.coords.longitude}`];
-
-    const parsedLocation = await Location.reverseGeocodeAsync(coords);
-
-    dispatch(
-      update({
+      const uploadedInfo = {
         userId,
         state: {
           photo,
@@ -42,8 +34,15 @@ export default function Avatar({ changeAvatarSvg }) {
           city: parsedLocation[0].city,
           street: parsedLocation[0].street,
         },
-      })
-    );
+      };
+
+      updateProfileData({ country: parsedLocation[0].country, region: parsedLocation[0].region, city: parsedLocation[0].city });
+
+      dispatch(update(uploadedInfo));
+      // dispatch(refresh());
+    } catch (error) {
+      console.log('Problem with updating avatar :>> ');
+    }
   };
 
   return (
