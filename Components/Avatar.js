@@ -13,35 +13,43 @@ import gpsLocation from '../Utils/gpsLocation';
 export default function Avatar({ changeAvatarSvg, updateProfileData }) {
   const dispatch = useDispatch();
   const avatar = useSelector(selectPhoto);
-  console.log('avatar :>> ', avatar);
+  console.log('Avatar', avatar);
   const userId = useSelector(selectUserId);
+
   let photoOnHardDrive;
+  let state;
 
   const handleChooseAvatar = async () => {
     try {
       photoOnHardDrive = await choseFileOnHardDrive();
-      const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
       const { coords, parsedLocation } = await gpsLocation();
-      dispatch(refreshAvatar({ photoOnHardDrive }));
-
-      const uploadedInfo = {
-        userId,
-        state: {
-          photo,
-          coordinate: coords,
-          country: parsedLocation[0].country,
-          region: parsedLocation[0].region,
-          city: parsedLocation[0].city,
-          street: parsedLocation[0].street,
-        },
+      state = {
+        coordinate: coords,
+        country: parsedLocation[0].country,
+        region: parsedLocation[0].region,
+        city: parsedLocation[0].city,
+        street: parsedLocation[0].street,
       };
 
-      updateProfileData({ country: parsedLocation[0].country, region: parsedLocation[0].region, city: parsedLocation[0].city });
-
-      dispatch(update(uploadedInfo));
-      // dispatch(refresh());
+      try {
+        if (userId) {
+          const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
+          updateProfileData({ ...state, photo });
+          dispatch(update({ userId, state }));
+        } else {
+          dispatch(refreshAvatar({ photoOnHardDrive }));
+          updateProfileData({ ...state, photo: photoOnHardDrive });
+        }
+      } catch (error) {
+        console.log('Avatar. Problem with uploading of avatar to cloud / saving avatar in state');
+      } finally {
+        // console.log('Avatar. UserId when chossing avatar', userId);
+      }
     } catch (error) {
-      console.log('Problem with updating avatar :>> ');
+      console.log('Avatar. Problem with GPS / choosing of avatar on hard drive');
+    } finally {
+      console.log('Avatar. Link of avatar from state', avatar);
+      console.log('Avatar. Link of avatar from hard drive', photoOnHardDrive);
     }
   };
 

@@ -5,10 +5,11 @@ import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { selectUserId, selectUserData } from '../redux/auth/authSelectors';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import PostComponent from '../Components/PostComponent';
 import { onScrollHandler } from '../Components/WrapperForTabBar';
 import Avatar from '../Components/Avatar';
+import { refresh } from '../redux/auth/authOperations';
 
 export default function PostsScreenMain({ navigation }) {
   const [posts, setPosts] = useState([]);
@@ -40,6 +41,7 @@ export default function PostsScreenMain({ navigation }) {
           return 0;
         });
       setPosts(postsArray);
+      
     });
   };
 

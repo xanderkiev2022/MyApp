@@ -26,7 +26,7 @@ const initialState = {
 
 export default function RegistrationScreen({ navigation }) {
   const dispatch = useDispatch();
-  const avatar = useSelector(selectPhoto);
+  // const avatar = useSelector(selectPhoto);
   const error = useSelector(selectError);
 
   // OnFocus
@@ -47,13 +47,13 @@ export default function RegistrationScreen({ navigation }) {
   };
 
   // Submit
-  useEffect(() => {
-    setState(prevState => ({ ...prevState, photo: avatar }));
-  }, [avatar]);
+  // useEffect(() => {
+  //   setState(prevState => ({ ...prevState, photo: avatar }));
+  // }, [avatar]);
 
   const handleSubmit = () => {
     dispatch(register(state));
-    setState(initialState);
+    // setState(initialState);
   };
 
   // WrongPass
@@ -88,6 +88,19 @@ export default function RegistrationScreen({ navigation }) {
     };
   }, []);
 
+    const handleUpdateProfileData = newData => {
+      setState(prevState => ({
+        ...prevState,
+        ...newData,
+      }));
+      
+  };
+  
+      useEffect(() => {
+        // dispatch(refresh());
+        console.log('state змінився :>> ', state);
+      }, [state]);
+
   return (
     <TouchableWithoutFeedback onPress={hideKayboard}>
       <View style={styles.container}>
@@ -99,7 +112,7 @@ export default function RegistrationScreen({ navigation }) {
             }}
           >
             <View style={styles.avatarBox}>
-              <Avatar />
+              <Avatar updateProfileData={handleUpdateProfileData} />
             </View>
 
             <Text style={styles.title}>Registration</Text>
@@ -108,8 +121,12 @@ export default function RegistrationScreen({ navigation }) {
               <InputLogin
                 isFocused={isFocused}
                 placeholder="Login"
-                onFocus={() => {handleFocus('login');}}
-                onBlur={() => {handleBlur('login');}}
+                onFocus={() => {
+                  handleFocus('login');
+                }}
+                onBlur={() => {
+                  handleBlur('login');
+                }}
                 value={state.login}
                 onChangeText={value => setState(prevState => ({ ...prevState, login: value }))}
               />
@@ -117,8 +134,12 @@ export default function RegistrationScreen({ navigation }) {
                 isFocused={isFocused}
                 placeholder="E-mail"
                 autoComplete="email"
-                onFocus={() => {handleFocus('email');}}
-                onBlur={() => {handleBlur('email');}}
+                onFocus={() => {
+                  handleFocus('email');
+                }}
+                onBlur={() => {
+                  handleBlur('email');
+                }}
                 value={state.email}
                 onChangeText={value => {
                   const trimmedValue = value.trim().toLowerCase();
@@ -130,13 +151,19 @@ export default function RegistrationScreen({ navigation }) {
                 isFocused={isFocused}
                 placeholder="Password"
                 autoComplete="password"
-                onFocus={() => {handleFocus('password');}}
-                onBlur={() => {handleBlur('password');}}
+                onFocus={() => {
+                  handleFocus('password');
+                }}
+                onBlur={() => {
+                  handleBlur('password');
+                }}
                 value={state.password}
                 onChangeText={value => setState(prevState => ({ ...prevState, password: value }))}
                 isPasswordShown={isPasswordShown}
                 onTogglePassword={() => setIsPasswordShown(prev => !prev)}
-                ref={ref => {inputPass = ref;}}
+                ref={ref => {
+                  inputPass = ref;
+                }}
               />
 
               <View>

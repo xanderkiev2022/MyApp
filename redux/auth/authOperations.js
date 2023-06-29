@@ -19,24 +19,16 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { getRefreshUserAction } from './authActions';
 
-export const register = createAsyncThunk('auth/register', async ({ login, email, password, photo }, thunkAPI) => {
+export const register = createAsyncThunk('auth/register', async (state, thunkAPI) => {
   try {
-    const res = await createUserWithEmailAndPassword(auth, email, password);
-    const user = res.user;
-
-    await updateProfile(user, { displayName: login });
-    const photoUrl = photo ? await getUrlofUploadedAvatar(photo, user.uid) : '';
-
-    const userData = {
-      userId: user.uid,
-      name: user.displayName,
-      email: user.email,
-      photo: photoUrl,
-      password,
-    };
+    const {user} = await createUserWithEmailAndPassword(auth, state.email, state.password);
+    await updateProfile(user, { displayName: state.login });
+    const photoUrl = state.photo ? await getUrlofUploadedAvatar(state.photo, user.uid) : '';
+    const uploadedInfo = { ...state, name: state.login, photo: photoUrl, userId: user.uid };
     const userRef = doc(db, 'users', user.uid);
-    await setDoc(userRef, userData);
-    return userData;
+    await setDoc(userRef, uploadedInfo);
+    console.log('uploadedInfo :>> ', uploadedInfo);
+    return uploadedInfo;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }
@@ -44,14 +36,21 @@ export const register = createAsyncThunk('auth/register', async ({ login, email,
 
 export const login = createAsyncThunk('auth/login', async ({ email, password }, thunkAPI) => {
   try {
-    const res = await signInWithEmailAndPassword(auth, email, password);
-    const user = res.user;
+    const { user } = await signInWithEmailAndPassword(auth, email, password);
+          // const userRef = doc(db, 'users', user.uid);
+          // const docSnap = await getDoc(userRef);
+    // const existingData = docSnap.data();
+
+        // console.log('existingData.userId :>> ', existingData.userId);
+        // console.log('user.uid :>> ', user.uid);
     return {
-      userId: user.uid,
-      name: user.displayName,
-      email: user.email,
-      photo: user.photoURL,
+      // userId: user.uid,
+      // name: user.displayName,
+      // email: user.email,
+      // photo: user.photoURL,
     };
+
+    // return existingData;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }
@@ -111,7 +110,7 @@ export const refresh = () =>  (dispatch) => {
       onAuthStateChanged(auth, async user => {
       if (user) {
         console.log('Користувач залогінений:', user.uid);
-          const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, 'users', user.uid);
       const docSnap = await getDoc(userRef);
       const existingData = docSnap.data();
 
@@ -121,6 +120,7 @@ export const refresh = () =>  (dispatch) => {
         }
         // return userData;
         dispatch(getRefreshUserAction(existingData));
+        console.log('existingData in refresh :>> ', existingData);
       }
       else {
         console.log('Користувач вийшов з системи або ще не увійшов');

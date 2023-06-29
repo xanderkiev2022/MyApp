@@ -18,16 +18,16 @@ const handlePending = state => {
 };
 const handleFulfilled = (state, { payload }) => {
   const { userId, name, email, photo, password } = payload;
-  // for (const key in payload) {
-  //   if (payload.hasOwnProperty(key)) {
-  //     state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
-  //   }
-  // }
-  state.userId = userId;
-  state.name = name;
-  state.email = email;
-  state.photo = photo;
-  state.password = password;
+  for (const key in payload) {
+    if (payload.hasOwnProperty(key)) {
+      state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
+    }
+  }
+  // state.userId = userId;
+  // state.name = name;
+  // state.email = email;
+  // state.photo = photo;
+  // state.password = password;
   state.isLoggedIn = true;
   state.isLoading = false;
   state.error = '';
@@ -124,10 +124,10 @@ const authSlice = createSlice({
       state.error = null;
     },
     refreshUser: (state, { payload }) => {
-      state.userId = payload.userId;
-      state.name = payload.name || null;
-      state.email = payload.email;
-      state.photo = payload.photo;
+      // state.userId = payload.userId;
+      // state.name = payload.name || null;
+      // state.email = payload.email;
+      // state.photo = payload.photo;
 
       for (const key in payload) {
         if (payload.hasOwnProperty(key)) {

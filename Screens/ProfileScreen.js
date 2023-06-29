@@ -19,6 +19,8 @@ import { logout, refresh, update } from '../redux/auth/authOperations';
 import Avatar from '../Components/Avatar';
 import { auth } from '../firebase/config';
 
+import moment from 'moment';
+
 export default function ProfileScreen({ navigation }) {
   const userId = useSelector(selectUserId);
   const userData = useSelector(selectUserData);
@@ -112,11 +114,43 @@ export default function ProfileScreen({ navigation }) {
           formattedDate += '.' + month;
           if (year) {
             formattedDate += '.' + year;
+            if (year.length > 3) {
+              const currentDate = new Date();
+              const enteredDate = new Date(`${year}-${month}-${day}`);
+              console.log('currentDate :>> ', currentDate);
+              console.log('enteredDate :>> ', enteredDate);
+
+              const age = calculateAge(currentDate, enteredDate);
+              console.log('age :>> ', age);
+              if (age > 80 || age < 15) {
+                alert(`Перевірте правильність введення дати, Вам ${age}?`);
+              } else (console.log('Формат дати вірний'))
+            }
+
+             
+
+             
           }
         }
       }
+
+
+
+
     }
+
     return formattedDate;
+  };
+
+  const calculateAge = (currentDate, enteredDate) => {
+    let age = currentDate.getFullYear() - enteredDate.getFullYear();
+    const monthDiff = currentDate.getMonth() - enteredDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < enteredDate.getDate())) {
+      age--;
+    }
+
+    return age;
   };
 
   const handleChangePhone = value => {
@@ -129,14 +163,16 @@ export default function ProfileScreen({ navigation }) {
 
     const handleChangeBirth = value => {
       const formattedDate = formatBirthDate(value);
-      setState(prevState => ({
-        ...prevState,
-        birth: formattedDate,
-      }));
+        setState(prevState => ({
+          ...prevState,
+          birth: formattedDate,
+        }));
   };
   
     useEffect(() => {
-      // dispatch(refresh());
+// if (state.birth.length < 8) {
+//   alert('Перевірте правильність введення дати');
+// }
       console.log('state змінився :>> ');
     }, [state]);
   
@@ -199,11 +235,20 @@ export default function ProfileScreen({ navigation }) {
                     }}
                     style={{
                       ...styles.inputData,
-                      borderColor: isFocused[field.name] ? '#FF6C00' : '#E8E8E8',
+                      // borderColor: isFocused[field.name] ? '#FF6C00' : '#E8E8E8',
+                      borderColor:
+                        field.name === 'birth' && state[field.name]?.length !== 10
+                          ? '#FF0000' // червоний колір
+                          : isFocused[field.name]
+                          ? '#FF6C00' // оранжевий колір
+                          : '#E8E8E8', // колір за замовчуванням
                     }}
                   />
                 </View>
               ))}
+
+              {/* <DatePickerAndroid date={state.selectedDate ? new Date(state.selectedDate) : new Date()} onDateChange={handleChangeBirth} mode="date" /> */}
+
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.btnComment}
