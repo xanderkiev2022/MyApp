@@ -22,9 +22,11 @@ import { getRefreshUserAction } from './authActions';
 export const register = createAsyncThunk('auth/register', async (state, thunkAPI) => {
   try {
     const {user} = await createUserWithEmailAndPassword(auth, state.email, state.password);
-    await updateProfile(user, { displayName: state.login });
+    await updateProfile(user, { displayName: state.login, photoURL: state.photo ?? state.photo });
     const photoUrl = state.photo ? await getUrlofUploadedAvatar(state.photo, user.uid) : '';
     const uploadedInfo = { ...state, name: state.login, photo: photoUrl, userId: user.uid };
+    console.log('uploadedInfo when register :>> ', uploadedInfo);
+    
     const userRef = doc(db, 'users', user.uid);
     await setDoc(userRef, uploadedInfo);
     console.log('uploadedInfo :>> ', uploadedInfo);

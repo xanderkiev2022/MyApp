@@ -5,11 +5,12 @@ import Slider from '../Components/Slider';
 import { CheckBox } from '../Components/CheckBox';
 import { Keyboard } from 'react-native';
 import { TouchableOpacity } from 'react-native';
+import EmptyScreen from './EmptyScreen';
 
 export default function SearchScreen({ navigation }) {
 
   // slider
-  const [sliderAge, setSliderAge] = useState(20); // Початкове значення sliderAge
+  const [sliderAge, setSliderAge] = useState([18,43]); // Початкове значення sliderAge
 
   // checkBox
   const [green, setGreen] = useState(false);
@@ -28,7 +29,9 @@ export default function SearchScreen({ navigation }) {
           <View style={styles.sliderContainer}>
             <View style={styles.sliderHeader}>
               <Text>Age</Text>
-              <Text style={styles.sliderAge}>{sliderAge}-45</Text>
+              <Text style={styles.sliderAge}>
+                {sliderAge[0]}-{sliderAge[1]}
+              </Text>
             </View>
             <Slider sliderAge={sliderAge} setSliderAge={setSliderAge} />
           </View>
@@ -59,6 +62,7 @@ export default function SearchScreen({ navigation }) {
             >
               <Text>Submit</Text>
             </TouchableOpacity>
+            <EmptyScreen ageLimit={sliderAge} />
           </View>
         </View>
       </BgImage>

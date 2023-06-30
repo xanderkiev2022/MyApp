@@ -20,6 +20,7 @@ import Avatar from '../Components/Avatar';
 import { auth } from '../firebase/config';
 
 import moment from 'moment';
+import { calculateAge, formatBirthDate } from '../Utils/ageValidation';
 
 export default function ProfileScreen({ navigation }) {
   const userId = useSelector(selectUserId);
@@ -100,59 +101,6 @@ export default function ProfileScreen({ navigation }) {
   return formattedNumber;
   };
 
-  const formatBirthDate = value => {
-    const cleaned = value.replace(/\D/g, ''); // Видаляємо всі нецифрові символи
-    const match = cleaned.match(/^(\d{0,2})(\d{0,2})(\d{0,4})$/); // Розбиваємо на групи (DD, MM, YYYY)
-    let formattedDate = '';
-    if (match) {
-      const [, day, month, year] = match;
-      formattedDate = '';
-
-      if (day) {
-        formattedDate += day;
-        if (month) {
-          formattedDate += '.' + month;
-          if (year) {
-            formattedDate += '.' + year;
-            if (year.length > 3) {
-              const currentDate = new Date();
-              const enteredDate = new Date(`${year}-${month}-${day}`);
-              console.log('currentDate :>> ', currentDate);
-              console.log('enteredDate :>> ', enteredDate);
-
-              const age = calculateAge(currentDate, enteredDate);
-              console.log('age :>> ', age);
-              if (age > 80 || age < 15) {
-                alert(`Перевірте правильність введення дати, Вам ${age}?`);
-              } else (console.log('Формат дати вірний'))
-            }
-
-             
-
-             
-          }
-        }
-      }
-
-
-
-
-    }
-
-    return formattedDate;
-  };
-
-  const calculateAge = (currentDate, enteredDate) => {
-    let age = currentDate.getFullYear() - enteredDate.getFullYear();
-    const monthDiff = currentDate.getMonth() - enteredDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < enteredDate.getDate())) {
-      age--;
-    }
-
-    return age;
-  };
-
   const handleChangePhone = value => {
     const formattedNumber = formatPhoneNumber(value);
     setState(prevState => ({
@@ -181,6 +129,8 @@ export default function ProfileScreen({ navigation }) {
       ...prevState,
       ...newData,
     }));
+    console.log('ProfileScreen. Updated avatar. newData :>> ', newData.photo);
+    console.log('ProfileScreen. Updated avatar. state :>> ', state.photo);
   };
 
   return (

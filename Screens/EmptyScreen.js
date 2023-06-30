@@ -12,24 +12,26 @@ import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-g
 // Firebase
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { calculateAge } from '../Utils/ageValidation';
 
-export default function EmptyScreen({ navigation }) {
+export default function EmptyScreen({ navigation, ageLimit }) {
+  console.log('ageLimit :>> ', ageLimit);
   const [position, setPosition] = useState(new Animated.ValueXY());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [myCollection, setMyCollection] = useState([]);
 
-const handleGestureEvent = Animated.event(
-  [
-    {
-      nativeEvent: {
-        translationX: position.x,
-        translationY: position.y,
+  const handleGestureEvent = Animated.event(
+    [
+      {
+        nativeEvent: {
+          translationX: position.x,
+          translationY: position.y,
+        },
       },
-    },
-  ],
-  { useNativeDriver: false }
+    ],
+    { useNativeDriver: false }
   );
-  
+
   const handleGestureStateChange = event => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
       if (event.nativeEvent.translationX > 200) {
@@ -58,16 +60,15 @@ const handleGestureEvent = Animated.event(
   });
 
   const interpolatedColor = position.x.interpolate({
-      inputRange: [-200, -20, 0, 20, 200],
-      outputRange: ['rgba(255, 0, 0, 0.9)', 'rgba(255, 0, 0, 0.2)', 'rgba(0, 0, 0, 0)', 'rgba(0, 255, 0, 0.2)', 'rgba(0, 255, 0, 0.9)'],
-      extrapolate: 'clamp',
-    });
+    inputRange: [-200, -20, 0, 20, 200],
+    outputRange: ['rgba(255, 0, 0, 0.9)', 'rgba(255, 0, 0, 0.2)', 'rgba(0, 0, 0, 0)', 'rgba(0, 255, 0, 0.2)', 'rgba(0, 255, 0, 0.9)'],
+    extrapolate: 'clamp',
+  });
 
   const animatedCardStyle = {
     transform: [{ translateX: position.x }, { translateY: position.y }, { rotate: rotationValues }],
     backgroundColor: interpolatedColor,
   };
-
 
   const getCollection = async () => {
     const usersCollection = collection(db, 'users');
@@ -75,46 +76,58 @@ const handleGestureEvent = Animated.event(
     onSnapshot(usersCollection, snapshot => {
       const userDataArray = snapshot.docs.map(doc => doc.data());
       // .map(doc => doc.data().photo);
-      setMyCollection(userDataArray);
-      console.log('myCollection :>> ', userDataArray);
+      const modifiedCollection = userDataArray.map(user => {
+        const modifiedUser = { ...user };
+
+        Object.keys(modifiedUser).forEach(key => {
+          if (Array.isArray(modifiedUser[key])) {
+            modifiedUser[key] = modifiedUser[key][modifiedUser[key].length - 1];
+          }
+        });
+
+        return modifiedUser;
+      });
+
+      setMyCollection(modifiedCollection);
+      console.log('modifiedCollection :>> ', modifiedCollection);
     });
   };
 
   useEffect(() => {
-    getCollection(); 
+    getCollection();
   }, []);
 
   const memoizedCollection = useMemo(() => myCollection, [myCollection]);
   const currentCard = memoizedCollection[currentIndex];
 
   return (
-    <View style={styles.container}>
-      <BgImage>
-        <View style={styles.regScr}>
-          <View style={styles.avatarImg}>
-            <Avatar changeAvatarSvg={true} />
-          </View>
-          {currentCard ? (
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <PanGestureHandler onGestureEvent={handleGestureEvent} onHandlerStateChange={handleGestureStateChange}>
-                <Animated.View style={[styles.cardContainer, animatedCardStyle]}>
-                  <View style={styles.card}>
-                    <Text style={styles.cardText}>{currentCard.name}</Text>
-                    <Text style={styles.cardText}>{currentCard.birth}</Text>
-                    <Text style={styles.cardText}>{currentCard.region}</Text>
-                    <Image style={styles.cardImage} source={{ uri: currentCard.photo }} />
-                  </View>
-                </Animated.View>
-              </PanGestureHandler>
-            </GestureHandlerRootView>
-          ) : (
-            <View style={styles.cardContainer}>
-              <Text style={styles.cardText}>You reached the finish</Text>
-            </View>
-          )}
+    // <View style={styles.container}>
+    // <BgImage>
+    <View style={styles.regScr}>
+      {/* <View style={styles.avatarImg}>
+             <Avatar changeAvatarSvg={true} />
+          </View> */}
+      {currentCard ? (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <PanGestureHandler onGestureEvent={handleGestureEvent} onHandlerStateChange={handleGestureStateChange}>
+            <Animated.View style={[styles.cardContainer, animatedCardStyle]}>
+              <View style={styles.card}>
+                {currentCard.name && <Text style={styles.cardText}>Name: {currentCard.name}</Text>}
+                {currentCard.birth && <Text style={styles.cardText}>Age: {calculateAge(currentCard.birth)}</Text>}
+                {currentCard.region && <Text style={styles.cardText}>Region: {currentCard.region}</Text>}
+                {currentCard.photo && <Image style={styles.cardImage} source={{ uri: currentCard.photo }} />}
+              </View>
+            </Animated.View>
+          </PanGestureHandler>
+        </GestureHandlerRootView>
+      ) : (
+        <View style={styles.cardContainer}>
+          <Text style={styles.cardText}>You reached the finish</Text>
         </View>
-      </BgImage>
+      )}
     </View>
+    // </BgImage>
+    // </View>
   );
 }
 

@@ -6,8 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { refreshAvatar } from '../redux/auth/authSlice';
 import { choseFileOnHardDrive } from '../Utils/hardDriveUtils';
 import { getUrlofUploadedAvatar } from '../firebase/config';
-import { refresh, update } from '../redux/auth/authOperations';
-import * as Location from 'expo-location';
+import { update } from '../redux/auth/authOperations';
 import gpsLocation from '../Utils/gpsLocation';
 
 export default function Avatar({ changeAvatarSvg, updateProfileData }) {
@@ -23,30 +22,31 @@ export default function Avatar({ changeAvatarSvg, updateProfileData }) {
     try {
       photoOnHardDrive = await choseFileOnHardDrive();
       const { coords, parsedLocation } = await gpsLocation();
+      const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
       state = {
         coordinate: coords,
         country: parsedLocation[0].country,
         region: parsedLocation[0].region,
         city: parsedLocation[0].city,
         street: parsedLocation[0].street,
+        photo
       };
 
       try {
-        if (userId) {
-          const photo = await getUrlofUploadedAvatar(photoOnHardDrive, userId);
-          updateProfileData({ ...state, photo });
+        if (userId) {          
           dispatch(update({ userId, state }));
+          updateProfileData(state);
         } else {
           dispatch(refreshAvatar({ photoOnHardDrive }));
           updateProfileData({ ...state, photo: photoOnHardDrive });
         }
       } catch (error) {
-        console.log('Avatar. Problem with uploading of avatar to cloud / saving avatar in state');
+        console.log('Avatar. Problem with saving of avatar in state');
       } finally {
         // console.log('Avatar. UserId when chossing avatar', userId);
       }
     } catch (error) {
-      console.log('Avatar. Problem with GPS / choosing of avatar on hard drive');
+      console.log('Avatar. Problem with GPS / choosing of avatar on hard drive / uploading of avatar to cloud');
     } finally {
       console.log('Avatar. Link of avatar from state', avatar);
       console.log('Avatar. Link of avatar from hard drive', photoOnHardDrive);

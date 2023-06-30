@@ -18,17 +18,32 @@ export default function Slider({ sliderAge, setSliderAge }) {
     const valueRange = 92 - 5;
     const valueOffset = position - 5;
 
-    const newSliderAge = Math.floor((valueOffset / valueRange) * ageRange) + 18;
+    const newSliderAge = Math.floor((valueOffset / valueRange) * ageRange) + 17;
     // Застосовуємо обмеження від 18 до 45
-    const clampedSliderAge = Math.max(18, Math.min(newSliderAge, 45));
+    const clampedSliderMinAge = Math.max(18, Math.min(newSliderAge, sliderAge[1]-1));
 
     // Оновлюємо значення sliderAge
-    setSliderAge(clampedSliderAge);
+    setSliderAge([clampedSliderMinAge, Math.max(clampedSliderMinAge, ...sliderAge.slice(1))]);
   };
 
   const updateRightHandlePosition = position => {
     rightHandleAnimation.setValue(position);
     setRightHandlePosition(position);
+    const ageRange = 45 - 18;
+    const valueRange = 92 - 5;
+    const valueOffset = position - 5;
+
+    const newSliderAge = Math.floor((valueOffset / valueRange) * ageRange) + 18;
+    // Застосовуємо обмеження від 18 до 45
+    const clampedSliderMaxAge = Math.max(18, Math.min(newSliderAge-2, 45));
+
+    // Оновлюємо значення sliderAge
+   setSliderAge([...sliderAge.slice(0, 1), clampedSliderMaxAge]);
+
+
+
+
+
   };
 
   const leftHandleTranslation = leftHandleAnimation.interpolate({
@@ -61,9 +76,7 @@ export default function Slider({ sliderAge, setSliderAge }) {
     onPanResponderMove: (event, gestureState) => {
       const { dx } = gestureState;
       const adjustedDx = dx / 3.65;
-
       const newRightHandlePosition = Math.max(leftHandlePosition + 5, Math.min(rightHandlePosition + adjustedDx, 92));
-
       updateRightHandlePosition(newRightHandlePosition);
     },
     onPanResponderRelease: () => {},
