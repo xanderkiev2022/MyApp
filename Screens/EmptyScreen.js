@@ -14,7 +14,11 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { calculateAge } from '../Utils/ageValidation';
 
-export default function EmptyScreen({ navigation, ageLimit }) {
+export default function EmptyScreen({ navigation,
+  ageLimit
+}) {
+  const defaultAgeLimit = [18, 42];
+  // const ageLimit = [18, 42];
   console.log('ageLimit :>> ', ageLimit);
   const [position, setPosition] = useState(new Animated.ValueXY());
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -72,11 +76,16 @@ export default function EmptyScreen({ navigation, ageLimit }) {
 
   const getCollection = async () => {
     const usersCollection = collection(db, 'users');
+    // const q = query(usersCollection, where('age', '>=', ageLimit[0]), where('age', '<=', ageLimit[1]));
 
-    onSnapshot(usersCollection, snapshot => {
-      const userDataArray = snapshot.docs.map(doc => doc.data());
-      // .map(doc => doc.data().photo);
-      const modifiedCollection = userDataArray.map(user => {
+    // const q = usersCollection;
+    const q = query(usersCollection);
+
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const userDataArray = snapshot.docs.map(doc => {
+        const user = doc.data();
+        console.log('user?.birth ', user.birth);
+
         const modifiedUser = { ...user };
 
         Object.keys(modifiedUser).forEach(key => {
@@ -84,18 +93,28 @@ export default function EmptyScreen({ navigation, ageLimit }) {
             modifiedUser[key] = modifiedUser[key][modifiedUser[key].length - 1];
           }
         });
+        const age = calculateAge(modifiedUser.birth);
 
-        return modifiedUser;
+        console.log('modifiedUser :>> ', { ...modifiedUser, age });
+        return { ...modifiedUser, age };
       });
 
-      setMyCollection(modifiedCollection);
-      console.log('modifiedCollection :>> ', modifiedCollection);
+      const filteredUsers = userDataArray.filter(user => {
+        const userAge = user.age || 0;
+        // return userAge >= ageLimit[0] && userAge <= ageLimit[1];
+     return userAge >= (ageLimit || defaultAgeLimit)[0] && userAge <= (ageLimit || defaultAgeLimit)[1];
+      });
+
+      setMyCollection(filteredUsers);
     });
+
+    return unsubscribe;
   };
 
   useEffect(() => {
     getCollection();
-  }, []);
+    }, [ageLimit]);
+  // }, []);
 
   const memoizedCollection = useMemo(() => myCollection, [myCollection]);
   const currentCard = memoizedCollection[currentIndex];
@@ -107,6 +126,7 @@ export default function EmptyScreen({ navigation, ageLimit }) {
       {/* <View style={styles.avatarImg}>
              <Avatar changeAvatarSvg={true} />
           </View> */}
+      <Text style={{ ...styles.cardText, alignSelf: 'center' }}>Found {myCollection.length} profiles</Text>
       {currentCard ? (
         <GestureHandlerRootView style={{ flex: 1 }}>
           <PanGestureHandler onGestureEvent={handleGestureEvent} onHandlerStateChange={handleGestureStateChange}>
