@@ -14,9 +14,7 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { calculateAge } from '../Utils/ageValidation';
 
-export default function EmptyScreen({ navigation,
-  ageLimit
-}) {
+export default function EmptyScreen({ navigation, ageLimit, eyeColor }) {
   const defaultAgeLimit = [18, 42];
   // const ageLimit = [18, 42];
   console.log('ageLimit :>> ', ageLimit);
@@ -76,15 +74,11 @@ export default function EmptyScreen({ navigation,
 
   const getCollection = async () => {
     const usersCollection = collection(db, 'users');
-    // const q = query(usersCollection, where('age', '>=', ageLimit[0]), where('age', '<=', ageLimit[1]));
-
-    // const q = usersCollection;
     const q = query(usersCollection);
 
     const unsubscribe = onSnapshot(q, snapshot => {
       const userDataArray = snapshot.docs.map(doc => {
         const user = doc.data();
-        console.log('user?.birth ', user.birth);
 
         const modifiedUser = { ...user };
 
@@ -93,16 +87,23 @@ export default function EmptyScreen({ navigation,
             modifiedUser[key] = modifiedUser[key][modifiedUser[key].length - 1];
           }
         });
-        const age = calculateAge(modifiedUser.birth);
+        // const age = calculateAge(modifiedUser.birth);
+        const age = modifiedUser.birth ? calculateAge(modifiedUser.birth) : null;
 
-        console.log('modifiedUser :>> ', { ...modifiedUser, age });
         return { ...modifiedUser, age };
       });
 
       const filteredUsers = userDataArray.filter(user => {
+        console.log('user :>> ', user);
+        console.log('eyeColor :>> ', eyeColor);
         const userAge = user.age || 0;
+        const userEyeColor = !user.eyeColor || (eyeColor && eyeColor.includes(user.eyeColor));
+        const ageCondition = (userAge >= (ageLimit || defaultAgeLimit)[0] && userAge <= (ageLimit || defaultAgeLimit)[1]) || user.age === null;
+        // const ageCondition = ageLimit || defaultAgeLimit ? userAge >= (ageLimit || defaultAgeLimit)[0] && userAge <= (ageLimit || defaultAgeLimit)[1] : true;
         // return userAge >= ageLimit[0] && userAge <= ageLimit[1];
-     return userAge >= (ageLimit || defaultAgeLimit)[0] && userAge <= (ageLimit || defaultAgeLimit)[1];
+        console.log('ageCondition :>> ', ageCondition);
+        return userEyeColor && ageCondition;
+        // return userAge >= (ageLimit || defaultAgeLimit)[0] && userAge <= (ageLimit || defaultAgeLimit)[1];
       });
 
       setMyCollection(filteredUsers);
@@ -113,7 +114,7 @@ export default function EmptyScreen({ navigation,
 
   useEffect(() => {
     getCollection();
-    }, [ageLimit]);
+  }, [ageLimit, eyeColor]);
   // }, []);
 
   const memoizedCollection = useMemo(() => myCollection, [myCollection]);
@@ -135,6 +136,7 @@ export default function EmptyScreen({ navigation,
                 {currentCard.name && <Text style={styles.cardText}>Name: {currentCard.name}</Text>}
                 {currentCard.birth && <Text style={styles.cardText}>Age: {calculateAge(currentCard.birth)}</Text>}
                 {currentCard.region && <Text style={styles.cardText}>Region: {currentCard.region}</Text>}
+                {currentCard.eyeColor && <Text style={styles.cardText}>Color of eyes: {currentCard.eyeColor}</Text>}
                 {currentCard.photo && <Image style={styles.cardImage} source={{ uri: currentCard.photo }} />}
               </View>
             </Animated.View>

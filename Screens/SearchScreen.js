@@ -8,18 +8,26 @@ import { TouchableOpacity } from 'react-native';
 import EmptyScreen from './EmptyScreen';
 
 export default function SearchScreen({ navigation }) {
-
   // slider
-  const [sliderAge, setSliderAge] = useState([18,43]); // Початкове значення sliderAge
-
-  // checkBox
-  const [green, setGreen] = useState(false);
-  const [blue, setBlue] = useState(false);
 
   const fields = [
-    { text: 'Blue color', disabled: false, isSelected: blue, setIsSelected: setBlue },
-    { text: 'Green color', disabled: false, isSelected: green, setIsSelected: setGreen },
+    { text: 'Blue color', value: 'blue', disabled: false },
+    { text: 'Green color', value: 'green', disabled: false },
+    { text: 'Gray color', value: 'gray', disabled: false },
   ];
+  const [sliderAge, setSliderAge] = useState([18, 43]); // Початкове значення sliderAge
+  const [eyeColor, setEyeColor] = useState(fields.map(field => field.value));
+
+  const handleEyeColorSelection = value => {
+    let updatedValues = [...eyeColor];
+    const valueIndex = updatedValues.indexOf(value);
+    if (valueIndex > -1) {
+      updatedValues.splice(valueIndex, 1);
+    } else {
+      updatedValues.push(value);
+    }
+    setEyeColor(updatedValues);
+  };
 
   return (
     <View style={styles.container}>
@@ -41,10 +49,12 @@ export default function SearchScreen({ navigation }) {
               <View key={field.text} style={styles.checkboxContainer}>
                 <CheckBox
                   disabled={field.disabled}
-                  isSelected={field.isSelected}
-                  onSelectChange={() => {
-                    field.setIsSelected(!field.isSelected);
-                  }}
+                  // isSelected={field.isSelected}
+                  isSelected={eyeColor.includes(field.value)}
+                  onSelectChange={() => handleEyeColorSelection(field.value)}
+                  // onSelectChange={() => {
+                  //   field.setIsSelected(!field.isSelected);
+                  // }}
                 />
                 <Text style={styles.checkboxText}>{field.text}</Text>
               </View>
@@ -62,7 +72,7 @@ export default function SearchScreen({ navigation }) {
             >
               <Text>Submit</Text>
             </TouchableOpacity>
-            <EmptyScreen ageLimit={sliderAge} />
+            <EmptyScreen ageLimit={sliderAge} eyeColor={eyeColor} />
           </View>
         </View>
       </BgImage>

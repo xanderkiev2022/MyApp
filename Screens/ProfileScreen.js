@@ -68,6 +68,7 @@ export default function ProfileScreen({ navigation }) {
     { name: 'country', placeholder: 'Country', svg: 'calendar' },
     { name: 'region', placeholder: 'Region', svg: 'calendar' },
     { name: 'city', placeholder: 'City', svg: 'calendar' },
+    { name: 'eyeColor', placeholder: 'Color of eyes', svg: 'calendar' },
   ];
 
   const formatPhoneNumber = number => {
