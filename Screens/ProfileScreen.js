@@ -18,6 +18,7 @@ import { selectUserData, selectUserId } from '../redux/auth/authSelectors';
 import { logout, refresh, update } from '../redux/auth/authOperations';
 import Avatar from '../Components/Avatar';
 import { auth } from '../firebase/config';
+import { debounce } from 'lodash';
 
 import moment from 'moment';
 import { calculateAge, formatBirthDate } from '../Utils/ageValidation';
@@ -31,8 +32,10 @@ export default function ProfileScreen({ navigation }) {
     let initialState = {};
     for (const key in userData) {
       if (userData.hasOwnProperty(key)) {
-        initialState[key] = userData[key]; 
-          if (userData.phone === '') { initialState.phone = '+380' }
+        initialState[key] = userData[key];
+        if (userData.phone === '') {
+          initialState.phone = '+380';
+        }
       }
     }
     return initialState;
@@ -73,58 +76,64 @@ export default function ProfileScreen({ navigation }) {
 
   const formatPhoneNumber = number => {
     // форматування номера телефону
-  const cleaned = number.replace(/\D/g, '');
-  const match = cleaned.match(/^(\d{0,2})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})$/);
-  let formattedNumber = '';
-  if (match) {
-    const [fullMatch, countryCode, areaCode, firstPart, secondPart, thirdPart] = match;
-    formattedNumber = '';
+    const cleaned = number.replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{0,2})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})$/);
+    let formattedNumber = '';
+    if (match) {
+      const [fullMatch, countryCode, areaCode, firstPart, secondPart, thirdPart] = match;
+      formattedNumber = '';
 
-    if (countryCode && countryCode.charAt(0) === '0') {
-      formattedNumber += '+38' + countryCode;
-    } else if (countryCode) {
-      formattedNumber += '+' + countryCode;
-    }
+      if (countryCode && countryCode.charAt(0) === '0') {
+        formattedNumber += '+38' + countryCode;
+      } else if (countryCode) {
+        formattedNumber += '+' + countryCode;
+      }
 
-    if (areaCode) {
-      formattedNumber += ' (' + areaCode;
-      if (firstPart) {
-        formattedNumber += ') ' + firstPart;
-        if (secondPart) {
-          formattedNumber += '-' + secondPart;
-          if (thirdPart) {
-            formattedNumber += '-' + thirdPart;
+      if (areaCode) {
+        formattedNumber += ' (' + areaCode;
+        if (firstPart) {
+          formattedNumber += ') ' + firstPart;
+          if (secondPart) {
+            formattedNumber += '-' + secondPart;
+            if (thirdPart) {
+              formattedNumber += '-' + thirdPart;
+            }
           }
         }
       }
     }
-  }
-  return formattedNumber;
+    return formattedNumber;
   };
 
-  const handleChangePhone = value => {
-    const formattedNumber = formatPhoneNumber(value);
-    setState(prevState => ({
-      ...prevState,
-      phone: formattedNumber,
-    }));
-  };
-
-    const handleChangeBirth = value => {
+  const handleChange = (field, value) => {
+    console.log('field.name :>> ', field.name);
+    if (field.name === 'birth') {
       const formattedDate = formatBirthDate(value);
-        setState(prevState => ({
-          ...prevState,
-          birth: formattedDate,
-        }));
+      setState(prevState => ({
+        ...prevState,
+        birth: formattedDate,
+      }));
+    } else if (field.name === 'phone') {
+      const formattedNumber = formatPhoneNumber(value);
+      setState(prevState => ({
+        ...prevState,
+        phone: formattedNumber,
+      }));
+    } else {
+      setState(prevState => ({
+        ...prevState,
+        [field.name]: value,
+      }));
+    }
   };
-  
-    useEffect(() => {
-// if (state.birth.length < 8) {
-//   alert('Перевірте правильність введення дати');
-// }
-      console.log('state змінився :>> ');
-    }, [state]);
-  
+
+  useEffect(() => {
+    // if (state.birth.length < 8) {
+    //   alert('Перевірте правильність введення дати');
+    // }
+    console.log('state змінився :>> ');
+  }, [state]);
+
   const handleUpdateProfileData = newData => {
     setState(prevState => ({
       ...prevState,
@@ -172,18 +181,7 @@ export default function ProfileScreen({ navigation }) {
                       handleBlur(field.name);
                     }}
                     value={state[field.name]}
-                    onChangeText={value => {
-                      if (field.name === 'phone') {
-                        handleChangePhone(value);
-                      } else if (field.name === 'birth') {
-                        handleChangeBirth(value);
-                      } else {
-                        setState(prevState => ({
-                          ...prevState,
-                          [field.name]: value,
-                        }));
-                      }
-                    }}
+                    onChangeText={value => {handleChange(field, value);}}
                     style={{
                       ...styles.inputData,
                       // borderColor: isFocused[field.name] ? '#FF6C00' : '#E8E8E8',

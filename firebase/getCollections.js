@@ -6,7 +6,24 @@ export const getCollectionOfEyeColors = async ({ setEyeCheckBoxFileds, setEyeCol
   const fetchedCollection = collection(db, 'users');
   const unsubscribe = onSnapshot(fetchedCollection, snapshot => {
     const userDataArray = snapshot.docs.map(doc => doc.data());
-    const filteredData = [...new Set(userDataArray.map(user => user.eyeColor))];
+
+    // збираємо в масив нові значення + беремо останнє  значення з масиву масивів
+    const filteredData = [
+      ...new Set(
+        userDataArray.map(user => {
+          const modifiedUser = { ...user };
+          // console.log('modifiedUser.length :>> ', modifiedUser.length);
+          Object.keys(modifiedUser).forEach(eyeColor => {
+            if (Array.isArray(modifiedUser[eyeColor])) {
+              modifiedUser[eyeColor] = modifiedUser[eyeColor][modifiedUser[eyeColor].length - 1];
+            }
+          });
+          return modifiedUser.eyeColor;
+        })
+      ),
+    ];
+
+    // створюємо масив об"єктів для чекбоксів
     const fields = filteredData.map(color => {
       if (color === undefined) {
         return { text: 'No information', value: 'noInfo', disabled: false };

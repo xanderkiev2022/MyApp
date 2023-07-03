@@ -8,7 +8,7 @@ export default function EmptyScreen({ navigation }) {
     <View style={styles.container}>
       <BgImage>
         <View style={styles.regScr}>
-          <Card />
+          <Card ageLimit={[18, 50]} eyeColor={['green', 'noInfo']} />
         </View>
       </BgImage>
     </View>
