@@ -40,10 +40,6 @@ export default function Slider({ sliderAge, setSliderAge }) {
     // Оновлюємо значення sliderAge
    setSliderAge([...sliderAge.slice(0, 1), clampedSliderMaxAge]);
 
-
-
-
-
   };
 
   const leftHandleTranslation = leftHandleAnimation.interpolate({
@@ -81,8 +77,6 @@ export default function Slider({ sliderAge, setSliderAge }) {
     },
     onPanResponderRelease: () => {},
   });
-
-  // const [sliderAge, setSliderAge] = useState(18);
 
   return (
     <View style={styles.slider}>

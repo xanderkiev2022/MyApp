@@ -1,22 +1,47 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Text, Animated } from 'react-native';
 import { BgImage } from '../Components/BgImage';
 import Slider from '../Components/Slider';
 import { CheckBox } from '../Components/CheckBox';
-import { Keyboard } from 'react-native';
 import { TouchableOpacity } from 'react-native';
-import EmptyScreen from './EmptyScreen';
+import { getCollectionOfEyeColors } from '../firebase/getCollections';
+import Card from '../Components/Card';
+import { useRef } from 'react';
 
 export default function SearchScreen({ navigation }) {
-  // slider
+  const [sliderAge, setSliderAge] = useState([18, 43]);
+  const [eyeCheckBoxFileds, setEyeCheckBoxFileds] = useState([]);
+  const [eyeColor, setEyeColor] = useState([]);
 
-  const fields = [
-    { text: 'Blue color', value: 'blue', disabled: false },
-    { text: 'Green color', value: 'green', disabled: false },
-    { text: 'Gray color', value: 'gray', disabled: false },
-  ];
-  const [sliderAge, setSliderAge] = useState([18, 43]); // Початкове значення sliderAge
-  const [eyeColor, setEyeColor] = useState(fields.map(field => field.value));
+  useEffect(() => {
+    getCollectionOfEyeColors({ setEyeCheckBoxFileds, setEyeColor });
+  }, []);
+
+  const [prefContainerVisible, setPrefContainerVisible] = useState(false);
+  const prefContainerHeight = useState(new Animated.Value(0))[0];
+  const [arrowDown, setArrowDown] = useState(true);
+
+  const togglePrefContainer = () => {
+    if (prefContainerVisible) {
+      Animated.timing(prefContainerHeight, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => {
+        setPrefContainerVisible(false);
+        setArrowDown(true);
+      });
+    } else {
+      Animated.timing(prefContainerHeight, {
+        toValue: 220,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => {
+        setPrefContainerVisible(true);
+        setArrowDown(false);
+      });
+    }
+  };
 
   const handleEyeColorSelection = value => {
     let updatedValues = [...eyeColor];
@@ -29,51 +54,62 @@ export default function SearchScreen({ navigation }) {
     setEyeColor(updatedValues);
   };
 
+  const throttledSliderAge = useRef([18, 43]);
+  const sliderAgeTimeout = useRef(null);
+  const handleSliderAgeChange = values => {
+    throttledSliderAge.current = values;
+    clearTimeout(sliderAgeTimeout.current);
+    sliderAgeTimeout.current = setTimeout(() => {
+      setSliderAge(values);
+    }, 200);
+  };
+
   return (
     <View style={styles.container}>
       <BgImage>
         <View style={styles.regScr}>
-          <Text style={{ ...styles.titleText, textAlign: 'center' }}>Set your preferences</Text>
-          <View style={styles.sliderContainer}>
-            <View style={styles.sliderHeader}>
-              <Text>Age</Text>
-              <Text style={styles.sliderAge}>
-                {sliderAge[0]}-{sliderAge[1]}
-              </Text>
-            </View>
-            <Slider sliderAge={sliderAge} setSliderAge={setSliderAge} />
-          </View>
-          <View style={styles.checkboxTitle}>
-            <Text style={styles.titleText}>Title of CheckBox</Text>
-            {fields.map(field => (
-              <View key={field.text} style={styles.checkboxContainer}>
-                <CheckBox
-                  disabled={field.disabled}
-                  // isSelected={field.isSelected}
-                  isSelected={eyeColor.includes(field.value)}
-                  onSelectChange={() => handleEyeColorSelection(field.value)}
-                  // onSelectChange={() => {
-                  //   field.setIsSelected(!field.isSelected);
-                  // }}
+          <TouchableOpacity onPress={togglePrefContainer}>
+            <Text style={{ ...styles.titleText, textAlign: 'center' }}>{arrowDown ? 'Preferences ▼' : 'Preferences ▲'}</Text>
+          </TouchableOpacity>
+          <Animated.View style={[styles.prefContainer, { height: prefContainerHeight }, !prefContainerVisible && { opacity: 0 }]}>
+            <View styles={styles.prefContainer}>
+              <View style={styles.sliderContainer}>
+                <View style={styles.sliderHeader}>
+                  <Text>Age</Text>
+                  <Text style={styles.sliderAge}>
+                    {sliderAge[0]}-{sliderAge[1]}
+                  </Text>
+                </View>
+                <Slider
+                  sliderAge={sliderAge}
+                  // setSliderAge={setSliderAge}
+                  setSliderAge={handleSliderAgeChange}
                 />
-                <Text style={styles.checkboxText}>{field.text}</Text>
               </View>
-            ))}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.btnComment}
-              // disabled={!comment}
-              onPress={() => {
-                // setComment('');
-                Keyboard.dismiss();
-                // addComment();
-                // setTextInputHeight(45);
-              }}
-            >
-              <Text>Submit</Text>
-            </TouchableOpacity>
-            <EmptyScreen ageLimit={sliderAge} eyeColor={eyeColor} />
-          </View>
+
+              <Text style={styles.titleText}>Eye color</Text>
+
+              <Animated.View
+                style={{
+                  ...styles.checkboxContainer,
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {eyeCheckBoxFileds.map(field => (
+                  <View key={field.text} style={styles.checkboxContainer}>
+                    <CheckBox
+                      disabled={field.disabled}
+                      isSelected={eyeColor.includes(field.value)}
+                      onSelectChange={() => handleEyeColorSelection(field.value)}
+                    />
+                    <Text style={styles.checkboxText}>{field.text}</Text>
+                  </View>
+                ))}
+              </Animated.View>
+            </View>
+          </Animated.View>
+          <Card ageLimit={sliderAge} eyeColor={eyeColor} />
         </View>
       </BgImage>
     </View>
@@ -97,10 +133,9 @@ const styles = StyleSheet.create({
   },
   sliderHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',    
+    justifyContent: 'space-between',
   },
-  checkboxTitle: {
-  },
+  checkboxTitle: {},
   titleText: {
     fontWeight: 'bold',
     fontSize: 19,
@@ -109,5 +144,7 @@ const styles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: 'row',
     marginBottom: 5,
+    marginRight: 5,
   },
+  prefContainer: {},
 });
