@@ -7,7 +7,7 @@ import { getCollectionOfFilteredUsers } from '../firebase/getCollections';
 import { SwipeCards } from '../Components/SwipeCards';
 
 export default function Card({ navigation, ageLimit, eyeColor }) {
-  console.log('ageLimit in Card :>> ', ageLimit);
+    console.log('Card rendered', eyeColor);
   const [position, setPosition] = useState(new Animated.ValueXY());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [myCollection, setMyCollection] = useState([]);

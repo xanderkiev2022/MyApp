@@ -35,10 +35,10 @@ export default function Avatar({ changeAvatarSvg, updateProfileData }) {
       try {
         if (userId) {          
           dispatch(update({ userId, state }));
-          updateProfileData(state);
+          updateProfileData(state, field={name:'photo'});
         } else {
           dispatch(refreshAvatar({ photoOnHardDrive }));
-          updateProfileData({ ...state, photo: photoOnHardDrive });
+          updateProfileData({ ...state, photo: photoOnHardDrive }, field={name:'photo'});
         }
       } catch (error) {
         console.log('Avatar. Problem with saving of avatar in state');

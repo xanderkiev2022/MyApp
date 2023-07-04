@@ -21,7 +21,9 @@ import { auth } from '../firebase/config';
 import { debounce } from 'lodash';
 
 import moment from 'moment';
-import { calculateAge, formatBirthDate } from '../Utils/ageValidation';
+import { formatBirthDate } from '../Utils/ageValidation';
+import { useCallback } from 'react';
+import { formatPhoneNumber } from '../Utils/phoneValidation';
 
 export default function ProfileScreen({ navigation }) {
   const userId = useSelector(selectUserId);
@@ -54,7 +56,7 @@ export default function ProfileScreen({ navigation }) {
   };
   const handleBlur = input => {
     setIsFocused(prevState => ({ ...prevState, [input]: false }));
-    setState(prevState => ({ ...prevState, [input]: state[input] }));
+    // setState(prevState => ({ ...prevState, [input]: state[input] }));
     dispatch(update({ userId, state: { [input]: state[input] } }));
   };
 
@@ -74,74 +76,22 @@ export default function ProfileScreen({ navigation }) {
     { name: 'eyeColor', placeholder: 'Color of eyes', svg: 'calendar' },
   ];
 
-  const formatPhoneNumber = number => {
-    // форматування номера телефону
-    const cleaned = number.replace(/\D/g, '');
-    const match = cleaned.match(/^(\d{0,2})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})$/);
-    let formattedNumber = '';
-    if (match) {
-      const [fullMatch, countryCode, areaCode, firstPart, secondPart, thirdPart] = match;
-      formattedNumber = '';
-
-      if (countryCode && countryCode.charAt(0) === '0') {
-        formattedNumber += '+38' + countryCode;
-      } else if (countryCode) {
-        formattedNumber += '+' + countryCode;
-      }
-
-      if (areaCode) {
-        formattedNumber += ' (' + areaCode;
-        if (firstPart) {
-          formattedNumber += ') ' + firstPart;
-          if (secondPart) {
-            formattedNumber += '-' + secondPart;
-            if (thirdPart) {
-              formattedNumber += '-' + thirdPart;
-            }
-          }
-        }
-      }
-    }
-    return formattedNumber;
-  };
-
-  const handleChange = (field, value) => {
-    console.log('field.name :>> ', field.name);
-    if (field.name === 'birth') {
-      const formattedDate = formatBirthDate(value);
-      setState(prevState => ({
-        ...prevState,
-        birth: formattedDate,
-      }));
-    } else if (field.name === 'phone') {
-      const formattedNumber = formatPhoneNumber(value);
-      setState(prevState => ({
-        ...prevState,
-        phone: formattedNumber,
-      }));
-    } else {
-      setState(prevState => ({
-        ...prevState,
-        [field.name]: value,
-      }));
-    }
-  };
-
-  useEffect(() => {
-    // if (state.birth.length < 8) {
-    //   alert('Перевірте правильність введення дати');
-    // }
-    console.log('state змінився :>> ');
-  }, [state]);
-
-  const handleUpdateProfileData = newData => {
+  // useCallback для створення мемоізованої функції
+  const handleChange = useCallback((value, field) => {
+    const updatedValue =
+      field.name === 'birth' ? formatBirthDate(value)
+        : field.name === 'phone' ? formatPhoneNumber(value)
+          : value;
     setState(prevState => ({
       ...prevState,
-      ...newData,
+      [field.name]: updatedValue,
     }));
-    console.log('ProfileScreen. Updated avatar. newData :>> ', newData.photo);
-    console.log('ProfileScreen. Updated avatar. state :>> ', state.photo);
-  };
+    console.log('value :>> ', value);
+  }, []);
+
+  useEffect(() => {
+    console.log('state змінився :>> ');
+  }, [state]);
 
   return (
     // <SafeAreaView style={{ flex: 1, justifyContent: 'flex-end' }}>
@@ -159,7 +109,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.container}>
           <ScrollView>
             <View style={styles.avatarBox}>
-              <Avatar updateProfileData={handleUpdateProfileData} />
+              <Avatar updateProfileData={handleChange} />
               <TouchableOpacity style={styles.exitSvg} onPress={() => dispatch(logout())}>
                 <Ionicons name="exit-outline" size={28} color="#BDBDBD" backgroundColor="transparent" />
               </TouchableOpacity>
@@ -181,7 +131,9 @@ export default function ProfileScreen({ navigation }) {
                       handleBlur(field.name);
                     }}
                     value={state[field.name]}
-                    onChangeText={value => {handleChange(field, value);}}
+                    onChangeText={value => {
+                      handleChange(value, field);
+                    }}
                     style={{
                       ...styles.inputData,
                       // borderColor: isFocused[field.name] ? '#FF6C00' : '#E8E8E8',
