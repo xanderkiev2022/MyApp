@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet,  Animated, } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
+import { View } from 'react-native';
 
-export const SwipeCards = ({ setCurrentIndex, children }) => {
+export const SwipeCards = ({ setCurrentIndex, noSwipe, adToFavorite, adToBlackList, children }) => {
   const [position, setPosition] = useState(new Animated.ValueXY());
 
   const handleGestureEvent = Animated.event(
@@ -22,9 +23,11 @@ export const SwipeCards = ({ setCurrentIndex, children }) => {
       if (event.nativeEvent.translationX > 200) {
         resetPosition();
         setCurrentIndex(prevIndex => prevIndex + 1);
+        adToFavorite();
       } else if (event.nativeEvent.translationX < -200) {
         resetPosition();
         setCurrentIndex(prevIndex => prevIndex + 1);
+        adToBlackList();
       } else {
         resetPosition();
       }
@@ -56,11 +59,17 @@ export const SwipeCards = ({ setCurrentIndex, children }) => {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <PanGestureHandler onGestureEvent={handleGestureEvent} onHandlerStateChange={handleGestureStateChange}>
-        <Animated.View style={[styles.cardContainer, animatedCardStyle]}>{children}</Animated.View>
-      </PanGestureHandler>
-    </GestureHandlerRootView>
+    <>
+      {noSwipe ? (
+        <View style={styles.cardContainer}>{children}</View>
+      ) : (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <PanGestureHandler onGestureEvent={handleGestureEvent} onHandlerStateChange={handleGestureStateChange}>
+            <Animated.View style={[styles.cardContainer, animatedCardStyle]}>{children}</Animated.View>
+          </PanGestureHandler>
+        </GestureHandlerRootView>
+      )}
+    </>
   );
 };
 

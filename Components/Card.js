@@ -3,11 +3,18 @@ import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import { useEffect } from 'react';
 import { useMemo } from 'react';
 
-import { getCollectionOfFilteredUsers } from '../firebase/getCollections';
+import { getCollectionOfBlackList, getCollectionOfFilteredUsers } from '../firebase/getCollections';
 import { SwipeCards } from '../Components/SwipeCards';
 
-export default function Card({ navigation, ageLimit, eyeColor }) {
-    console.log('Card rendered', eyeColor);
+import { useDispatch, useSelector } from 'react-redux';
+import { update } from '../redux/auth/authOperations';
+import { selectUserData } from '../redux/auth/authSelectors';
+
+export default function Card({ navigation, ageLimit, eyeColor, noSwipe }) {
+  const dispatch = useDispatch();
+  const { blackList, userId } = useSelector(selectUserData);
+
+  console.log('Card rendered', eyeColor);
   const [position, setPosition] = useState(new Animated.ValueXY());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [myCollection, setMyCollection] = useState([]);
@@ -20,18 +27,26 @@ export default function Card({ navigation, ageLimit, eyeColor }) {
   };
 
   useEffect(() => {
-    getCollectionOfFilteredUsers({ ageLimit, eyeColor, setMyCollection, setCurrentIndex, resetPosition });
+    getCollectionOfFilteredUsers({ ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition });
   }, [ageLimit, eyeColor]);
 
   const memoizedCollection = useMemo(() => myCollection, [myCollection]);
   const currentCard = memoizedCollection[currentIndex];
+
+  const adToFavorite = () => {
+    dispatch(update({ userId, state: { favorite: currentCard.userId } }));
+  }
+
+    const adToBlackList = () => {
+    dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+    };
 
   return (
     <>
       <View style={styles.regScr}>
         <Text style={{ ...styles.cardText, alignSelf: 'center' }}>Found {myCollection.length} profiles</Text>
         {currentCard ? (
-          <SwipeCards setCurrentIndex={setCurrentIndex}>
+          <SwipeCards setCurrentIndex={setCurrentIndex} noSwipe={noSwipe} adToFavorite={adToFavorite} adToBlackList={adToBlackList}>
             <View style={styles.card}>
               {currentCard.name && <Text style={styles.cardText}>Name: {currentCard.name}</Text>}
               {currentCard.birth && <Text style={styles.cardText}>Age: {currentCard.age}</Text>}

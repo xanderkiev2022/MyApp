@@ -131,7 +131,12 @@ const authSlice = createSlice({
 
       for (const key in payload) {
         if (payload.hasOwnProperty(key)) {
-          state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
+          if (key === 'blackList') {
+            state[key] = Array.isArray(payload[key]) ? payload[key] : [payload[key]];
+          } else {
+            state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
+          }
+          // state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
         }
       }
       state.isLoggedIn = true;
