@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import { useEffect } from 'react';
 import { useMemo } from 'react';
@@ -40,21 +40,24 @@ export default function Card({ navigation, ageLimit, eyeColor, blackList=[], noS
   const memoizedCollection = useMemo(() => myCollection, [myCollection]);
   const currentCard = memoizedCollection[currentIndex];
 
-  const adToFavorite = () => {
+  const adToFavorite = useCallback(() => {
     // dispatch(update({ userId, state: { favorite: currentCard.userId } }));
-  }
+  }, [currentCard, userId]);
 
-    const adToBlackList = () => {
-      dispatch(update({ userId, state: { blackList: currentCard.userId } }));
-  };
+  const adToBlackList = useCallback(() => {
+    dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+  }, [currentCard, dispatch, userId]);
   
-const handleRemove = currentUser => {
-  const updatedBlackList = blackList.filter(user => user !== currentUser);
-  console.log('blackList11111 :>> ', blackList);
-  console.log('updatedBlackList :>> ', updatedBlackList);
-    console.log('currentUser :>> ', currentUser);
-  dispatch(update({ userId, state: { blackList: updatedBlackList } }));
-};
+  const handleRemove = useCallback(
+    currentUser => {
+      const updatedBlackList = blackList.filter(user => user !== currentUser);
+      console.log('blackList11111 :>> ', blackList);
+      console.log('updatedBlackList :>> ', updatedBlackList);
+      console.log('currentUser :>> ', currentUser);
+      dispatch(update({ userId, state: { blackList: updatedBlackList } }));
+    },
+    [blackList, dispatch, userId]
+  );
 
   return (
     <>

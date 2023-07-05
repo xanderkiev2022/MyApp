@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, Text, Animated } from 'react-native';
 import { BgImage } from '../Components/BgImage';
 import Slider from '../Components/Slider';
@@ -46,26 +46,33 @@ export default function SearchScreen({ navigation }) {
     }
   };
 
-  const handleEyeColorSelection = value => {
-    let updatedValues = [...eyeColor];
-    const valueIndex = updatedValues.indexOf(value);
-    if (valueIndex > -1) {
-      updatedValues.splice(valueIndex, 1);
-    } else {
-      updatedValues.push(value);
-    }
-    setEyeColor(updatedValues);
-  };
+  const handleEyeColorSelection = useCallback(
+    value => {
+      let updatedValues = [...eyeColor];
+      const valueIndex = updatedValues.indexOf(value);
+      if (valueIndex > -1) {
+        updatedValues.splice(valueIndex, 1);
+      } else {
+        updatedValues.push(value);
+      }
+      setEyeColor(updatedValues);
+    },
+    [eyeColor]
+  );
 
   const throttledSliderAge = useRef([18, 43]);
   const sliderAgeTimeout = useRef(null);
-  const handleSliderAgeChange = values => {
-    throttledSliderAge.current = values;
-    clearTimeout(sliderAgeTimeout.current);
-    sliderAgeTimeout.current = setTimeout(() => {
-      setSliderAge(values);
-    }, 200);
-  };
+  
+ const handleSliderAgeChange = useCallback(
+   values => {
+     throttledSliderAge.current = values;
+     clearTimeout(sliderAgeTimeout.current);
+     sliderAgeTimeout.current = setTimeout(() => {
+       setSliderAge(values);
+     }, 200);
+   },
+   [setSliderAge]
+ );
 
   return (
     <View style={styles.container}>
