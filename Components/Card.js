@@ -3,16 +3,22 @@ import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import { useEffect } from 'react';
 import { useMemo } from 'react';
 
-import { getCollectionOfBlackList, getCollectionOfFilteredUsers } from '../firebase/getCollections';
+import { getCollectionOfBlackList, getCollectionOfFilteredUsers, getFilteredUsers } from '../firebase/getCollections';
 import { SwipeCards } from '../Components/SwipeCards';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { update } from '../redux/auth/authOperations';
-import { selectUserData } from '../redux/auth/authSelectors';
+import { refreshDatabase, update } from '../redux/auth/authOperations';
+import { selectDatabase, selectUserData } from '../redux/auth/authSelectors';
+import { TouchableOpacity } from 'react-native';
 
-export default function Card({ navigation, ageLimit, eyeColor, noSwipe }) {
+export default function Card({ navigation, ageLimit, eyeColor, blackList=[], noSwipe }) {
   const dispatch = useDispatch();
-  const { blackList, userId } = useSelector(selectUserData);
+  const {userId } = useSelector(selectUserData);
+  const userData = useSelector(selectUserData);
+  const state = useSelector(state => state);
+
+  
+  const database = useSelector(selectDatabase);
 
   console.log('Card rendered', eyeColor);
   const [position, setPosition] = useState(new Animated.ValueXY());
@@ -27,27 +33,43 @@ export default function Card({ navigation, ageLimit, eyeColor, noSwipe }) {
   };
 
   useEffect(() => {
-    getCollectionOfFilteredUsers({ ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition });
-  }, [ageLimit, eyeColor]);
+    // getFilteredUsers({ database, ageLimit, eyeColor, setMyCollection, setCurrentIndex, resetPosition });
+    getCollectionOfFilteredUsers({ ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition, userId });
+  }, [ageLimit, eyeColor, blackList]);
 
   const memoizedCollection = useMemo(() => myCollection, [myCollection]);
   const currentCard = memoizedCollection[currentIndex];
 
   const adToFavorite = () => {
-    dispatch(update({ userId, state: { favorite: currentCard.userId } }));
+    // dispatch(update({ userId, state: { favorite: currentCard.userId } }));
   }
 
     const adToBlackList = () => {
-    dispatch(update({ userId, state: { blackList: currentCard.userId } }));
-    };
+      dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+  };
+  
+const handleRemove = currentUser => {
+  const updatedBlackList = blackList.filter(user => user !== currentUser);
+  console.log('blackList11111 :>> ', blackList);
+  console.log('updatedBlackList :>> ', updatedBlackList);
+    console.log('currentUser :>> ', currentUser);
+  dispatch(update({ userId, state: { blackList: updatedBlackList } }));
+};
 
   return (
     <>
       <View style={styles.regScr}>
         <Text style={{ ...styles.cardText, alignSelf: 'center' }}>Found {myCollection.length} profiles</Text>
-        {currentCard ? (
-          <SwipeCards setCurrentIndex={setCurrentIndex} noSwipe={noSwipe} adToFavorite={adToFavorite} adToBlackList={adToBlackList}>
+        {currentCard
+          // && !blackList.includes(currentCard.userId)
+          ?
+          (<SwipeCards setCurrentIndex={setCurrentIndex} noSwipe={noSwipe} adToFavorite={adToFavorite} adToBlackList={adToBlackList}>
             <View style={styles.card}>
+              {noSwipe && (
+                <TouchableOpacity onPress={() => handleRemove(currentCard.userId)}>
+                  <Text>X</Text>
+                </TouchableOpacity>
+              )}
               {currentCard.name && <Text style={styles.cardText}>Name: {currentCard.name}</Text>}
               {currentCard.birth && <Text style={styles.cardText}>Age: {currentCard.age}</Text>}
               {currentCard.region && <Text style={styles.cardText}>Region: {currentCard.region}</Text>}

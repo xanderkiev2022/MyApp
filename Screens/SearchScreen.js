@@ -7,11 +7,14 @@ import { TouchableOpacity } from 'react-native';
 import { getCollectionOfEyeColors } from '../firebase/getCollections';
 import Card from '../Components/Card';
 import { useRef } from 'react';
+import { selectUserData } from '../redux/auth/authSelectors';
+import { useSelector } from 'react-redux';
 
 export default function SearchScreen({ navigation }) {
   const [sliderAge, setSliderAge] = useState([18, 43]);
   const [eyeCheckBoxFileds, setEyeCheckBoxFileds] = useState([]);
   const [eyeColor, setEyeColor] = useState([]);
+  const {blackList} = useSelector(selectUserData);
 
   useEffect(() => {
     getCollectionOfEyeColors({ setEyeCheckBoxFileds, setEyeColor });
@@ -109,7 +112,7 @@ export default function SearchScreen({ navigation }) {
               </Animated.View>
             </View>
           </Animated.View>
-          <Card ageLimit={sliderAge} eyeColor={eyeColor} />
+          <Card ageLimit={sliderAge} eyeColor={eyeColor} blackList={blackList} />
         </View>
       </BgImage>
     </View>

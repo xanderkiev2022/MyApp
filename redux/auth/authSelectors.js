@@ -11,3 +11,5 @@ export const selectPhone = state => state.auth.phone;
 export const selectDOB = state => state.auth.birth;
 
 export const selectUserData = state => state.auth;
+
+export const selectDatabase = state => state.auth.database;

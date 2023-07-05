@@ -2,13 +2,18 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Card from '../Components/Card';
 import { BgImage } from '../Components/BgImage';
+import { useSelector } from 'react-redux';
+import { selectUserData } from '../redux/auth/authSelectors';
 
 export default function EmptyScreen({ navigation }) {
+
+  const { blackList } = useSelector(selectUserData);
+  
   return (
     <View style={styles.container}>
       <BgImage>
         <View style={styles.regScr}>
-          <Card noSwipe={true} ageLimit={[18, 50]} eyeColor={['green', 'noInfo']} />
+          <Card noSwipe={true} ageLimit={[18, 50]} eyeColor={['green', 'noInfo']} blackList = {blackList} />
         </View>
       </BgImage>
     </View>

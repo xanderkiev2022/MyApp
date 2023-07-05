@@ -13,16 +13,24 @@ const initialState = {
   error: '',
 };
 
+const setPayloadValues = (state, payload) => {
+  for (const key in payload) {
+    if (payload.hasOwnProperty(key)) {
+      if (key === 'blackList') {
+        state[key] = Array.isArray(payload[key]) ? payload[key] : [payload[key]];
+      } else {
+        state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
+      }
+    }
+  }
+};
+
 const handlePending = state => {
   state.isLoading = true;
 };
 const handleFulfilled = (state, { payload }) => {
   const { userId, name, email, photo, password } = payload;
-  for (const key in payload) {
-    if (payload.hasOwnProperty(key)) {
-      state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
-    }
-  }
+  setPayloadValues(state, payload);
   // state.userId = userId;
   // state.name = name;
   // state.email = email;
@@ -51,38 +59,9 @@ const handleLogoutFulfilled = state => {
   state.isLoading = false;
 };
 
-const handleUserFulfilledRefreshing = (state, { payload }) => {
-  const { userId, name, email, photo, isLoggedIn } = payload;
-  // state.userId = userId;
-  // state.name = name;
-  // state.email = email;
-  // state.photo = photo;
-        for (const key in payload) {
-          if (payload.hasOwnProperty(key)) {
-            state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
-          }
-        }
-        state.isLoggedIn = true;
-        state.isLoading = false;
-        state.error = '';
-  // state.isLoggedIn = isLoggedIn;
-  // state.error = '';
-  state.isRefreshing = false;
-};
-const handleRejectedRefreshing = (state, action) => {
-  state.isRefreshing = false;
-};
-const handlePendingRefreshing = state => {
-  state.isRefreshing = true;
-};
-
 const handleUserFulfilledUpdate = (state, { payload }) => {
   // const { photo } = payload;
-  for (const key in payload) {
-    if (payload.hasOwnProperty(key)) {
-      state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
-    }
-  }
+  setPayloadValues(state, payload);
   // state.photo = photo;
   state.error = '';
   state.isLoading = false;
@@ -128,32 +107,23 @@ const authSlice = createSlice({
       // state.name = payload.name || null;
       // state.email = payload.email;
       // state.photo = payload.photo;
-
-      for (const key in payload) {
-        if (payload.hasOwnProperty(key)) {
-          if (key === 'blackList') {
-            state[key] = Array.isArray(payload[key]) ? payload[key] : [payload[key]];
-          } else {
-            state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
-          }
-          // state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];
-        }
-      }
+      setPayloadValues(state, payload);
       state.isLoggedIn = true;
       state.isLoading = false;
       state.error = '';
     },
     refreshAvatar: (state, { payload }) => {
       state.photo = payload.photoOnHardDrive;
-      
     },
+    // refreshDatabase: (state, { payload }) => {
+    //    for (const key in payload) {
+    //          state.database[key] = payload[key];
+    //    }
+    // },
   },
   extraReducers: builder => {
     builder
       .addCase(logout.fulfilled, handleLogoutFulfilled)
-      // .addCase(refresh.pending, handlePendingRefreshing)
-      // .addCase(refresh.fulfilled, handleUserFulfilledRefreshing)
-      // .addCase(refresh.rejected, handleRejectedRefreshing)
       .addCase(update.pending, handlePendingUpdate)
       .addCase(update.fulfilled, handleUserFulfilledUpdate)
       .addCase(update.rejected, handleRejectedUpdate)

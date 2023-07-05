@@ -46,7 +46,6 @@ export const getCollectionOfEyeColors = async ({ setEyeCheckBoxFileds, setEyeCol
 //      const userDataArray = snapshot.docs.map(doc => doc.data());
 // console.log('userDataArray :>> ', userDataArray);
 
-
 //      const currentUser = userDataArray.find(user => user.userId === userId);
 //      console.log('currentUser :>> ', currentUser);
 
@@ -94,8 +93,7 @@ export const getCollectionOfEyeColors = async ({ setEyeCheckBoxFileds, setEyeCol
 //   return unsubscribe;
 // };
 
-
-export const getCollectionOfFilteredUsers = async ({ ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition }) => {
+export const getCollectionOfFilteredUsers = async ({ ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition, userId }) => {
   const defaultAgeLimit = [18, 42];
   const usersCollection = collection(db, 'users');
   const unsubscribe = onSnapshot(usersCollection, snapshot => {
@@ -106,7 +104,7 @@ export const getCollectionOfFilteredUsers = async ({ ageLimit, eyeColor, blackLi
 
       Object.keys(modifiedUser).forEach(key => {
         if (Array.isArray(modifiedUser[key])) {
-            modifiedUser[key] = modifiedUser[key][modifiedUser[key].length - 1];
+          modifiedUser[key] = modifiedUser[key][modifiedUser[key].length - 1];
         }
       });
       const age = modifiedUser.birth ? calculateAge(modifiedUser.birth) : null;
@@ -115,18 +113,22 @@ export const getCollectionOfFilteredUsers = async ({ ageLimit, eyeColor, blackLi
     });
 
     const filteredUsers = userDataArray.filter(user => {
-      const userEyeColor = (!user.eyeColor && eyeColor && eyeColor.includes('noInfo')) || (eyeColor && eyeColor.includes(user.eyeColor));
-      const userAge = (user.age >= (ageLimit || defaultAgeLimit)[0] && user.age <= (ageLimit || defaultAgeLimit)[1]) || user.age === null;
+      const userEyeColor = (!user.eyeColor && eyeColor && eyeColor?.includes('noInfo')) || (eyeColor && eyeColor?.includes(user.eyeColor));
+      const userAge =
+        (user.age >= (ageLimit || defaultAgeLimit)[0] && user.age <= (ageLimit || defaultAgeLimit)[1]) || user.age === null || typeof user.age === 'undefined';
       // const userBlackList = user.userId === userId && user.blackList ? [...user.blackList] : [];
-      const userInBlackList = blackList.includes(user.userId);
-      console.log('user.userId :>> ', user.userId);
-      console.log('userInBlackList :>> ', userInBlackList);
+      const userInBlackList = blackList?.includes(user.userId);
+      const currentUser = userId === user.userId;
+      // console.log('user.userId :>> ', user.userId);
+      // console.log('userInBlackList :>> ', userInBlackList);
 
-      const result = userEyeColor && userAge && !userInBlackList
-  
+      const result = userEyeColor && userAge && !userInBlackList && !currentUser;
+
       return result;
     });
-
+    console.log('власник :>> ', userId);
+    console.log('BlackList :>> ', blackList);
+    console.log('Avaliable users :>> ', filteredUsers.map(user => user.userId));
     setMyCollection(filteredUsers);
     setCurrentIndex(0);
     resetPosition();
@@ -134,3 +136,33 @@ export const getCollectionOfFilteredUsers = async ({ ageLimit, eyeColor, blackLi
 
   return unsubscribe;
 };
+
+// export const getFilteredUsers = async ({ database, ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition }) => {
+//   const defaultAgeLimit = [18, 42];
+
+//   const userDataArray = database.map(user => {
+//     const modifiedUser = { ...user };
+
+//     Object.keys(modifiedUser).forEach(key => {
+//       if (Array.isArray(modifiedUser[key])) {
+//         modifiedUser[key] = modifiedUser[key][modifiedUser[key].length - 1];
+//       }
+//     });
+//     const age = modifiedUser.birth ? calculateAge(modifiedUser.birth) : null;
+
+//     return { ...modifiedUser, age };
+//   });
+
+//   const filteredUsers = userDataArray.filter(user => {
+//     const userEyeColor = (!user.eyeColor && eyeColor && eyeColor.includes('noInfo')) || (eyeColor && eyeColor.includes(user.eyeColor));
+//     const userAge = (user.age >= (ageLimit || defaultAgeLimit)[0] && user.age <= (ageLimit || defaultAgeLimit)[1]) || user.age === null;
+//     // const userInBlackList = blackList.includes(user.userId);
+//     const result = userEyeColor && userAge;
+//     // && !userInBlackList;
+//     return result;
+//   });
+//   console.log('filteredUsers :>> ', filteredUsers);
+//   setMyCollection(filteredUsers);
+//   setCurrentIndex(0);
+//   resetPosition();
+// };

@@ -8,17 +8,17 @@ import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
 import ProfileScreen from './ProfileScreen';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectIsLoggedIn, selectUserData } from '../redux/auth/authSelectors';
+import { selectDatabase, selectIsLoggedIn, selectUserData } from '../redux/auth/authSelectors';
 import RegistrationScreen from './RegistrationScreen';
 import LoginScreen from './LoginScreen';
-import { auth, db } from '../firebase/config';
+import { auth, database, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth/react-native';
 // import { refreshUser } from '../redux/auth/authSlice';
 import { getTabBarVisible } from '../Components/WrapperForTabBar';
 import SearchScreen from './SearchScreen';
 import EmptyScreen from './EmptyScreen';
 import { doc, getDoc } from 'firebase/firestore';
-import { refresh } from '../redux/auth/authOperations';
+import { refresh, refreshDatabase } from '../redux/auth/authOperations';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
@@ -26,7 +26,8 @@ const MainStack = createStackNavigator();
 export default function Home() {
   const authCheck = useSelector(selectIsLoggedIn);
   const dispatch = useDispatch();
-    const userData = useSelector(selectUserData);
+  const userData = useSelector(selectUserData);
+  const database = useSelector(selectDatabase);
 
   const needToLogin = async () => {
     
@@ -56,8 +57,9 @@ export default function Home() {
   // };
 
   useEffect(() => {
-      dispatch(refresh()); 
-    console.log('userData :>> ', userData);
+    dispatch(refresh()); 
+    // console.log('userData!!!!!!!!!!!!!!!!! :>> ', userData);
+    // dispatch(refreshDatabase())
   }, []);
 
   // if (authCheck) {

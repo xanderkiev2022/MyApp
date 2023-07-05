@@ -12,21 +12,22 @@ import {
 } from 'firebase/auth';
 import { app, auth, auth2, database, db, getUrlofUploadedAvatar, storage } from '../../firebase/config';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 
 // FirebaseLogin
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
-import { getRefreshUserAction } from './authActions';
+import { getRefreshDatabaseAction, getRefreshUserAction } from './authActions';
+import { calculateAge } from '../../Utils/ageValidation';
 
 export const register = createAsyncThunk('auth/register', async (state, thunkAPI) => {
   try {
-    const {user} = await createUserWithEmailAndPassword(auth, state.email, state.password);
+    const { user } = await createUserWithEmailAndPassword(auth, state.email, state.password);
     await updateProfile(user, { displayName: state.login, photoURL: state.photo ?? state.photo });
     const photoUrl = state.photo ? await getUrlofUploadedAvatar(state.photo, user.uid) : '';
     const uploadedInfo = { ...state, name: state.login, photo: photoUrl, userId: user.uid };
     console.log('uploadedInfo when register :>> ', uploadedInfo);
-    
+
     const userRef = doc(db, 'users', user.uid);
     await setDoc(userRef, uploadedInfo);
     console.log('uploadedInfo :>> ', uploadedInfo);
@@ -39,12 +40,12 @@ export const register = createAsyncThunk('auth/register', async (state, thunkAPI
 export const login = createAsyncThunk('auth/login', async ({ email, password }, thunkAPI) => {
   try {
     const { user } = await signInWithEmailAndPassword(auth, email, password);
-          // const userRef = doc(db, 'users', user.uid);
-          // const docSnap = await getDoc(userRef);
+    // const userRef = doc(db, 'users', user.uid);
+    // const docSnap = await getDoc(userRef);
     // const existingData = docSnap.data();
 
-        // console.log('existingData.userId :>> ', existingData.userId);
-        // console.log('user.uid :>> ', user.uid);
+    // console.log('existingData.userId :>> ', existingData.userId);
+    // console.log('user.uid :>> ', user.uid);
     return {
       // userId: user.uid,
       // name: user.displayName,
@@ -78,6 +79,9 @@ export const update = createAsyncThunk('auth/update', async ({ userId, state }, 
           const updatedField = existingData[field].filter(item => item !== state[field]);
           updatedField.push(state[field]);
           uploadedInfo[field] = updatedField;
+          if (Array.isArray(state[field])) { // якщо відправляємо масив, то існуючий масив перезатираємо
+            uploadedInfo[field] = [...state[field]];
+          }
         } else {
           uploadedInfo[field] = [existingData[field], state[field]];
         }
@@ -90,7 +94,7 @@ export const update = createAsyncThunk('auth/update', async ({ userId, state }, 
     // return {
     //   photo: state.photo ? state.photo : existingData.photo,
     // };
-    return uploadedInfo; 
+    return uploadedInfo;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }
@@ -105,26 +109,24 @@ export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
   }
 });
 
-export const refresh = () =>  (dispatch) => {
+export const refresh = () => dispatch => {
   try {
     console.log('Виконуємо рефреш');
-    // const unsubscribe =
-      onAuthStateChanged(auth, async user => {
+    const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
         console.log('Користувач залогінений:', user.uid);
-      const userRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(userRef);
-      const existingData = docSnap.data();
+        const userRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(userRef);
+        const existingData = docSnap.data();
 
-      let userData = {};
+        let userData = {};
         for (const field in existingData) {
           userData[field] = existingData[field];
         }
-        // return userData;
+        console.log('existingData :>> ', existingData);
         dispatch(getRefreshUserAction(existingData));
-        console.log('existingData in refresh :>> ', existingData);
-      }
-      else {
+        // console.log('existingData in refresh :>> ', existingData);
+      } else {
         console.log('Користувач вийшов з системи або ще не увійшов');
         // dispatch(
         //   handleRejectedRefreshing({
@@ -137,38 +139,31 @@ export const refresh = () =>  (dispatch) => {
         // );
       }
     });
-    // return () => {
-    //   unsubscribe();
-    // };
+    return () => {
+      unsubscribe();
+    };
   } catch (error) {
-    // return thunkAPI.rejectWithValue(error.message);
     console.log(error.toString());
   }
 };
 
+export const refreshDatabase = () => async dispatch => {
+  try {
+    const usersCollection = collection(db, 'users');
+    const unsubscribe = onSnapshot(usersCollection, snapshot => {
+    const userDataArray = snapshot.docs.map(doc => doc.data());
 
-// export const refresh = () => dispatch => {
-//   // try {
-//   //   // console.log('Виконуємо рефреш');
-//   //   onAuthStateChanged(auth2, user => {
-//   //     // const user2 = auth;
-//   //     // const user2 = user?.reload();
-//   //     // const user2 = auth?.currentUser?.getIdToken(true);
-//   //     // console.log('user2 в рефреш :>> ', user2);
-//   //     if (user) {
-//   //       const userData = {
-//   //         userId: user.uid,
-//   //         name: user.displayName,
-//   //         email: user.email,
-//   //         photo: user.photoURL,
-//   //       };
-//   //       dispatch(refreshUser(userData));
-//   //     }
-//   //   });
-//   // } catch (err) {
-//   //   console.log(err.toString());
-//   // }
-// };
+    // const querySnapshot = await getDocs(usersCollection);
+    // const userDataArray = querySnapshot.docs.map(doc => doc.data());
+    // console.log('userDataArray :>> ', userDataArray);
+    dispatch(getRefreshDatabaseAction(userDataArray));
+    });
+
+    return unsubscribe;
+  } catch (error) {
+    console.log(error.toString());
+  }
+};
 
 WebBrowser.maybeCompleteAuthSession();
 export const loginWithGoogle = createAsyncThunk('auth/loginWithGoogle', async (req, thunkAPI) => {
