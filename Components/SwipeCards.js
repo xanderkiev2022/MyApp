@@ -2,9 +2,22 @@ import React, { useState } from 'react';
 import { StyleSheet,  Animated, } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
 import { View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { update } from '../redux/auth/authOperations';
+import { selectUserData } from '../redux/auth/authSelectors';
 
-export const SwipeCards = ({ setCurrentIndex, noSwipe, adToFavorite, adToBlackList, children }) => {
+
+export const SwipeCards = ({
+  currentCard,
+  setCurrentIndex,
+  noSwipe,
+  // adToFavorite,
+  // adToBlackList,
+  children,
+}) => {
   const [position, setPosition] = useState(new Animated.ValueXY());
+  const dispatch = useDispatch();
+  const { userId } = useSelector(selectUserData);
 
   const handleGestureEvent = Animated.event(
     [
@@ -23,11 +36,13 @@ export const SwipeCards = ({ setCurrentIndex, noSwipe, adToFavorite, adToBlackLi
       if (event.nativeEvent.translationX > 200) {
         resetPosition();
         setCurrentIndex(prevIndex => prevIndex + 1);
-        adToFavorite();
+        dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+        // adToFavorite();
       } else if (event.nativeEvent.translationX < -200) {
         resetPosition();
         setCurrentIndex(prevIndex => prevIndex + 1);
-        adToBlackList();
+        // adToBlackList();
+        dispatch(update({ userId, state: { blackList: currentCard.userId } }));
       } else {
         resetPosition();
       }

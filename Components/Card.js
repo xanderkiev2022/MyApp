@@ -11,66 +11,77 @@ import { refreshDatabase, update } from '../redux/auth/authOperations';
 import { selectDatabase, selectUserData } from '../redux/auth/authSelectors';
 import { TouchableOpacity } from 'react-native';
 
-export default function Card({ navigation, ageLimit, eyeColor, blackList=[], noSwipe }) {
+export default function Card({
+  navigation,
+  // ageLimit,
+  // eyeColor,
+  // blackList = [],
+  // myCollection,
+  currentCard,
+  // currentIndex,
+  setCurrentIndex,
+  noSwipe,
+  remove,
+}) {
   const dispatch = useDispatch();
-  const {userId } = useSelector(selectUserData);
-  const userData = useSelector(selectUserData);
-  const state = useSelector(state => state);
+  // const {userId } = useSelector(selectUserData);
+  // const userData = useSelector(selectUserData);
+  // const state = useSelector(state => state);
 
-  
-  const database = useSelector(selectDatabase);
+  // const database = useSelector(selectDatabase);
 
-  console.log('Card rendered', eyeColor);
-  const [position, setPosition] = useState(new Animated.ValueXY());
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [myCollection, setMyCollection] = useState([]);
+  // console.log('Card rendered', eyeColor);
+  // const [position, setPosition] = useState(new Animated.ValueXY());
+  // const [currentIndex, setCurrentIndex] = useState(0);
+  // const [myCollection, setMyCollection] = useState([]);
 
-  const resetPosition = () => {
-    Animated.spring(position, {
-      toValue: { x: 0, y: 0 },
-      useNativeDriver: false,
-    }).start();
-  };
+  // const resetPosition = () => {
+  //   Animated.spring(position, {
+  //     toValue: { x: 0, y: 0 },
+  //     useNativeDriver: false,
+  //   }).start();
+  // };
 
-  useEffect(() => {
-    // getFilteredUsers({ database, ageLimit, eyeColor, setMyCollection, setCurrentIndex, resetPosition });
-    getCollectionOfFilteredUsers({ ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition, userId });
-  }, [ageLimit, eyeColor, blackList]);
+  // useEffect(() => {
+  //   // getFilteredUsers({ database, ageLimit, eyeColor, setMyCollection, setCurrentIndex, resetPosition });
+  //   getCollectionOfFilteredUsers({ ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition, userId });
+  // }, [ageLimit, eyeColor, blackList]);
 
-  const memoizedCollection = useMemo(() => myCollection, [myCollection]);
-  const currentCard = memoizedCollection[currentIndex];
+  // const memoizedCollection = useMemo(() => myCollection, [myCollection]);
+  // const currentCard = memoizedCollection[currentIndex];
 
-  const adToFavorite = useCallback(() => {
-    // dispatch(update({ userId, state: { favorite: currentCard.userId } }));
-  }, [currentCard, userId]);
+  // const adToFavorite = useCallback(() => {
+  // dispatch(update({ userId, state: { favorite: currentCard.userId } }));
+  // }, [currentCard, userId]);
 
-  const adToBlackList = useCallback(() => {
-    dispatch(update({ userId, state: { blackList: currentCard.userId } }));
-  }, [currentCard, dispatch, userId]);
-  
-  const handleRemove = useCallback(
-    currentUser => {
-      const updatedBlackList = blackList.filter(user => user !== currentUser);
-      console.log('blackList11111 :>> ', blackList);
-      console.log('updatedBlackList :>> ', updatedBlackList);
-      console.log('currentUser :>> ', currentUser);
-      dispatch(update({ userId, state: { blackList: updatedBlackList } }));
-    },
-    [blackList, dispatch, userId]
-  );
+  // const adToBlackList = useCallback(() => {
+  // dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+  // }, [currentCard, dispatch, userId]);
+
+  // const handleRemove = useCallback(
+  //   currentUser => {
+  //     const updatedBlackList = blackList.filter(user => user !== currentUser);
+  //     console.log('blackList11111 :>> ', blackList);
+  //     console.log('updatedBlackList :>> ', updatedBlackList);
+  //     console.log('currentUser :>> ', currentUser);
+  //     dispatch(update({ userId, state: { blackList: updatedBlackList } }));
+  //   },
+  //   [blackList, dispatch, userId]
+  // );
 
   return (
     <>
       <View style={styles.regScr}>
-        <Text style={{ ...styles.cardText, alignSelf: 'center' }}>Found {myCollection.length} profiles</Text>
-        {currentCard
-          // && !blackList.includes(currentCard.userId)
-          ?
-          (<SwipeCards setCurrentIndex={setCurrentIndex} noSwipe={noSwipe} adToFavorite={adToFavorite} adToBlackList={adToBlackList}>
+        {currentCard ? (
+          <SwipeCards
+            currentCard={currentCard}
+            setCurrentIndex={setCurrentIndex}
+            noSwipe={noSwipe}
+          >
             <View style={styles.card}>
               {noSwipe && (
-                <TouchableOpacity onPress={() => handleRemove(currentCard.userId)}>
-                  <Text>X</Text>
+                <TouchableOpacity onPress={() => remove(currentCard.userId)}>
+                  <Text style={{marginLeft:'auto', marginRight: 20}}>X</Text>
                 </TouchableOpacity>
               )}
               {currentCard.name && <Text style={styles.cardText}>Name: {currentCard.name}</Text>}

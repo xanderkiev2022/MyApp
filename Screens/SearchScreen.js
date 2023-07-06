@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Text, Animated } from 'react-native';
 import { BgImage } from '../Components/BgImage';
 import Slider from '../Components/Slider';
 import { CheckBox } from '../Components/CheckBox';
 import { TouchableOpacity } from 'react-native';
-import { getCollectionOfEyeColors } from '../firebase/getCollections';
+import { getCollectionOfEyeColors, getCollectionOfFilteredUsers } from '../firebase/getCollections';
 import Card from '../Components/Card';
 import { useRef } from 'react';
 import { selectUserData } from '../redux/auth/authSelectors';
@@ -14,11 +14,39 @@ export default function SearchScreen({ navigation }) {
   const [sliderAge, setSliderAge] = useState([18, 43]);
   const [eyeCheckBoxFileds, setEyeCheckBoxFileds] = useState([]);
   const [eyeColor, setEyeColor] = useState([]);
-  const {blackList} = useSelector(selectUserData);
+  const { blackList, userId } = useSelector(selectUserData);
+  const [myCollection, setMyCollection] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     getCollectionOfEyeColors({ setEyeCheckBoxFileds, setEyeColor });
   }, []);
+
+  const getCollection = async () => {
+
+      const filteredUsers = await getCollectionOfFilteredUsers({
+        sliderAge,
+        eyeColor,
+        blackList,
+        setMyCollection,
+        setCurrentIndex,
+        userId,
+      });
+    setMyCollection(filteredUsers);
+    setIsLoading(false);
+    };
+
+
+  useEffect(() => {
+    setIsLoading(true);
+    getCollection();
+    }, [sliderAge, eyeColor, blackList]);
+
+    // const memoizedCollection = useMemo(() => myCollection, [myCollection]);
+    // const currentCard = memoizedCollection[currentIndex];
+  const currentCard = myCollection[currentIndex];
+
 
   const [prefContainerVisible, setPrefContainerVisible] = useState(false);
   const prefContainerHeight = useState(new Animated.Value(0))[0];
@@ -119,7 +147,18 @@ export default function SearchScreen({ navigation }) {
               </Animated.View>
             </View>
           </Animated.View>
-          <Card ageLimit={sliderAge} eyeColor={eyeColor} blackList={blackList} />
+          <Text style={{ ...styles.cardText, alignSelf: 'center' }}>Found {myCollection.length} profiles</Text>
+          {!isLoading && (
+            <Card
+              // ageLimit={sliderAge}
+              // eyeColor={eyeColor}
+              // blackList={blackList}
+              // myCollection={myCollection}
+              currentCard={currentCard}
+              // currentIndex={currentIndex}
+              setCurrentIndex={setCurrentIndex}
+            />
+          )}
         </View>
       </BgImage>
     </View>
