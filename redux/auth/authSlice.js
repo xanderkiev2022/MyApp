@@ -115,6 +115,9 @@ const authSlice = createSlice({
     refreshAvatar: (state, { payload }) => {
       state.photo = payload.photoOnHardDrive;
     },
+    refreshEyeColorFields: (state, { payload }) => {
+      state.eyeColorFields = payload;
+    },
     // refreshDatabase: (state, { payload }) => {
     //    for (const key in payload) {
     //          state.database[key] = payload[key];
@@ -135,5 +138,5 @@ const authSlice = createSlice({
       .addMatcher(isAnyOf(register.rejected, login.rejected), handleRejected);
   },
 });
-export const { removeError, refreshUser, refreshAvatar } = authSlice.actions;
+export const { removeError, refreshUser, refreshAvatar, refreshEyeColorFields } = authSlice.actions;
 export const authReducer = authSlice.reducer;

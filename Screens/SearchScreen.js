@@ -4,53 +4,44 @@ import { BgImage } from '../Components/BgImage';
 import Slider from '../Components/Slider';
 import { CheckBox } from '../Components/CheckBox';
 import { TouchableOpacity } from 'react-native';
-import { getCollectionOfEyeColors, getCollectionOfFilteredUsers } from '../firebase/getCollections';
+import { getCollectionOfFilteredUsers } from '../firebase/getCollections';
 import Card from '../Components/Card';
 import { useRef } from 'react';
 import { selectUserData } from '../redux/auth/authSelectors';
 import { useSelector } from 'react-redux';
 
 export default function SearchScreen({ navigation }) {
+  const { blackList, userId, eyeColorFields } = useSelector(selectUserData);
+
   const [sliderAge, setSliderAge] = useState([18, 43]);
-  const [eyeCheckBoxFileds, setEyeCheckBoxFileds] = useState([]);
-  const [eyeColor, setEyeColor] = useState([]);
-  const { blackList, userId } = useSelector(selectUserData);
+  const [eyeColor, setEyeColor] = useState(eyeColorFields.map(field => field.value));
   const [myCollection, setMyCollection] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    getCollectionOfEyeColors({ setEyeCheckBoxFileds, setEyeColor });
-  }, []);
+  console.log('SearchScreen :>> ');
 
   const getCollection = async () => {
-
-      const filteredUsers = await getCollectionOfFilteredUsers({
-        sliderAge,
-        eyeColor,
-        blackList,
-        setMyCollection,
-        setCurrentIndex,
-        userId,
-      });
+    const filteredUsers = await getCollectionOfFilteredUsers({
+      sliderAge,
+      eyeColor,
+      blackList,
+      setMyCollection,
+      setCurrentIndex,
+      userId,
+    });
     setMyCollection(filteredUsers);
-    setIsLoading(false);
-    };
-
+  };
 
   useEffect(() => {
-    setIsLoading(true);
     getCollection();
-    }, [sliderAge, eyeColor, blackList]);
+  }, [sliderAge, eyeColor, blackList]);
 
-    // const memoizedCollection = useMemo(() => myCollection, [myCollection]);
-    // const currentCard = memoizedCollection[currentIndex];
-  const currentCard = myCollection[currentIndex];
-
+  const memoizedCollection = useMemo(() => myCollection, [myCollection]);
+  const currentCard = memoizedCollection[currentIndex];
 
   const [prefContainerVisible, setPrefContainerVisible] = useState(false);
-  const prefContainerHeight = useState(new Animated.Value(0))[0];
   const [arrowDown, setArrowDown] = useState(true);
+  const prefContainerHeight = useState(new Animated.Value(0))[0];
 
   const togglePrefContainer = () => {
     if (prefContainerVisible) {
@@ -74,6 +65,7 @@ export default function SearchScreen({ navigation }) {
     }
   };
 
+  // Збираємо масив вибраних кольорів
   const handleEyeColorSelection = useCallback(
     value => {
       let updatedValues = [...eyeColor];
@@ -90,17 +82,17 @@ export default function SearchScreen({ navigation }) {
 
   const throttledSliderAge = useRef([18, 43]);
   const sliderAgeTimeout = useRef(null);
-  
- const handleSliderAgeChange = useCallback(
-   values => {
-     throttledSliderAge.current = values;
-     clearTimeout(sliderAgeTimeout.current);
-     sliderAgeTimeout.current = setTimeout(() => {
-       setSliderAge(values);
-     }, 200);
-   },
-   [setSliderAge]
- );
+
+  const handleSliderAgeChange = useCallback(
+    values => {
+      throttledSliderAge.current = values;
+      clearTimeout(sliderAgeTimeout.current);
+      sliderAgeTimeout.current = setTimeout(() => {
+        setSliderAge(values);
+      }, 100);
+    },
+    [setSliderAge]
+  );
 
   return (
     <View style={styles.container}>
@@ -134,7 +126,7 @@ export default function SearchScreen({ navigation }) {
                   justifyContent: 'space-between',
                 }}
               >
-                {eyeCheckBoxFileds.map(field => (
+                {eyeColorFields.map(field => (
                   <View key={field.text} style={styles.checkboxContainer}>
                     <CheckBox
                       disabled={field.disabled}
@@ -148,17 +140,7 @@ export default function SearchScreen({ navigation }) {
             </View>
           </Animated.View>
           <Text style={{ ...styles.cardText, alignSelf: 'center' }}>Found {myCollection.length} profiles</Text>
-          {!isLoading && (
-            <Card
-              // ageLimit={sliderAge}
-              // eyeColor={eyeColor}
-              // blackList={blackList}
-              // myCollection={myCollection}
-              currentCard={currentCard}
-              // currentIndex={currentIndex}
-              setCurrentIndex={setCurrentIndex}
-            />
-          )}
+          <Card currentCard={currentCard} setCurrentIndex={setCurrentIndex} />
         </View>
       </BgImage>
     </View>

@@ -11,40 +11,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectDatabase, selectIsLoggedIn, selectUserData } from '../redux/auth/authSelectors';
 import RegistrationScreen from './RegistrationScreen';
 import LoginScreen from './LoginScreen';
-import { auth, database, db } from '../firebase/config';
-import { onAuthStateChanged } from 'firebase/auth/react-native';
-// import { refreshUser } from '../redux/auth/authSlice';
 import { getTabBarVisible } from '../Components/WrapperForTabBar';
 import SearchScreen from './SearchScreen';
 import EmptyScreen from './EmptyScreen';
-import { doc, getDoc } from 'firebase/firestore';
-import { refresh, refreshDatabase } from '../redux/auth/authOperations';
+import { refresh } from '../redux/auth/authOperations';
+import { refreshEyeColorFields } from '../redux/auth/authSlice';
+import { getCollectionOfEyeColors } from '../firebase/getCollections';
 
 const MainTab = createBottomTabNavigator();
 const MainStack = createStackNavigator();
 
 export default function Home() {
-  const authCheck = useSelector(selectIsLoggedIn);
   const dispatch = useDispatch();
-  const userData = useSelector(selectUserData);
-  const database = useSelector(selectDatabase);
+  const authCheck = useSelector(selectIsLoggedIn);
 
-  const needToLogin = async () => {
-    
-    // onAuthStateChanged(auth, async user => {
-    //   const userRef = doc(db, 'users', user.uid);
-    //   const docSnap = await getDoc(userRef);
-    //   const existingData = docSnap.data();
-
-    //   let userData = {};
-    //   if (user) {
-    //     for (const field in existingData) {
-    //       userData[field] = existingData[field];
-    //     }
-    //     dispatch(refreshUser(existingData));
-    //   }
-    // });
-  };
+  console.log('Home :>> ');
 
   // Логінемося
   // const needToLogin = async () => {
@@ -56,15 +37,15 @@ export default function Home() {
   //   }
   // };
 
+  const getCollection = async () => {
+    const fields = await getCollectionOfEyeColors();
+    dispatch(refreshEyeColorFields(fields));
+  };
+
   useEffect(() => {
     dispatch(refresh()); 
-    // console.log('userData!!!!!!!!!!!!!!!!! :>> ', userData);
-    // dispatch(refreshDatabase())
+      getCollection();
   }, []);
-
-  // if (authCheck) {
-  //   dispatch(refresh());
-  // }
 
     return (
       <NavigationContainer>

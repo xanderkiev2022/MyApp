@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectUserData } from '../redux/auth/authSelectors';
 import { useCallback } from 'react';
 import { update } from '../redux/auth/authOperations';
-import { getCollectionOfUsersById } from '../firebase/getCollections';
+import { getCollectionOfEyeColors, getCollectionOfUsersById } from '../firebase/getCollections';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useMemo } from 'react';
@@ -32,7 +32,7 @@ export default function EmptyScreen({ navigation }) {
     const filteredUsers = await getCollectionOfUsersById(blackList);
     setMyCollection(filteredUsers);
   }
-  
+
   useEffect( () => {
       getCollection();
     }, [blackList]);
