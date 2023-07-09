@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     height: '100%',
     // height: '75%',
     // backgroundColor: '#FFFFFF',
-    backgroundColor: 'yellow',
+    // backgroundColor: 'yellow',
     borderRadius: 5,
   },
   cardContainer: {
