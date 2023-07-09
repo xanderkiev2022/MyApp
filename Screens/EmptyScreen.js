@@ -1,22 +1,19 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, FlatList, Dimensions } from 'react-native';
 import Card from '../Components/Card';
 import { BgImage } from '../Components/BgImage';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectUserData } from '../redux/auth/authSelectors';
 import { useCallback } from 'react';
 import { update } from '../redux/auth/authOperations';
-import { getCollectionOfEyeColors, getCollectionOfUsersById } from '../firebase/getCollections';
+import { getCollectionOfUsersById } from '../firebase/getCollections';
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { useMemo } from 'react';
 
 export default function EmptyScreen({ navigation }) {
-
-  const { blackList, userId } = useSelector(selectUserData);
   const dispatch = useDispatch();
-    const [myCollection, setMyCollection] = useState([]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+  const { blackList, userId } = useSelector(selectUserData);
+  const [myCollection, setMyCollection] = useState([]);
 
   const handleRemove = useCallback(
     currentUser => {
@@ -26,32 +23,38 @@ export default function EmptyScreen({ navigation }) {
       },
       [blackList, dispatch, userId]
   );
-  
-  
+    
   const getCollection = async () => {
     const filteredUsers = await getCollectionOfUsersById(blackList);
     setMyCollection(filteredUsers);
   }
 
-  useEffect( () => {
-      getCollection();
-    }, [blackList]);
+  useEffect(() => {
+    getCollection();
+  }, [blackList]);
   
-      const memoizedCollection = useMemo(() => myCollection, [myCollection]);
-      const currentCard = memoizedCollection[currentIndex];
+  const numColumns = 2;
+  const cardWidth = Dimensions.get('window').width / numColumns - 16;
+  const cardHeight = Dimensions.get('window').height - 444;
+  
+  const renderItem = ({ item }) => (
+    <View style={{ ...styles.card, width: cardWidth, height: cardHeight }}>
+      <Card key={item.userId} noSwipe={true} blackList={blackList} remove={handleRemove} currentCard={item} />
+    </View>
+  );
   
   return (
     <View style={styles.container}>
       <BgImage>
-        <View style={styles.regScr}>
-          <Card
-            noSwipe={true}
-            blackList={blackList}
-            remove={handleRemove}
-            currentCard={currentCard}
-            setCurrentIndex={setCurrentIndex}
-          />
-        </View>
+          <View style={styles.cardContainer}>
+            <FlatList
+              data={myCollection}
+              renderItem={renderItem}
+              keyExtractor={item => item.userId}
+              numColumns={numColumns}
+              contentContainerStyle={styles.flatListContent}
+            />
+          </View>
       </BgImage>
     </View>
   );
@@ -60,16 +63,18 @@ export default function EmptyScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  regScr: {
+  cardContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingBottom: 50,
+    paddingTop: 50,
+  },
+  flatListContent: {
     paddingHorizontal: 16,
-    height: '85%',
-    backgroundColor: '#FFFFFF',
-    // backgroundColor: 'yellow',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    paddingVertical: 16,
+  },
+  card: {
+    paddingVertical: 8,
+    paddingHorizontal: 8,
   },
 });

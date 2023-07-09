@@ -120,7 +120,7 @@ export const getCollectionOfFilteredUsers = async ({ sliderAge, eyeColor, blackL
         (user.age >= (sliderAge || defaultSliderAge)[0] && user.age <= (sliderAge || defaultSliderAge)[1]) ||
         user.age === null ||
         typeof user.age === 'undefined';
-      const userInBlackList = blackList?.includes(user.userId);
+      const userInBlackList = blackList?.includes(user.userId) || null;
       const currentUser = userId === user.userId;
 
       const result = userEyeColor && userAge && !userInBlackList && !currentUser;

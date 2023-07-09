@@ -1,39 +1,15 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Image } from 'react-native';
-import { useEffect } from 'react';
-import { useMemo } from 'react';
-
-import { getCollectionOfBlackList, getCollectionOfFilteredUsers, getFilteredUsers } from '../firebase/getCollections';
+import React from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { SwipeCards } from '../Components/SwipeCards';
-
-import { useDispatch, useSelector } from 'react-redux';
-import { refreshDatabase, update } from '../redux/auth/authOperations';
-import { selectDatabase, selectUserData } from '../redux/auth/authSelectors';
 import { TouchableOpacity } from 'react-native';
 
 export default function Card({
   navigation,
-  // ageLimit,
-  // eyeColor,
-  // blackList = [],
-  // myCollection,
   currentCard,
-  // currentIndex,
   setCurrentIndex,
   noSwipe,
   remove,
 }) {
-  const dispatch = useDispatch();
-  // const {userId } = useSelector(selectUserData);
-  // const userData = useSelector(selectUserData);
-  // const state = useSelector(state => state);
-
-  // const database = useSelector(selectDatabase);
-
-  // console.log('Card rendered', eyeColor);
-  // const [position, setPosition] = useState(new Animated.ValueXY());
-  // const [currentIndex, setCurrentIndex] = useState(0);
-  // const [myCollection, setMyCollection] = useState([]);
 
   // const resetPosition = () => {
   //   Animated.spring(position, {
@@ -41,33 +17,6 @@ export default function Card({
   //     useNativeDriver: false,
   //   }).start();
   // };
-
-  // useEffect(() => {
-  //   // getFilteredUsers({ database, ageLimit, eyeColor, setMyCollection, setCurrentIndex, resetPosition });
-  //   getCollectionOfFilteredUsers({ ageLimit, eyeColor, blackList, setMyCollection, setCurrentIndex, resetPosition, userId });
-  // }, [ageLimit, eyeColor, blackList]);
-
-  // const memoizedCollection = useMemo(() => myCollection, [myCollection]);
-  // const currentCard = memoizedCollection[currentIndex];
-
-  // const adToFavorite = useCallback(() => {
-  // dispatch(update({ userId, state: { favorite: currentCard.userId } }));
-  // }, [currentCard, userId]);
-
-  // const adToBlackList = useCallback(() => {
-  // dispatch(update({ userId, state: { blackList: currentCard.userId } }));
-  // }, [currentCard, dispatch, userId]);
-
-  // const handleRemove = useCallback(
-  //   currentUser => {
-  //     const updatedBlackList = blackList.filter(user => user !== currentUser);
-  //     console.log('blackList11111 :>> ', blackList);
-  //     console.log('updatedBlackList :>> ', updatedBlackList);
-  //     console.log('currentUser :>> ', currentUser);
-  //     dispatch(update({ userId, state: { blackList: updatedBlackList } }));
-  //   },
-  //   [blackList, dispatch, userId]
-  // );
 
   return (
     <>
@@ -103,13 +52,13 @@ export default function Card({
 
 const styles = StyleSheet.create({
   regScr: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    height: '75%',
+    paddingHorizontal: 1,
+    paddingVertical: 1,
+    height: '100%',
+    // height: '75%',
     // backgroundColor: '#FFFFFF',
     backgroundColor: 'yellow',
-
-    borderRadius: 25,
+    borderRadius: 5,
   },
   cardContainer: {
     flex: 1,
@@ -118,22 +67,20 @@ const styles = StyleSheet.create({
   },
   card: {
     paddingTop: 10,
-    width: 300,
-    height: 400,
-    borderRadius: 10,
+    width: '100%',
+    height: '100%',
+    borderRadius: 5,
     backgroundColor: '#ffffff',
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: 'green',
+    shadowOffset: { width: 1, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 1,
-    borderRadius: 25,
+    elevation: 80,
   },
   cardText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 10,
+    paddingHorizontal: 10,
   },
   cardImage: {
     width: '100%',

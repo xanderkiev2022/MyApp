@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, Text, Animated } from 'react-native';
+import { View, StyleSheet, Text, Animated, Dimensions } from 'react-native';
 import { BgImage } from '../Components/BgImage';
 import Slider from '../Components/Slider';
 import { CheckBox } from '../Components/CheckBox';
@@ -94,6 +94,8 @@ export default function SearchScreen({ navigation }) {
     [setSliderAge]
   );
 
+const cardHeight = Dimensions.get('window').height - 300;
+
   return (
     <View style={styles.container}>
       <BgImage>
@@ -140,7 +142,9 @@ export default function SearchScreen({ navigation }) {
             </View>
           </Animated.View>
           <Text style={{ ...styles.cardText, alignSelf: 'center' }}>Found {myCollection.length} profiles</Text>
-          <Card currentCard={currentCard} setCurrentIndex={setCurrentIndex} />
+          <View style={{ ...styles.card, height: cardHeight }}>
+            <Card currentCard={currentCard} setCurrentIndex={setCurrentIndex} />
+          </View>
         </View>
       </BgImage>
     </View>
@@ -178,4 +182,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   prefContainer: {},
+  cardText: {
+paddingBottom: 10,
+  },
 });
