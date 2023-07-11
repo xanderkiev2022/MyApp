@@ -16,7 +16,7 @@ const initialState = {
 const setPayloadValues = (state, payload) => {
   for (const key in payload) {
     if (payload.hasOwnProperty(key)) {
-      if (key === 'blackList') {
+      if (key === 'blackList' || key === 'whiteList') {
         state[key] = Array.isArray(payload[key]) ? payload[key] : [payload[key]];
       } else {
         state[key] = Array.isArray(payload[key]) ? payload[key][payload[key].length - 1] : payload[key];

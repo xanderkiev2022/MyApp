@@ -11,7 +11,7 @@ import { selectUserData } from '../redux/auth/authSelectors';
 import { useSelector } from 'react-redux';
 
 export default function SearchScreen({ navigation }) {
-  const { blackList, userId, eyeColorFields } = useSelector(selectUserData);
+  const { whiteList, blackList, userId, eyeColorFields } = useSelector(selectUserData);
 
   const [sliderAge, setSliderAge] = useState([18, 43]);
   const [eyeColor, setEyeColor] = useState(eyeColorFields.map(field => field.value));
@@ -25,7 +25,7 @@ export default function SearchScreen({ navigation }) {
       sliderAge,
       eyeColor,
       blackList,
-      setMyCollection,
+      whiteList,
       setCurrentIndex,
       userId,
     });
@@ -34,7 +34,7 @@ export default function SearchScreen({ navigation }) {
 
   useEffect(() => {
     getCollection();
-  }, [sliderAge, eyeColor, blackList]);
+  }, [sliderAge, eyeColor, blackList, whiteList]);
 
   const memoizedCollection = useMemo(() => myCollection, [myCollection]);
   const currentCard = memoizedCollection[currentIndex];
@@ -164,6 +164,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
   },
   sliderContainer: {
+    marginTop: 10,
     marginBottom: 20,
   },
   sliderHeader: {
@@ -183,6 +184,6 @@ const styles = StyleSheet.create({
   },
   prefContainer: {},
   cardText: {
-paddingBottom: 10,
+    paddingBottom: 10,
   },
 });

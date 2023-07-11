@@ -36,7 +36,7 @@ export const SwipeCards = ({
       if (event.nativeEvent.translationX > 200) {
         resetPosition();
         setCurrentIndex(prevIndex => prevIndex + 1);
-        dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+        dispatch(update({ userId, state: { whiteList: currentCard.userId } }));
         // adToFavorite();
       } else if (event.nativeEvent.translationX < -200) {
         resetPosition();
@@ -64,13 +64,15 @@ export const SwipeCards = ({
 
   const interpolatedColor = position.x.interpolate({
     inputRange: [-200, -20, 0, 20, 200],
-    outputRange: ['rgba(255, 0, 0, 0.9)', 'rgba(255, 0, 0, 0.2)', 'rgba(0, 0, 0, 0)', 'rgba(0, 255, 0, 0.2)', 'rgba(0, 255, 0, 0.9)'],
+    outputRange: ['rgba(255, 0, 0, 0.9)', 'rgba(255, 0, 0, 0.2)', 'white', 'rgba(0, 255, 0, 0.2)', 'rgba(0, 255, 0, 0.9)'],
     extrapolate: 'clamp',
   });
 
   const animatedCardStyle = {
     transform: [{ translateX: position.x }, { translateY: position.y }, { rotate: rotationValues }],
     backgroundColor: interpolatedColor,
+    borderColor: interpolatedColor,
+    // backgroundColor: 'orange',
   };
 
   return (
@@ -93,6 +95,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 25,
+    borderRadius: 5,
+    borderWidth: 3,
   },
 });

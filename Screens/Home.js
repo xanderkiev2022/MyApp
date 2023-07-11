@@ -60,9 +60,9 @@ export default function Home() {
                 } else if (route.name === 'PostsScreen') {
                   return <SimpleLineIcons name="grid" size={focused ? size + 2 : size} color={color} />;
                 } else if (route.name === 'SearchScreen') {
-                  return <SimpleLineIcons name="heart" size={focused ? size + 2 : size} color={color} />;
+                  return <SimpleLineIcons name="magnifier" size={focused ? size + 2 : size} color={color} />;
                 } else if (route.name === 'Empty') {
-                  return <SimpleLineIcons name="eye" size={focused ? size + 2 : size} color={color} />;
+                  return <SimpleLineIcons name="heart" size={focused ? size + 2 : size} color={color} />;
                 }
               },
               tabBarActiveTintColor: '#FF6C00',
@@ -73,12 +73,14 @@ export default function Home() {
             })}
           >
             <MainTab.Screen
-              name="Empty"
-              component={EmptyScreen}
-              options={{
+              name="PostsScreen"
+              component={PostsScreen}
+              options={({ route }) => ({
                 headerShown: false,
-              }}
+                tabBarStyle: { display: 'flex' },
+              })}
             />
+
             <MainTab.Screen
               name="Profile"
               component={ProfileScreen}
@@ -106,14 +108,12 @@ export default function Home() {
                 tabBarStyle: { display: 'flex' },
               })}
             />
-
             <MainTab.Screen
-              name="PostsScreen"
-              component={PostsScreen}
-              options={({ route }) => ({
+              name="Empty"
+              component={EmptyScreen}
+              options={{
                 headerShown: false,
-                tabBarStyle: { display: 'flex' },
-              })}
+              }}
             />
           </MainTab.Navigator>
         ) : (

@@ -41,59 +41,62 @@ export const getCollectionOfEyeColors = async () => {
 }
 
 // numeros call of this function. onSnapshot?
-export const getCollectionOfFilteredUsersAAA = async ({
-  sliderAge,
-  eyeColor,
-  blackList,
-  setCurrentIndex,
-  // resetPosition,
-  userId,
-}) => {
-  const defaultSliderAge = [18, 42];
-  const usersCollection = collection(db, 'users');
+// export const getCollectionOfFilteredUsersAAA = async ({
+//   sliderAge,
+//   eyeColor,
+//   blackList,
+//   whiteList,
+//   setCurrentIndex,
+//   // resetPosition,
+//   userId,
+// }) => {
+//   const defaultSliderAge = [18, 42];
+//   const usersCollection = collection(db, 'users');
 
-  return new Promise((resolve, reject) => {
-    const unsubscribe = onSnapshot(
-      usersCollection,
-      snapshot => {
-        const userDataArray = snapshot.docs.map(doc => {
-          const user = doc.data();
+//   return new Promise((resolve, reject) => {
+//     const unsubscribe = onSnapshot(
+//       usersCollection,
+//       snapshot => {
+//         const userDataArray = snapshot.docs.map(doc => {
+//           const user = doc.data();
 
-          const modifiedUser = { ...user };
+//           const modifiedUser = { ...user };
 
-          Object.keys(modifiedUser).forEach(key => {
-            if (Array.isArray(modifiedUser[key])) {
-              modifiedUser[key] = modifiedUser[key][modifiedUser[key].length - 1];
-            }
-          });
-          const age = modifiedUser.birth ? calculateAge(modifiedUser.birth) : null;
+//           Object.keys(modifiedUser).forEach(key => {
+//             if (Array.isArray(modifiedUser[key])) {
+//               modifiedUser[key] = modifiedUser[key][modifiedUser[key].length - 1];
+//             }
+//           });
+//           const age = modifiedUser.birth ? calculateAge(modifiedUser.birth) : null;
 
-          return { ...modifiedUser, age };
-        });
+//           return { ...modifiedUser, age };
+//         });
 
-        const filteredUsers = userDataArray.filter(user => {
-          const userEyeColor = (!user.eyeColor && eyeColor && eyeColor?.includes('noInfo')) || (eyeColor && eyeColor?.includes(user.eyeColor));
-          const userAge =
-            (user.age >= (sliderAge || defaultSliderAge)[0] && user.age <= (sliderAge || defaultSliderAge)[1]) ||
-            user.age === null ||
-            typeof user.age === 'undefined';
-          const userInBlackList = blackList?.includes(user.userId);
-          const currentUser = userId === user.userId;
-          const result = userEyeColor && userAge && !currentUser && !userInBlackList;
-          return result;
-        });
-        console.log('getCollectionOfFilteredUsers ');
-        resolve(filteredUsers);
-        setCurrentIndex(0);
-      },
-      reject
-    );
+//         const filteredUsers = userDataArray.filter(user => {
+//           const userEyeColor = (!user.eyeColor && eyeColor && eyeColor?.includes('noInfo')) || (eyeColor && eyeColor?.includes(user.eyeColor));
+//           const userAge =
+//             (user.age >= (sliderAge || defaultSliderAge)[0] && user.age <= (sliderAge || defaultSliderAge)[1]) ||
+//             user.age === null ||
+//             typeof user.age === 'undefined';
+//           const userInBlackList = blackList?.includes(user.userId);
+//           const userInWhiteList = whiteList?.includes(user.userId);
+//           const currentUser = userId === user.userId;
+//           const result = userEyeColor && userAge && !currentUser && !userInBlackList && !userInWhiteList;
+//           console.log('result :>> ', result);
+//           return result;
+//         });
+//         console.log('getCollectionOfFilteredUsers ');
+//         resolve(filteredUsers);
+//         setCurrentIndex(0);
+//       },
+//       reject
+//     );
 
-    return unsubscribe;
-  });
-};
+//     return unsubscribe;
+//   });
+// };
 
-export const getCollectionOfFilteredUsers = async ({ sliderAge, eyeColor, blackList, setCurrentIndex, userId }) => {
+export const getCollectionOfFilteredUsers = async ({ sliderAge, eyeColor, blackList, whiteList, setCurrentIndex, userId }) => {
   const defaultSliderAge = [18, 42];
   const usersCollection = collection(db, 'users');
 
@@ -121,9 +124,10 @@ export const getCollectionOfFilteredUsers = async ({ sliderAge, eyeColor, blackL
         user.age === null ||
         typeof user.age === 'undefined';
       const userInBlackList = blackList?.includes(user.userId) || null;
+      const userInWhiteList = whiteList?.includes(user.userId) || null;
       const currentUser = userId === user.userId;
 
-      const result = userEyeColor && userAge && !userInBlackList && !currentUser;
+      const result = userEyeColor && userAge && !userInBlackList && !userInWhiteList && !currentUser;
       return result;
     });
 

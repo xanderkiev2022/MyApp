@@ -2,12 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { SwipeCards } from '../Components/SwipeCards';
 import { TouchableOpacity } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 
 export default function Card({
   navigation,
   currentCard,
   setCurrentIndex,
   noSwipe,
+  favorite,
   remove,
 }) {
 
@@ -22,15 +24,12 @@ export default function Card({
     <>
       <View style={styles.regScr}>
         {currentCard ? (
-          <SwipeCards
-            currentCard={currentCard}
-            setCurrentIndex={setCurrentIndex}
-            noSwipe={noSwipe}
-          >
+          <SwipeCards currentCard={currentCard} setCurrentIndex={setCurrentIndex} noSwipe={noSwipe}>
             <View style={styles.card}>
               {noSwipe && (
                 <TouchableOpacity onPress={() => remove(currentCard.userId)}>
-                  <Text style={{marginLeft:'auto', marginRight: 20}}>X</Text>
+                  {favorite && <FontAwesome name="heart" style={styles.heartIcon} />}
+                  {!favorite && <Text style={{ marginLeft: 'auto', marginRight: 20 }}>X</Text>}
                 </TouchableOpacity>
               )}
               {currentCard.name && <Text style={styles.cardText}>Name: {currentCard.name}</Text>}
@@ -70,7 +69,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 5,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff',
     overflow: 'hidden',
     shadowColor: 'green',
     shadowOffset: { width: 1, height: 2 },
@@ -101,5 +100,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+  },
+  heartIcon: {
+    marginLeft: 'auto',
+    marginRight: 20,
+    fontSize: 24,
+    color: 'red',
   },
 });
