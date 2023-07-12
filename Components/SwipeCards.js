@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
-import { StyleSheet,  Animated, } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, Animated } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { update } from '../redux/auth/authOperations';
 import { selectUserData } from '../redux/auth/authSelectors';
+import { FontAwesome } from '@expo/vector-icons';
+import { useEffect } from 'react';
 
+const AnimatedSvg = Animated.createAnimatedComponent(FontAwesome);
 
 export const SwipeCards = ({
   currentCard,
   setCurrentIndex,
   noSwipe,
-  // adToFavorite,
-  // adToBlackList,
   children,
 }) => {
   const [position, setPosition] = useState(new Animated.ValueXY());
   const dispatch = useDispatch();
   const { userId } = useSelector(selectUserData);
+  // const [svgColor, setSvgColor] = useState('gray');
 
   const handleGestureEvent = Animated.event(
     [
@@ -37,11 +39,9 @@ export const SwipeCards = ({
         resetPosition();
         setCurrentIndex(prevIndex => prevIndex + 1);
         dispatch(update({ userId, state: { whiteList: currentCard.userId } }));
-        // adToFavorite();
       } else if (event.nativeEvent.translationX < -200) {
         resetPosition();
         setCurrentIndex(prevIndex => prevIndex + 1);
-        // adToBlackList();
         dispatch(update({ userId, state: { blackList: currentCard.userId } }));
       } else {
         resetPosition();
@@ -68,11 +68,36 @@ export const SwipeCards = ({
     extrapolate: 'clamp',
   });
 
+    const interpolatedPlus = position.x.interpolate({
+      inputRange: [0, 5, 20, 200],
+      outputRange: ['gray', 'gray', 'rgba(0, 255, 0, 0.2)', 'rgba(0, 255, 0, 0.9)'],
+      extrapolate: 'clamp',
+    });
+  
+      const interpolatedMinus = position.x.interpolate({
+        inputRange: [-200, -20, 0, 5],
+        outputRange: ['rgba(255, 0, 0, 0.9)', 'rgba(255, 0, 0, 0.2)', 'gray', 'gray'],
+        extrapolate: 'clamp',
+      });
+
   const animatedCardStyle = {
-    transform: [{ translateX: position.x }, { translateY: position.y }, { rotate: rotationValues }],
+    transform: [
+      { translateX: position.x },
+      { translateY: position.y },
+      { rotate: rotationValues },
+    ],
     backgroundColor: interpolatedColor,
     borderColor: interpolatedColor,
-    // backgroundColor: 'orange',
+  };
+
+  const animatedHeartStyle = {
+    transform: [{ translateX: 0 }, { translateY: 0 }],
+    color: interpolatedPlus,
+  };
+
+  const animatedCloseStyle = {
+    transform: [{ translateX: 0 }, { translateY: 0 }],
+    color: interpolatedMinus,
   };
 
   return (
@@ -80,11 +105,17 @@ export const SwipeCards = ({
       {noSwipe ? (
         <View style={styles.cardContainer}>{children}</View>
       ) : (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <PanGestureHandler onGestureEvent={handleGestureEvent} onHandlerStateChange={handleGestureStateChange}>
-            <Animated.View style={[styles.cardContainer, animatedCardStyle]}>{children}</Animated.View>
-          </PanGestureHandler>
-        </GestureHandlerRootView>
+        <>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <PanGestureHandler onGestureEvent={handleGestureEvent} onHandlerStateChange={handleGestureStateChange}>
+              <Animated.View style={[styles.cardContainer, animatedCardStyle]}>{children}</Animated.View>
+            </PanGestureHandler>
+          </GestureHandlerRootView>
+          <View style={styles.iconContainer}>
+            <AnimatedSvg name="close" style={[styles.svg, animatedCloseStyle]} />
+            <AnimatedSvg name="heart" style={[styles.svg, animatedHeartStyle]} />
+          </View>
+        </>
       )}
     </>
   );
@@ -97,5 +128,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 5,
     borderWidth: 3,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: -30,
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  svg: {
+    marginHorizontal: 20,
+    fontSize: 24,
+    width: 24,
+    height: 24,
+    // color: 'red',
   },
 });
