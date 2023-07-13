@@ -6,16 +6,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { update } from '../redux/auth/authOperations';
 import { selectUserData } from '../redux/auth/authSelectors';
 import { FontAwesome } from '@expo/vector-icons';
-import { useEffect } from 'react';
 
 const AnimatedSvg = Animated.createAnimatedComponent(FontAwesome);
 
-export const SwipeCards = ({
-  currentCard,
-  setCurrentIndex,
-  noSwipe,
-  children,
-}) => {
+export const SwipeCards = ({ currentCard, setCurrentIndex, noSwipe, children }) => {
   const [position, setPosition] = useState(new Animated.ValueXY());
   const dispatch = useDispatch();
   const { userId } = useSelector(selectUserData);
@@ -38,35 +32,26 @@ export const SwipeCards = ({
   const handleGestureStateChange = event => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
       if (event.nativeEvent.translationX > 200) {
-        handlePressPlus()
+        handlePressPlus();
       } else if (event.nativeEvent.translationX < -200) {
-        handlePressMinus()
+        handlePressMinus();
       } else {
         resetPosition();
       }
     }
   };
 
-const handlePressPlus = () => {
-  resetPosition();
-  setCurrentIndex(prevIndex => prevIndex + 1);
-  dispatch(update({ userId, state: { whiteList: currentCard.userId } }));
-};
-
-  const handlePressMinus = () => {
-      resetPosition();
-      setCurrentIndex(prevIndex => prevIndex + 1);
-      dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+  const handlePressPlus = () => {
+    resetPosition();
+    setCurrentIndex(prevIndex => prevIndex + 1);
+    dispatch(update({ userId, state: { whiteList: currentCard.userId } }));
   };
 
-  // const handlePressSVG = () => {
-  //   setIsPressedMinus(true);
-  // };
-
-  // const handleReleaseSVG = () => {
-  //   setIsPressedMinus(false);
-  // };
-      
+  const handlePressMinus = () => {
+    resetPosition();
+    setCurrentIndex(prevIndex => prevIndex + 1);
+    dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+  };
 
   const resetPosition = () => {
     Animated.spring(position, {
@@ -87,24 +72,20 @@ const handlePressPlus = () => {
     extrapolate: 'clamp',
   });
 
-    const interpolatedPlus = position.x.interpolate({
-      inputRange: [0, 5, 20, 200],
-      outputRange: ['gray', 'gray', 'rgba(0, 255, 0, 0.2)', 'green'],
-      extrapolate: 'clamp',
-    });
-  
-      const interpolatedMinus = position.x.interpolate({
-        inputRange: [-200, -20, -5, 0],
-        outputRange: ['red', 'rgba(255, 0, 0, 0.2)', 'gray', 'gray'],
-        extrapolate: 'clamp',
-      });
+  const interpolatedPlus = position.x.interpolate({
+    inputRange: [0, 5, 20, 200],
+    outputRange: ['gray', 'gray', 'rgba(0, 255, 0, 0.2)', 'green'],
+    extrapolate: 'clamp',
+  });
+
+  const interpolatedMinus = position.x.interpolate({
+    inputRange: [-200, -20, -5, 0],
+    outputRange: ['red', 'rgba(255, 0, 0, 0.2)', 'gray', 'gray'],
+    extrapolate: 'clamp',
+  });
 
   const animatedCardStyle = {
-    transform: [
-      { translateX: position.x },
-      { translateY: position.y },
-      { rotate: rotationValues },
-    ],
+    transform: [{ translateX: position.x }, { translateY: position.y }, { rotate: rotationValues }],
     backgroundColor: interpolatedColor,
     borderColor: interpolatedColor,
   };
@@ -184,6 +165,5 @@ const styles = StyleSheet.create({
     fontSize: 24,
     width: 24,
     height: 24,
-    // color: 'red',
   },
 });
