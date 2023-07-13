@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { StyleSheet, Animated } from 'react-native';
+import { StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,6 +20,8 @@ export const SwipeCards = ({
   const dispatch = useDispatch();
   const { userId } = useSelector(selectUserData);
   // const [svgColor, setSvgColor] = useState('gray');
+  const [isPressedMinus, setIsPressedMinus] = useState(false);
+  const [isPressedPlus, setIsPressedPlus] = useState(false);
 
   const handleGestureEvent = Animated.event(
     [
@@ -36,18 +38,35 @@ export const SwipeCards = ({
   const handleGestureStateChange = event => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
       if (event.nativeEvent.translationX > 200) {
-        resetPosition();
-        setCurrentIndex(prevIndex => prevIndex + 1);
-        dispatch(update({ userId, state: { whiteList: currentCard.userId } }));
+        handlePressPlus()
       } else if (event.nativeEvent.translationX < -200) {
-        resetPosition();
-        setCurrentIndex(prevIndex => prevIndex + 1);
-        dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+        handlePressMinus()
       } else {
         resetPosition();
       }
     }
   };
+
+const handlePressPlus = () => {
+  resetPosition();
+  setCurrentIndex(prevIndex => prevIndex + 1);
+  dispatch(update({ userId, state: { whiteList: currentCard.userId } }));
+};
+
+  const handlePressMinus = () => {
+      resetPosition();
+      setCurrentIndex(prevIndex => prevIndex + 1);
+      dispatch(update({ userId, state: { blackList: currentCard.userId } }));
+  };
+
+  // const handlePressSVG = () => {
+  //   setIsPressedMinus(true);
+  // };
+
+  // const handleReleaseSVG = () => {
+  //   setIsPressedMinus(false);
+  // };
+      
 
   const resetPosition = () => {
     Animated.spring(position, {
@@ -64,19 +83,19 @@ export const SwipeCards = ({
 
   const interpolatedColor = position.x.interpolate({
     inputRange: [-200, -20, 0, 20, 200],
-    outputRange: ['rgba(255, 0, 0, 0.9)', 'rgba(255, 0, 0, 0.2)', 'white', 'rgba(0, 255, 0, 0.2)', 'rgba(0, 255, 0, 0.9)'],
+    outputRange: ['red', 'rgba(255, 0, 0, 0.2)', 'white', 'rgba(0, 255, 0, 0.2)', 'green'],
     extrapolate: 'clamp',
   });
 
     const interpolatedPlus = position.x.interpolate({
       inputRange: [0, 5, 20, 200],
-      outputRange: ['gray', 'gray', 'rgba(0, 255, 0, 0.2)', 'rgba(0, 255, 0, 0.9)'],
+      outputRange: ['gray', 'gray', 'rgba(0, 255, 0, 0.2)', 'green'],
       extrapolate: 'clamp',
     });
   
       const interpolatedMinus = position.x.interpolate({
-        inputRange: [-200, -20, 0, 5],
-        outputRange: ['rgba(255, 0, 0, 0.9)', 'rgba(255, 0, 0, 0.2)', 'gray', 'gray'],
+        inputRange: [-200, -20, -5, 0],
+        outputRange: ['red', 'rgba(255, 0, 0, 0.2)', 'gray', 'gray'],
         extrapolate: 'clamp',
       });
 
@@ -92,12 +111,12 @@ export const SwipeCards = ({
 
   const animatedHeartStyle = {
     transform: [{ translateX: 0 }, { translateY: 0 }],
-    color: interpolatedPlus,
+    color: isPressedPlus ? 'green' : interpolatedPlus,
   };
 
   const animatedCloseStyle = {
     transform: [{ translateX: 0 }, { translateY: 0 }],
-    color: interpolatedMinus,
+    color: isPressedMinus ? 'red' : interpolatedMinus,
   };
 
   return (
@@ -112,8 +131,30 @@ export const SwipeCards = ({
             </PanGestureHandler>
           </GestureHandlerRootView>
           <View style={styles.iconContainer}>
-            <AnimatedSvg name="close" style={[styles.svg, animatedCloseStyle]} />
-            <AnimatedSvg name="heart" style={[styles.svg, animatedHeartStyle]} />
+            <TouchableOpacity
+              onPress={handlePressMinus}
+              onPressIn={() => {
+                setIsPressedMinus(true);
+              }}
+              onPressOut={() => {
+                setIsPressedMinus(false);
+              }}
+              activeOpacity={0.8}
+            >
+              <AnimatedSvg name="close" style={[styles.svg, animatedCloseStyle]} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handlePressPlus}
+              onPressIn={() => {
+                setIsPressedPlus(true);
+              }}
+              onPressOut={() => {
+                setIsPressedPlus(false);
+              }}
+              activeOpacity={0.8}
+            >
+              <AnimatedSvg name="heart" style={[styles.svg, animatedHeartStyle]} />
+            </TouchableOpacity>
           </View>
         </>
       )}
