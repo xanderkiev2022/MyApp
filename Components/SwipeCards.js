@@ -100,6 +100,16 @@ export const SwipeCards = ({ currentCard, setCurrentIndex, noSwipe, children }) 
     color: isPressedMinus ? 'red' : interpolatedMinus,
   };
 
+  const animatedCircleStyle = {
+    borderWidth: 2,
+    borderColor: 'gray',
+    borderRadius: 50,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  };
+
   return (
     <>
       {noSwipe ? (
@@ -122,7 +132,9 @@ export const SwipeCards = ({ currentCard, setCurrentIndex, noSwipe, children }) 
               }}
               activeOpacity={0.8}
             >
-              <AnimatedSvg name="close" style={[styles.svg, animatedCloseStyle]} />
+              <View style={animatedCircleStyle}>
+                <AnimatedSvg name="close" style={[styles.svg, animatedCloseStyle]} />
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handlePressPlus}
@@ -155,15 +167,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    position: 'absolute',
-    bottom: -30,
+    bottom: -10,
     width: '100%',
     paddingHorizontal: 20,
   },
   svg: {
-    marginHorizontal: 20,
     fontSize: 24,
-    width: 24,
-    height: 24,
   },
 });
